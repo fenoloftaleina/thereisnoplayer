@@ -234,7 +234,7 @@ void InitCubes()
 //    1,2,3
 //   };
 
-bgfx::VertexBufferHandle m_vbh;
+bgfx::DynamicVertexBufferHandle m_vbh;
 bgfx::IndexBufferHandle m_ibh;
 bgfx::ProgramHandle m_program;
 
@@ -297,7 +297,7 @@ int main (int argc, char* args[]) {
 
   PosColorVertex::init();
   InitCubes();
-  m_vbh = bgfx::createVertexBuffer(
+  m_vbh = bgfx::createDynamicVertexBuffer(
               // Static data can be passed with bgfx::makeRef
               bgfx::makeRef(s_cubeVertices, vertices_count * sizeof(PosColorVertex)),
               PosColorVertex::ms_layout
