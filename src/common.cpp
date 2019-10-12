@@ -25,3 +25,8 @@ bgfx::ShaderHandle Common::loadShader(const char* _name)
   bgfx::setName(handle, _name);
   return handle;
 }
+
+bool Common::sameSpot(const bx::Vec3& v1, const bx::Vec3 v2)
+{
+  return (int)(v1.x) == (int)(v2.x) && (int)(v1.y) == (int)(v2.y) && (int)(v1.z) == (int)(v2.z);
+}

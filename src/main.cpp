@@ -17,12 +17,10 @@ const int h = HEIGHT;
 const int w2 = w / 2;
 const int h2 = h / 2;
 
-static const int moving_count = 10;
-static const int static_count = 10;
-
 
 BufferObject moving_bo;
 BufferObject static_bo;
+BufferObject doors_bo;
 
 
 struct Cube
@@ -31,12 +29,26 @@ struct Cube
   bx::Vec3 col {0.7f, 0.7f, 0.7f};
 
   bx::Vec3 spot {0, 0, 0};
+  bx::Vec3 next_spot {0, 0, 0};
 };
+
+static const int moving_count = 10;
+static const int static_count = 10;
 
 Cube moving_cubes[moving_count];
 Cube static_cubes[static_count];
 
 bx::Vec3 spot_offset = {-5, -5, -5};
+
+struct Door
+{
+  Cube cube;
+  int towards;
+  bx::Vec3 collision_face_normal;
+};
+
+static const int door_count = 2;
+Door doors[door_count];
 
 void initVertices()
 {
@@ -51,7 +63,7 @@ void initVertices()
   moving_cubes[8].spot = {8, 0, 0};
   moving_cubes[9].spot = {9, 0, 0};
 
-  static_cubes[0].spot = {5, 0, 0};
+  static_cubes[0].spot = {5, 5, 5};
   static_cubes[1].spot = {5, 1, 0};
   static_cubes[2].spot = {5, 2, 0};
   static_cubes[3].spot = {5, 3, 0};
@@ -60,7 +72,14 @@ void initVertices()
   static_cubes[6].spot = {5, 3, 3};
   static_cubes[7].spot = {5, 2, 3};
   static_cubes[8].spot = {5, 1, 3};
-  static_cubes[9].spot = {5, 0, 3};
+  static_cubes[9].spot = {5, 1, 2};
+
+  doors[0].cube.spot = {1, 1, 1};
+  doors[0].towards = 1;
+  doors[0].collision_face_normal = {0, 0, 1};
+  doors[1].cube.spot = {3, 3, 3};
+  doors[1].towards = -1;
+  doors[1].collision_face_normal = {-1, 0, 0};
 
   for (int i = 0; i < moving_count; ++i) {
     moving_cubes[i].col = bx::Vec3(0.85f, 0.2f, 0.32f);
@@ -73,12 +92,19 @@ void initVertices()
     static_cubes[i].pos = bx::add(bx::mul(static_cubes[i].spot, 2.0f), spot_offset);
     static_bo.writeCubeVertices(i, static_cubes[i].pos, static_cubes[i].col);
   }
+
+  for (int i = 0; i < door_count; ++i) {
+    doors[i].cube.col = bx::Vec3(0.1f, 99/255.0f, 15/255.0f);
+    doors[i].cube.pos = bx::add(bx::mul(doors[i].cube.spot, 2.0f), spot_offset);
+    doors_bo.writeCubeVertices(i, doors[i].cube.pos, doors[i].cube.col);
+  }
 }
 
 void initShit()
 {
   moving_bo.initCubes(moving_count);
   static_bo.initCubes(static_count);
+  doors_bo.initCubes(door_count);
 
   initVertices();
 
@@ -86,6 +112,8 @@ void initShit()
   moving_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
   static_bo.createBuffers();
   static_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+  doors_bo.createBuffers();
+  doors_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
 }
 
 int main (int argc, char* args[])
@@ -183,6 +211,7 @@ int main (int argc, char* args[])
   float mx = 1.0f, my = 1.0f;
 
   bool front = true;
+  bool were_collisions;
 
   // Poll for events and wait till user closes window
   bool quit = false;
@@ -240,8 +269,12 @@ int main (int argc, char* args[])
             cur_pos.y -= my;
             break;
 
-          case SDLK_SPACE:
+          case SDLK_f:
             front = !front;
+            break;
+
+          case SDLK_r:
+            // reset
             break;
         }
       }
@@ -249,16 +282,43 @@ int main (int argc, char* args[])
 
     dt = current_time - last_time;
 
+    were_collisions = false;
     for (int i = 0; i < moving_count; ++i) {
-      moving_cubes[i].spot = bx::add(moving_cubes[i].spot, cur_pos);
-      if (moving_cubes[i].spot.x == 1 && moving_cubes[i].spot.y == 1 && moving_cubes[i].spot.z == 1) {
-        moving_cubes[i].spot = bx::Vec3(3, 3, 3);
+      moving_cubes[i].next_spot = bx::add(moving_cubes[i].spot, cur_pos);
+
+      for (int j = 0; j < door_count; ++j) {
+        if (Common::sameSpot(moving_cubes[i].next_spot, doors[j].cube.spot)) {
+          if (Common::sameSpot(moving_cubes[i].spot, bx::add(doors[j].cube.spot, doors[j].collision_face_normal))) {
+            moving_cubes[i].next_spot = bx::add(doors[j + doors[j].towards].cube.spot, doors[j + doors[j].towards].collision_face_normal);
+          } else {
+            were_collisions = true;
+          }
+        }
       }
-      moving_cubes[i].pos = bx::add(bx::mul(moving_cubes[i].spot, 2.0f), spot_offset);
-      moving_bo.writeCubeVertices(i, moving_cubes[i].pos, moving_cubes[i].col);
+    }
+    for (int i = 0; i < moving_count; ++i) {
+      for (int j = i + 1; j < moving_count; ++j) {
+        were_collisions = were_collisions || Common::sameSpot(moving_cubes[i].next_spot, moving_cubes[j].next_spot);
+      }
+
+      for (int j = 0; j < static_count; ++j) {
+        were_collisions = were_collisions || Common::sameSpot(moving_cubes[i].next_spot, static_cubes[j].spot);
+      }
     }
 
-    moving_bo.updateBuffer();
+    if (!were_collisions) {
+      for (int i = 0; i < moving_count; ++i) {
+
+        moving_cubes[i].spot = moving_cubes[i].next_spot;
+
+        moving_cubes[i].pos = bx::add(bx::mul(moving_cubes[i].spot, 2.0f), spot_offset);
+        moving_bo.writeCubeVertices(i, moving_cubes[i].pos, moving_cubes[i].col);
+      }
+
+      moving_bo.updateBuffer();
+    } else {
+      printf("COLLISIONS!\n");
+    }
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
     // const bx::Vec3 eye = { -5.0f, 2.0f, -10.0f };
@@ -283,36 +343,6 @@ int main (int argc, char* args[])
 
     bgfx::setViewTransform(0, view, proj);
 
-    // Set view 0 default viewport.
-    // bgfx::setViewRect(0, 0, 0,
-    //                   WIDTH,
-    //                   HEIGHT);
-
-    // bgfx::touch(0);
-
-    // x += dt * mx;
-    // y += dt * my;
-    // if (abs(x) >= 3) {
-    //   mx *= -1;
-    // }
-    // if (abs(y) >= 3) {
-    //   my *= -1;
-    // }
-
-    // Set render states.
-    bgfx::setState(0
-        | BGFX_STATE_WRITE_R
-        | BGFX_STATE_WRITE_G
-        | BGFX_STATE_WRITE_B
-        | BGFX_STATE_WRITE_A
-        | BGFX_STATE_WRITE_Z
-        | BGFX_STATE_DEPTH_TEST_LESS
-        | BGFX_STATE_CULL_CCW
-        | BGFX_STATE_MSAA
-        // | BGFX_STATE_PT_LINES
-        // | BGFX_STATE_PT_LINESTRIP
-        );
-
     float mtx[16];
     bx::mtxSRT(mtx, 1, 1, 1, 0, 0, 0, 0.0f, 0.0f, 0);
 
@@ -324,6 +354,7 @@ int main (int argc, char* args[])
 
     moving_bo.draw();
     static_bo.draw();
+    doors_bo.draw();
 
     bgfx::frame();
 
