@@ -6,6 +6,8 @@
 #include <fstream>
 #include <bx/math.h>
 
+#include "buffer_object.hpp"
+#include "common.hpp"
 
 SDL_Window* window = NULL;
 const int WIDTH = 1600;
@@ -15,109 +17,11 @@ const int h = HEIGHT;
 const int w2 = w / 2;
 const int h2 = h / 2;
 
-bgfx::ShaderHandle loadShader(const char* _name) {
-    char* data = new char[2048];
-    std::ifstream file;
-    size_t fileSize;
-    file.open(_name);
-    assert(file.is_open());
-
-    file.seekg(0, std::ios::end);
-    fileSize = file.tellg();
-    file.seekg(0, std::ios::beg);
-    file.read(data, fileSize);
-    file.close();
-
-    const bgfx::Memory* mem = bgfx::copy(data,fileSize+1);
-    mem->data[mem->size-1] = '\0';
-    bgfx::ShaderHandle handle = bgfx::createShader(mem);
-    bgfx::setName(handle, _name);
-    return handle;
-}
-
-struct PosColorVertex {
-  float x;
-  float y;
-  float z;
-  float r;
-  float g;
-  float b;
-  float normal_x;
-  float normal_y;
-  float normal_z;
-
-  static void init() {
-    ms_layout
-      .begin()
-      .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-      .add(bgfx::Attrib::Color0,   3, bgfx::AttribType::Float)
-      .add(bgfx::Attrib::Normal,   3, bgfx::AttribType::Float)
-      .end();
-  };
-
-  static bgfx::VertexLayout ms_layout;
-};
-
-
-bgfx::VertexLayout PosColorVertex::ms_layout;
-
 static const int cubes_count = 20;
-static const int faces_per_cube_count = 6;
-static const int vertices_per_face_count = 4;
-static const int vertices_per_cube_count = faces_per_cube_count * vertices_per_face_count;
 
-static const int vertices_count = vertices_per_cube_count * cubes_count;
-static PosColorVertex* vertices = new PosColorVertex[vertices_count];
 
-static const int indices_per_face_count = 6;
+BufferObject bo;
 
-static const int indices_count = indices_per_face_count * faces_per_cube_count * cubes_count;
-static uint16_t* indices = new uint16_t[indices_count];
-
-static const bx::Vec3 constexpr pos_vertices[vertices_per_cube_count] = {
-  // CCW culling, indices: 0, 1, 3, 1, 2, 3, means: 'u' shapes starting on the right
-
-  // front
-  {  1.0f,  1.0f, -1.0f,},
-  {  1.0f, -1.0f, -1.0f,},
-  { -1.0f, -1.0f, -1.0f,},
-  { -1.0f,  1.0f, -1.0f,},
-
-  // right
-  {  1.0f,  1.0f,  1.0f,},
-  {  1.0f, -1.0f,  1.0f,},
-  {  1.0f, -1.0f, -1.0f,},
-  {  1.0f,  1.0f, -1.0f,},
-
-  // back
-  { -1.0f,  1.0f,  1.0f,},
-  { -1.0f, -1.0f,  1.0f,},
-  {  1.0f, -1.0f,  1.0f,},
-  {  1.0f,  1.0f,  1.0f,},
-
-  // left
-  { -1.0f,  1.0f, -1.0f,},
-  { -1.0f, -1.0f, -1.0f,},
-  { -1.0f, -1.0f,  1.0f,},
-  { -1.0f,  1.0f,  1.0f,},
-
-  //top
-  {  1.0f,  1.0f,  1.0f,},
-  {  1.0f,  1.0f, -1.0f,},
-  { -1.0f,  1.0f, -1.0f,},
-  { -1.0f,  1.0f,  1.0f,},
-
-  //bottom
-  { -1.0f, -1.0f,  1.0f,},
-  { -1.0f, -1.0f, -1.0f,},
-  {  1.0f, -1.0f, -1.0f,},
-  {  1.0f, -1.0f,  1.0f,},
-};
-
-void pv3(bx::Vec3 v)
-{
-  printf("%f %f %f\n", v.x, v.y, v.z);
-}
 
 struct Cube
 {
@@ -126,65 +30,6 @@ struct Cube
 
   bx::Vec3 spot {0, 0, 0};
 };
-
-void writeBuffer(int offset, bx::Vec3 pos, bx::Vec3 col)
-{
-  bx::Vec3 end_pos, normal, a, b, c;
-
-  for (int i = 0; i < vertices_per_cube_count; ++i) {
-    end_pos = bx::add(pos_vertices[i], pos);
-
-    vertices[offset + i].x = end_pos.x;
-    vertices[offset + i].y = end_pos.y;
-    vertices[offset + i].z = end_pos.z;
-    vertices[offset + i].r = col.x;
-    vertices[offset + i].g = col.y;
-    vertices[offset + i].b = col.z;
-  }
-
-  for(int i = 0; i < vertices_per_cube_count; i += 4) {
-    a = bx::Vec3(
-        vertices[offset + i + 0].x,
-        vertices[offset + i + 0].y,
-        vertices[offset + i + 0].z
-        );
-    b = bx::Vec3(
-        vertices[offset + i + 1].x,
-        vertices[offset + i + 1].y,
-        vertices[offset + i + 1].z
-        );
-    c = bx::Vec3(
-        vertices[offset + i + 3].x,
-        vertices[offset + i + 3].y,
-        vertices[offset + i + 3].z
-        );
-
-    normal = bx::normalize(
-        bx::cross(
-          bx::sub(a, b),
-          bx::sub(a, c)
-          )
-        );
-
-    vertices[offset + i + 0].normal_x =
-      vertices[offset + i + 1].normal_x =
-      vertices[offset + i + 2].normal_x =
-      vertices[offset + i + 3].normal_x =
-      normal.x;
-
-    vertices[offset + i + 0].normal_y =
-      vertices[offset + i + 1].normal_y =
-      vertices[offset + i + 2].normal_y =
-      vertices[offset + i + 3].normal_y =
-      normal.y;
-
-    vertices[offset + i + 0].normal_z =
-      vertices[offset + i + 1].normal_z =
-      vertices[offset + i + 2].normal_z =
-      vertices[offset + i + 3].normal_z =
-      normal.z;
-  }
-}
 
 Cube c[cubes_count];
 
@@ -216,34 +61,20 @@ void initVertices()
 
   for (int i = 0; i < cubes_count; ++i) {
     c[i].pos = bx::add(bx::mul(c[i].spot, 2.0f), spot_offset);
-    writeBuffer(i * vertices_per_cube_count, c[i].pos, c[i].col);
-  }
-}
-
-void initIndices()
-{
-  for (int i = 0; i < indices_count / 6; ++i) {
-    indices[i * 6 + 0] = i * 4 + 0;
-    indices[i * 6 + 1] = i * 4 + 1;
-    indices[i * 6 + 2] = i * 4 + 3;
-    indices[i * 6 + 3] = i * 4 + 1;
-    indices[i * 6 + 4] = i * 4 + 2;
-    indices[i * 6 + 5] = i * 4 + 3;
+    bo.writeCubeVertices(i, c[i].pos, c[i].col);
   }
 }
 
 void initShit()
 {
+  bo.initCubes(cubes_count);
   initVertices();
-  initIndices();
+  bo.createBuffers();
+  bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
 }
 
-bgfx::DynamicVertexBufferHandle m_vbh;
-bgfx::IndexBufferHandle m_ibh;
-bgfx::ProgramHandle m_program;
-
-int main (int argc, char* args[]) {
-
+int main (int argc, char* args[])
+{
   // Initialize SDL systems
   if(SDL_Init( SDL_INIT_VIDEO ) < 0) {
     printf("SDL could not initialize! SDL_Error: %s\n",
@@ -299,25 +130,12 @@ int main (int argc, char* args[]) {
   bgfx::init();
   // bgfx::init(bgfx::RendererType::Metal);
 
+
   PosColorVertex::init();
   initShit();
 
-  m_vbh = bgfx::createDynamicVertexBuffer(
-              // Static data can be passed with bgfx::makeRef
-              bgfx::makeRef(vertices, vertices_count * sizeof(vertices[0])),
-              PosColorVertex::ms_layout
-          );
 
-  m_ibh = bgfx::createIndexBuffer(
-              // Static data can be passed with bgfx::makeRef
-              bgfx::makeRef(indices, indices_count * sizeof(indices[0]))
-              // bgfx::makeRef(indices, 6 * sizeof(indices[0]))
-          );
 
-  bgfx::ShaderHandle vsh = loadShader("bin/v_simple.bin");
-  bgfx::ShaderHandle fsh = loadShader("bin/f_simple.bin");
-
-  m_program = bgfx::createProgram(vsh,fsh,  true);
 
   bgfx::UniformHandle u_twh = bgfx::createUniform("twh", bgfx::UniformType::Vec4);
 
@@ -421,10 +239,10 @@ int main (int argc, char* args[]) {
         c[i].spot = bx::Vec3(3, 3, 3);
       }
       c[i].pos = bx::add(bx::mul(c[i].spot, 2.0f), spot_offset);
-      writeBuffer(i * vertices_per_cube_count, c[i].pos, c[i].col);
+      bo.writeCubeVertices(i, c[i].pos, c[i].col);
     }
 
-    bgfx::update(m_vbh, 0, bgfx::makeRef(vertices, vertices_count * sizeof(vertices[0])));
+    bo.updateBuffer();
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
     // const bx::Vec3 eye = { -5.0f, 2.0f, -10.0f };
@@ -465,16 +283,6 @@ int main (int argc, char* args[]) {
     //   my *= -1;
     // }
 
-    float mtx[16];
-    bx::mtxSRT(mtx, 1, 1, 1, 0, 0, 0, 0.0f, 0.0f, 0);
-
-    // Set model matrix for rendering.
-    bgfx::setTransform(mtx);
-
-    // Set vertex and index buffer.
-    bgfx::setVertexBuffer(0, m_vbh);
-    bgfx::setIndexBuffer(m_ibh);
-
     // Set render states.
     bgfx::setState(0
         | BGFX_STATE_WRITE_R
@@ -489,11 +297,16 @@ int main (int argc, char* args[]) {
         // | BGFX_STATE_PT_LINESTRIP
         );
 
+    float mtx[16];
+    bx::mtxSRT(mtx, 1, 1, 1, 0, 0, 0, 0.0f, 0.0f, 0);
+
+    // Set model matrix for rendering.
+    bgfx::setTransform(mtx);
+
     u_twh_val[0] = current_time;
     bgfx::setUniform(u_twh, &u_twh_val);
 
-    // Submit primitive for rendering to view 0.
-    bgfx::submit(0, m_program);
+    bo.draw();
 
     bgfx::frame();
 
@@ -501,10 +314,9 @@ int main (int argc, char* args[]) {
     current_time = SDL_GetTicks();
   }
 
-  bgfx::destroy(m_vbh);
-  bgfx::destroy(m_ibh);
+  bo.destroy();
   bgfx::destroy(u_twh);
-  bgfx::destroy(m_program);
+
   bgfx::shutdown();
   // Free up window
   SDL_DestroyWindow(window);
