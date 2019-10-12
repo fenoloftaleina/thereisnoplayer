@@ -21,6 +21,7 @@ const int h2 = h / 2;
 BufferObject moving_bo;
 BufferObject static_bo;
 BufferObject doors_bo;
+BufferObject winning_doors_bo;
 
 
 struct Cube
@@ -48,7 +49,9 @@ struct Door
 };
 
 static const int door_count = 2;
+static const int winning_door_count = 2;
 Door doors[door_count];
+Door winning_doors[winning_door_count];
 
 bx::Vec3 door_colors[1] = {
   {0.7f, 0.1f, 0.5f}
@@ -85,6 +88,11 @@ void initVertices()
   doors[1].towards = -1;
   doors[1].collision_face_normal = {-1, 0, 0};
 
+  winning_doors[0].cube.spot = {-2, 5, 7};
+  // winning_doors[0].collision_face_normal = {0, 0, -1};
+  winning_doors[1].cube.spot = {5, 5, 7};
+  // winning_doors[1].collision_face_normal = {-1, 0, 0};
+
   for (int i = 0; i < moving_count; ++i) {
     moving_cubes[i].col = bx::Vec3(0.85f, 0.2f, 0.32f);
     moving_cubes[i].pos = bx::add(bx::mul(moving_cubes[i].spot, 2.0f), spot_offset);
@@ -112,6 +120,21 @@ void initVertices()
     }
     doors_bo.setFaceColor(i, door_face, door_colors[i - (doors[i].towards == -1)]);
   }
+
+  for (int i = 0; i < door_count; ++i) {
+    winning_doors[i].cube.col = bx::Vec3(0.5f, 0.5f, 0.5f);
+    winning_doors[i].cube.pos = bx::add(bx::mul(winning_doors[i].cube.spot, 2.0f), spot_offset);
+    winning_doors_bo.writeCubeVertices(i, winning_doors[i].cube.pos, winning_doors[i].cube.col);
+
+    // if (doors[i].collision_face_normal.x) {
+    //   door_face = 3;
+    // } else if(doors[i].collision_face_normal.y) {
+    //   door_face = 4;
+    // } else {
+    //   door_face = 0;
+    // }
+    // winning_doors_bo.setFaceColor(i, door_face, bx::Vec3(0.5f, 0.5f, 0.5f));
+  }
 }
 
 void initShit()
@@ -119,6 +142,7 @@ void initShit()
   moving_bo.initCubes(moving_count);
   static_bo.initCubes(static_count);
   doors_bo.initCubes(door_count);
+  winning_doors_bo.initCubes(winning_door_count);
 
   initVertices();
 
@@ -128,6 +152,8 @@ void initShit()
   static_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
   doors_bo.createBuffers();
   doors_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+  winning_doors_bo.createBuffers();
+  winning_doors_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
 }
 
 int main (int argc, char* args[])
@@ -226,6 +252,7 @@ int main (int argc, char* args[])
 
   bool front = true;
   bool were_collisions;
+  int winning_count;
 
   // Poll for events and wait till user closes window
   bool quit = false;
@@ -295,6 +322,19 @@ int main (int argc, char* args[])
     }
 
     dt = current_time - last_time;
+
+    winning_count = 0;
+    for (int i = 0; i < moving_count; ++i) {
+      for (int j = 0; j < winning_door_count; ++j) {
+        if (Common::sameSpot(moving_cubes[i].spot, winning_doors[j].cube.spot)) {
+          winning_count += 1;
+        }
+      }
+    }
+
+    if (winning_count == winning_door_count) {
+      printf("WIN!\n");
+    }
 
     were_collisions = false;
     for (int i = 0; i < moving_count; ++i) {
@@ -369,6 +409,7 @@ int main (int argc, char* args[])
     moving_bo.draw();
     static_bo.draw();
     doors_bo.draw();
+    winning_doors_bo.draw();
 
     bgfx::frame();
 
@@ -378,6 +419,8 @@ int main (int argc, char* args[])
 
   moving_bo.destroy();
   static_bo.destroy();
+  doors_bo.destroy();
+  winning_doors_bo.destroy();
   bgfx::destroy(u_twh);
 
   bgfx::shutdown();

@@ -1,4 +1,4 @@
-$input v_color0, v_normal0
+$input v_color0, v_normal0, v_position0
 
 #include <bgfx_shader.sh>
 
@@ -16,5 +16,5 @@ void main()
   st = st / twh.yz;
   st.x = st.x + twh.x * 0.0001;
 
-	gl_FragColor = vec4(vec3(0.267, 0.20, 0.333) - vec3(pow(random(st), 35.0)), 1.0);
+	gl_FragColor = vec4(v_color0 - vec3(pow(random(st), 35.0)), 1.0);
 }
