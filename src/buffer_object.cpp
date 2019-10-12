@@ -118,9 +118,21 @@ void BufferObject::createShaders(const char* vertex_shader_path, const char* fra
 
 void BufferObject::draw()
 {
-    bgfx::setVertexBuffer(0, m_vbh);
-    bgfx::setIndexBuffer(m_ibh);
-    bgfx::submit(0, m_program);
+  bgfx::setState(0
+      | BGFX_STATE_WRITE_R
+      | BGFX_STATE_WRITE_G
+      | BGFX_STATE_WRITE_B
+      | BGFX_STATE_WRITE_A
+      | BGFX_STATE_WRITE_Z
+      | BGFX_STATE_DEPTH_TEST_LESS
+      | BGFX_STATE_CULL_CCW
+      | BGFX_STATE_MSAA
+      );
+
+  bgfx::setVertexBuffer(0, m_vbh);
+  bgfx::setIndexBuffer(m_ibh);
+
+  bgfx::submit(0, m_program);
 }
 
 void BufferObject::destroy()

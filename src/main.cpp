@@ -17,10 +17,12 @@ const int h = HEIGHT;
 const int w2 = w / 2;
 const int h2 = h / 2;
 
-static const int cubes_count = 20;
+static const int moving_count = 10;
+static const int static_count = 10;
 
 
-BufferObject bo;
+BufferObject moving_bo;
+BufferObject static_bo;
 
 
 struct Cube
@@ -31,46 +33,57 @@ struct Cube
   bx::Vec3 spot {0, 0, 0};
 };
 
-Cube c[cubes_count];
+Cube moving_cubes[moving_count];
+Cube static_cubes[static_count];
 
-int static_threshold = 10;
 bx::Vec3 spot_offset = {-5, -5, -5};
 
 void initVertices()
 {
-  c[0].spot = {0, 0, 0};
-  c[1].spot = {1, 0, 0};
-  c[2].spot = {2, 0, 0};
-  c[3].spot = {3, 0, 0};
-  c[4].spot = {4, 0, 0};
-  c[5].spot = {5, 0, 0};
-  c[6].spot = {6, 0, 0};
-  c[7].spot = {7, 0, 0};
-  c[8].spot = {8, 0, 0};
-  c[9].spot = {9, 0, 0};
-  c[10].spot = {5, 0, 0};
-  c[11].spot = {5, 1, 0};
-  c[12].spot = {5, 2, 0};
-  c[13].spot = {5, 3, 0};
-  c[14].spot = {5, 3, 1};
-  c[15].spot = {5, 3, 2};
-  c[16].spot = {5, 3, 3};
-  c[17].spot = {5, 2, 3};
-  c[18].spot = {5, 1, 3};
-  c[19].spot = {5, 0, 3};
+  moving_cubes[0].spot = {0, 0, 0};
+  moving_cubes[1].spot = {1, 0, 0};
+  moving_cubes[2].spot = {2, 0, 0};
+  moving_cubes[3].spot = {3, 0, 0};
+  moving_cubes[4].spot = {4, 0, 0};
+  moving_cubes[5].spot = {5, 0, 0};
+  moving_cubes[6].spot = {6, 0, 0};
+  moving_cubes[7].spot = {7, 0, 0};
+  moving_cubes[8].spot = {8, 0, 0};
+  moving_cubes[9].spot = {9, 0, 0};
 
-  for (int i = 0; i < cubes_count; ++i) {
-    c[i].pos = bx::add(bx::mul(c[i].spot, 2.0f), spot_offset);
-    bo.writeCubeVertices(i, c[i].pos, c[i].col);
+  static_cubes[0].spot = {5, 0, 0};
+  static_cubes[1].spot = {5, 1, 0};
+  static_cubes[2].spot = {5, 2, 0};
+  static_cubes[3].spot = {5, 3, 0};
+  static_cubes[4].spot = {5, 3, 1};
+  static_cubes[5].spot = {5, 3, 2};
+  static_cubes[6].spot = {5, 3, 3};
+  static_cubes[7].spot = {5, 2, 3};
+  static_cubes[8].spot = {5, 1, 3};
+  static_cubes[9].spot = {5, 0, 3};
+
+  for (int i = 0; i < moving_count; ++i) {
+    moving_cubes[i].pos = bx::add(bx::mul(moving_cubes[i].spot, 2.0f), spot_offset);
+    moving_bo.writeCubeVertices(i, moving_cubes[i].pos, moving_cubes[i].col);
+  }
+
+  for (int i = 0; i < static_count; ++i) {
+    static_cubes[i].pos = bx::add(bx::mul(static_cubes[i].spot, 2.0f), spot_offset);
+    static_bo.writeCubeVertices(i, static_cubes[i].pos, static_cubes[i].col);
   }
 }
 
 void initShit()
 {
-  bo.initCubes(cubes_count);
+  moving_bo.initCubes(moving_count);
+  static_bo.initCubes(static_count);
+
   initVertices();
-  bo.createBuffers();
-  bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+
+  moving_bo.createBuffers();
+  moving_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+  static_bo.createBuffers();
+  static_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
 }
 
 int main (int argc, char* args[])
@@ -233,16 +246,16 @@ int main (int argc, char* args[])
 
     dt = current_time - last_time;
 
-    for (int i = 0; i < static_threshold; ++i) {
-      c[i].spot = bx::add(c[i].spot, cur_pos);
-      if (c[i].spot.x == 1 && c[i].spot.y == 1 && c[i].spot.z == 1) {
-        c[i].spot = bx::Vec3(3, 3, 3);
+    for (int i = 0; i < moving_count; ++i) {
+      moving_cubes[i].spot = bx::add(moving_cubes[i].spot, cur_pos);
+      if (moving_cubes[i].spot.x == 1 && moving_cubes[i].spot.y == 1 && moving_cubes[i].spot.z == 1) {
+        moving_cubes[i].spot = bx::Vec3(3, 3, 3);
       }
-      c[i].pos = bx::add(bx::mul(c[i].spot, 2.0f), spot_offset);
-      bo.writeCubeVertices(i, c[i].pos, c[i].col);
+      moving_cubes[i].pos = bx::add(bx::mul(moving_cubes[i].spot, 2.0f), spot_offset);
+      moving_bo.writeCubeVertices(i, moving_cubes[i].pos, moving_cubes[i].col);
     }
 
-    bo.updateBuffer();
+    moving_bo.updateBuffer();
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
     // const bx::Vec3 eye = { -5.0f, 2.0f, -10.0f };
@@ -306,7 +319,8 @@ int main (int argc, char* args[])
     u_twh_val[0] = current_time;
     bgfx::setUniform(u_twh, &u_twh_val);
 
-    bo.draw();
+    moving_bo.draw();
+    static_bo.draw();
 
     bgfx::frame();
 
@@ -314,7 +328,8 @@ int main (int argc, char* args[])
     current_time = SDL_GetTicks();
   }
 
-  bo.destroy();
+  moving_bo.destroy();
+  static_bo.destroy();
   bgfx::destroy(u_twh);
 
   bgfx::shutdown();
