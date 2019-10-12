@@ -63,11 +63,13 @@ void initVertices()
   static_cubes[9].spot = {5, 0, 3};
 
   for (int i = 0; i < moving_count; ++i) {
+    moving_cubes[i].col = bx::Vec3(0.85f, 0.2f, 0.32f);
     moving_cubes[i].pos = bx::add(bx::mul(moving_cubes[i].spot, 2.0f), spot_offset);
     moving_bo.writeCubeVertices(i, moving_cubes[i].pos, moving_cubes[i].col);
   }
 
   for (int i = 0; i < static_count; ++i) {
+    static_cubes[i].col = bx::Vec3(0.0f, 99/255.0f, 115/255.0f);
     static_cubes[i].pos = bx::add(bx::mul(static_cubes[i].spot, 2.0f), spot_offset);
     static_bo.writeCubeVertices(i, static_cubes[i].pos, static_cubes[i].col);
   }
@@ -166,7 +168,8 @@ int main (int argc, char* args[])
   // Clear the view rect
   bgfx::setViewClear(0,
                      BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH,
-                     0x443355FF, 1.0f, 0);
+                     0x555555FF, 1.0f, 0);
+                     // 0x443355FF, 1.0f, 0);
 
 
   // Set empty primitive on screen
