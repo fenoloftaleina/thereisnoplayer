@@ -50,6 +50,10 @@ struct Door
 static const int door_count = 2;
 Door doors[door_count];
 
+bx::Vec3 door_colors[1] = {
+  {0.7f, 0.1f, 0.5f}
+};
+
 void initVertices()
 {
   moving_cubes[0].spot = {0, 0, 0};
@@ -76,7 +80,7 @@ void initVertices()
 
   doors[0].cube.spot = {1, 1, 1};
   doors[0].towards = 1;
-  doors[0].collision_face_normal = {0, 0, 1};
+  doors[0].collision_face_normal = {0, 0, -1};
   doors[1].cube.spot = {3, 3, 3};
   doors[1].towards = -1;
   doors[1].collision_face_normal = {-1, 0, 0};
@@ -93,10 +97,20 @@ void initVertices()
     static_bo.writeCubeVertices(i, static_cubes[i].pos, static_cubes[i].col);
   }
 
+  int door_face;
   for (int i = 0; i < door_count; ++i) {
     doors[i].cube.col = bx::Vec3(0.1f, 99/255.0f, 15/255.0f);
     doors[i].cube.pos = bx::add(bx::mul(doors[i].cube.spot, 2.0f), spot_offset);
     doors_bo.writeCubeVertices(i, doors[i].cube.pos, doors[i].cube.col);
+
+    if (doors[i].collision_face_normal.x) {
+      door_face = 3;
+    } else if(doors[i].collision_face_normal.y) {
+      door_face = 4;
+    } else {
+      door_face = 0;
+    }
+    doors_bo.setFaceColor(i, door_face, door_colors[i - (doors[i].towards == -1)]);
   }
 }
 
@@ -270,7 +284,7 @@ int main (int argc, char* args[])
             break;
 
           case SDLK_f:
-            front = !front;
+            // front = !front;
             break;
 
           case SDLK_r:

@@ -88,6 +88,18 @@ void BufferObject::writeCubeVertices(int nth_cube, bx::Vec3 pos, bx::Vec3 col)
   }
 }
 
+void BufferObject::setFaceColor(const int nth_cube, const int nth_face, bx::Vec3 col)
+{
+  int offset = nth_cube * vertices_per_cube_count;
+  int face_offset = nth_face * vertices_per_face_count;
+
+  for (int i = 0; i < vertices_per_face_count; ++i) {
+    vertices[offset + face_offset + i].r = col.x;
+    vertices[offset + face_offset + i].g = col.y;
+    vertices[offset + face_offset + i].b = col.z;
+  }
+}
+
 void BufferObject::createBuffers()
 {
   m_vbh = bgfx::createDynamicVertexBuffer(

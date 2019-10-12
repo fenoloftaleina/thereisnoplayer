@@ -96,6 +96,7 @@ struct BufferObject {
   void initCubes(const int cubes_count);
   void writeCubesIndices();
   void writeCubeVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
+  void setFaceColor(const int nth_cube, const int nth_face, bx::Vec3 col);
   void createBuffers();
   void updateBuffer();
   void createShaders(const char* vertex_shader_path, const char* fragment_shader_path);
