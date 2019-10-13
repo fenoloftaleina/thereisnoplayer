@@ -35,6 +35,7 @@ BufferObject moving_bo;
 BufferObject static_bo;
 BufferObject doors_bo;
 BufferObject winning_doors_bo;
+BufferObject editor_bo;
 
 struct Cube
 {
@@ -53,6 +54,7 @@ struct Cube
 
 std::vector<Cube> moving_cubes;
 std::vector<Cube> static_cubes;
+Cube editor_cube;
 
 bx::Vec3 spot_offset = {-5, -5, -5};
 
@@ -72,10 +74,6 @@ struct Door
 std::vector<Door> doors;
 std::vector<Door> winning_doors;
 
-bx::Vec3 door_colors[1] = {
-  {0.7f, 0.1f, 0.5f}
-};
-
 void load(const char* filename)
 {
   std::ifstream is(filename, std::ios::binary);
@@ -89,6 +87,25 @@ void save(const char* filename)
   cereal::PortableBinaryOutputArchive ar(os);
   ar(moving_cubes, static_cubes, doors, winning_doors);
 }
+
+bx::Vec3 posOnSpot(const bx::Vec3& spot)
+{
+  return bx::add(bx::mul(spot, 2.0f), spot_offset);
+}
+
+bx::Vec3 moving_cubes_color = {0.85f, 0.2f, 0.32f};
+bx::Vec3 static_cubes_color = {0.0f, 99/255.0f, 115/255.0f};
+bx::Vec3 editor_cube_color = {0.3f, 0.3f, 0.3f};
+bx::Vec3 doors_color = {0.1f, 99/255.0f, 15/255.0f};
+bx::Vec3 winning_doors_color = {0.5f, 0.5f, 0.5f};
+bx::Vec3 gate_colors[] = {
+  {0.7f, 0.1f, 0.5f},
+  {0.2f, 1.0f, 0.1f},
+  {0.5f, 0.2f, 0.3f},
+  {0.1f, 0.1f, 0.1f},
+  {0.5f, 0.5f, 0.5f},
+  {0.7f, 0.9f, 0.9f},
+};
 
 void initVertices()
 {
@@ -130,23 +147,26 @@ void initVertices()
   //
   // save("levels/nothing");
 
+  editor_cube.col = editor_cube_color;
+  editor_cube.pos = bx::add(bx::mul(editor_cube.spot, 2.0f), spot_offset);
+  editor_bo.writeCubeVertices(0, editor_cube.pos, editor_cube.col);
 
   for (int i = 0; i < moving_cubes.size(); ++i) {
-    moving_cubes[i].col = bx::Vec3(0.85f, 0.2f, 0.32f);
-    moving_cubes[i].pos = bx::add(bx::mul(moving_cubes[i].spot, 2.0f), spot_offset);
+    moving_cubes[i].col = moving_cubes_color;
+    moving_cubes[i].pos = posOnSpot(moving_cubes[i].spot);
     moving_bo.writeCubeVertices(i, moving_cubes[i].pos, moving_cubes[i].col);
   }
 
   for (int i = 0; i < static_cubes.size(); ++i) {
-    static_cubes[i].col = bx::Vec3(0.0f, 99/255.0f, 115/255.0f);
-    static_cubes[i].pos = bx::add(bx::mul(static_cubes[i].spot, 2.0f), spot_offset);
+    static_cubes[i].col = static_cubes_color;
+    static_cubes[i].pos = posOnSpot(static_cubes[i].spot);
     static_bo.writeCubeVertices(i, static_cubes[i].pos, static_cubes[i].col);
   }
 
   int door_face;
   for (int i = 0; i < doors.size(); ++i) {
-    doors[i].cube.col = bx::Vec3(0.1f, 99/255.0f, 15/255.0f);
-    doors[i].cube.pos = bx::add(bx::mul(doors[i].cube.spot, 2.0f), spot_offset);
+    doors[i].cube.col = doors_color;
+    doors[i].cube.pos = posOnSpot(doors[i].cube.spot);
     doors_bo.writeCubeVertices(i, doors[i].cube.pos, doors[i].cube.col);
 
     if (doors[i].collision_face_normal.x) {
@@ -156,14 +176,109 @@ void initVertices()
     } else {
       door_face = 0;
     }
-    doors_bo.setFaceColor(i, door_face, door_colors[i - (doors[i].towards == -1)]);
+    doors_bo.setFaceColor(i, door_face, gate_colors[i - (doors[i].towards == -1)]);
   }
 
-  for (int i = 0; i < doors.size(); ++i) {
-    winning_doors[i].cube.col = bx::Vec3(0.5f, 0.5f, 0.5f);
-    winning_doors[i].cube.pos = bx::add(bx::mul(winning_doors[i].cube.spot, 2.0f), spot_offset);
+  for (int i = 0; i < winning_doors.size(); ++i) {
+    winning_doors[i].cube.col = winning_doors_color;
+    winning_doors[i].cube.pos = posOnSpot(winning_doors[i].cube.spot);
     winning_doors_bo.writeCubeVertices(i, winning_doors[i].cube.pos, winning_doors[i].cube.col);
   }
+}
+
+int idxForSpot(const std::vector<Cube>& v, const bx::Vec3& spot)
+{
+  for (int i = 0; i < v.size(); ++i) {
+    if (Common::sameSpot(v[i].spot, spot)) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+int idxForSpot(const std::vector<Door>& v, const bx::Vec3& spot)
+{
+  for (int i = 0; i < v.size(); ++i) {
+    if (Common::sameSpot(v[i].cube.spot, spot)) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+bool removeOnIdx(std::vector<Cube>& v, int i)
+{
+  if (i != -1) {
+    v.erase(v.begin() + i);
+    return true;
+  }
+
+  return false;
+}
+
+bool removeOnIdx(std::vector<Door>& v, int i)
+{
+  if (i != -1) {
+    v.erase(v.begin() + i);
+    return true;
+  }
+
+  return false;
+}
+
+void removeOnSpot(const bx::Vec3& spot)
+{
+  removeOnIdx(moving_cubes, idxForSpot(moving_cubes, spot)) ||
+    removeOnIdx(static_cubes, idxForSpot(static_cubes, spot)) ||
+    removeOnIdx(doors, idxForSpot(doors, spot)) ||
+    removeOnIdx(winning_doors, idxForSpot(winning_doors, spot));
+}
+
+void addMovingCube(const bx::Vec3& spot)
+{
+  Cube c;
+  c.col = moving_cubes_color;
+  c.spot = spot;
+  c.pos = posOnSpot(c.spot);
+  moving_cubes.push_back(c);
+}
+
+void addStaticCube(const bx::Vec3& spot)
+{
+  Cube c;
+  c.col = static_cubes_color;
+  c.spot = spot;
+  c.pos = posOnSpot(c.spot);
+  static_cubes.push_back(c);
+}
+
+void addOrUpdateDoor(const bx::Vec3& spot, const bx::Vec3& collision_face_normal)
+{
+  Door d;
+  d.cube.col = doors_color;
+  d.cube.spot = spot;
+  d.cube.pos = posOnSpot(d.cube.spot);
+  d.collision_face_normal = collision_face_normal;
+  int idx = idxForSpot(doors, spot);
+  if (idx == -1) {
+    d.towards = doors.back().towards * -1;
+    doors.push_back(d);
+  } else {
+    d.towards = doors[idx].towards;
+    doors[idx] = d;
+  }
+}
+
+
+void addWinningDoor(const bx::Vec3& spot)
+{
+  Door d;
+  d.cube.col = winning_doors_color;
+  d.cube.spot = spot;
+  d.cube.pos = posOnSpot(d.cube.spot);
+  winning_doors.push_back(d);
 }
 
 void initBos()
@@ -172,6 +287,7 @@ void initBos()
   static_bo.initCubes(cubes_in_memory_count);
   doors_bo.initCubes(doors_in_memory_count);
   winning_doors_bo.initCubes(doors_in_memory_count);
+  editor_bo.initCubes(1);
 
   moving_bo.createBuffers();
   moving_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
@@ -181,6 +297,8 @@ void initBos()
   doors_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
   winning_doors_bo.createBuffers();
   winning_doors_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
+  editor_bo.createBuffers();
+  editor_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
 }
 
 void runLevel(int level)
@@ -189,6 +307,16 @@ void runLevel(int level)
   load(levels[current_level]);
 
   initVertices();
+}
+
+void updateAllVerticesAndBuffers()
+{
+  initVertices();
+
+  moving_bo.updateBuffer();
+  static_bo.updateBuffer();
+  doors_bo.updateBuffer();
+  winning_doors_bo.updateBuffer();
 }
 
 int main (int argc, char* args[])
@@ -253,6 +381,7 @@ int main (int argc, char* args[])
   static_cubes.reserve(cubes_in_memory_count);
   doors.reserve(doors_in_memory_count);
   winning_doors.reserve(doors_in_memory_count);
+  editor_cube.spot = {0, 0, 0};
   PosColorVertex::init();
   initBos();
   runLevel(0);
@@ -292,6 +421,7 @@ int main (int argc, char* args[])
   bool front = true;
   bool were_collisions;
   int winning_count;
+  bool editor = false;
 
   // Poll for events and wait till user closes window
   bool quit = false;
@@ -305,10 +435,6 @@ int main (int argc, char* args[])
         quit = true;
       } else if (currentEvent.type == SDL_KEYDOWN) {
         switch (currentEvent.key.keysym.sym) {
-          case SDLK_ESCAPE:
-            quit = true;
-            break;
-
           case SDLK_q:
             if (front) {
               cur_pos.z += mx;
@@ -354,15 +480,66 @@ int main (int argc, char* args[])
             break;
 
           case SDLK_r:
-            // reset
+            runLevel(current_level);
             break;
 
-          case SDLK_b:
+          case SDLK_v:
             runLevel(--current_level);
             break;
 
-          case SDLK_n:
+          case SDLK_b:
             runLevel(++current_level);
+            break;
+
+          case SDLK_h:
+            editor = !editor;
+            break;
+
+          case SDLK_u:
+            // moving/user
+            addMovingCube(editor_cube.spot);
+            updateAllVerticesAndBuffers();
+            break;
+
+          case SDLK_i:
+            // static
+            addStaticCube(editor_cube.spot);
+            updateAllVerticesAndBuffers();
+            break;
+
+          case SDLK_o:
+            // winnning
+            addWinningDoor(editor_cube.spot);
+            updateAllVerticesAndBuffers();
+            break;
+
+          case SDLK_j:
+            // gate left
+            addOrUpdateDoor(editor_cube.spot, bx::Vec3(-1, 0, 0));
+            updateAllVerticesAndBuffers();
+            break;
+
+          case SDLK_k:
+            // gate top
+            addOrUpdateDoor(editor_cube.spot, bx::Vec3(0, 1, 0));
+            updateAllVerticesAndBuffers();
+            break;
+
+          case SDLK_l:
+            // gate right
+            addOrUpdateDoor(editor_cube.spot, bx::Vec3(0, 0, -1));
+            updateAllVerticesAndBuffers();
+            break;
+
+          case SDLK_n:
+            // remote/no
+            removeOnSpot(editor_cube.spot);
+            updateAllVerticesAndBuffers();
+            break;
+
+          case SDLK_p:
+            // persist
+            save(levels[current_level]);
             break;
         }
       }
@@ -383,42 +560,50 @@ int main (int argc, char* args[])
       runLevel(++current_level);
     }
 
-    were_collisions = false;
-    for (int i = 0; i < moving_cubes.size(); ++i) {
-      moving_cubes[i].next_spot = bx::add(moving_cubes[i].spot, cur_pos);
+    if (!editor) {
+      were_collisions = false;
+      for (int i = 0; i < moving_cubes.size(); ++i) {
+        moving_cubes[i].next_spot = bx::add(moving_cubes[i].spot, cur_pos);
 
-      for (int j = 0; j < doors.size(); ++j) {
-        if (Common::sameSpot(moving_cubes[i].next_spot, doors[j].cube.spot)) {
-          if (Common::sameSpot(moving_cubes[i].spot, bx::add(doors[j].cube.spot, doors[j].collision_face_normal))) {
-            moving_cubes[i].next_spot = bx::add(doors[j + doors[j].towards].cube.spot, doors[j + doors[j].towards].collision_face_normal);
-          } else {
-            were_collisions = true;
+        for (int j = 0; j < doors.size(); ++j) {
+          if (Common::sameSpot(moving_cubes[i].next_spot, doors[j].cube.spot)) {
+            if (Common::sameSpot(moving_cubes[i].spot, bx::add(doors[j].cube.spot, doors[j].collision_face_normal))) {
+              moving_cubes[i].next_spot = bx::add(doors[j + doors[j].towards].cube.spot, doors[j + doors[j].towards].collision_face_normal);
+            } else {
+              were_collisions = true;
+            }
           }
         }
       }
-    }
-    for (int i = 0; i < moving_cubes.size(); ++i) {
-      for (int j = i + 1; j < moving_cubes.size(); ++j) {
-        were_collisions = were_collisions || Common::sameSpot(moving_cubes[i].next_spot, moving_cubes[j].next_spot);
-      }
-
-      for (int j = 0; j < static_cubes.size(); ++j) {
-        were_collisions = were_collisions || Common::sameSpot(moving_cubes[i].next_spot, static_cubes[j].spot);
-      }
-    }
-
-    if (!were_collisions) {
       for (int i = 0; i < moving_cubes.size(); ++i) {
+        for (int j = i + 1; j < moving_cubes.size(); ++j) {
+          were_collisions = were_collisions || Common::sameSpot(moving_cubes[i].next_spot, moving_cubes[j].next_spot);
+        }
 
-        moving_cubes[i].spot = moving_cubes[i].next_spot;
-
-        moving_cubes[i].pos = bx::add(bx::mul(moving_cubes[i].spot, 2.0f), spot_offset);
-        moving_bo.writeCubeVertices(i, moving_cubes[i].pos, moving_cubes[i].col);
+        for (int j = 0; j < static_cubes.size(); ++j) {
+          were_collisions = were_collisions || Common::sameSpot(moving_cubes[i].next_spot, static_cubes[j].spot);
+        }
       }
 
-      moving_bo.updateBuffer();
+      if (!were_collisions) {
+        for (int i = 0; i < moving_cubes.size(); ++i) {
+          moving_cubes[i].spot = moving_cubes[i].next_spot;
+
+          moving_cubes[i].pos = bx::add(bx::mul(moving_cubes[i].spot, 2.0f), spot_offset);
+          moving_bo.writeCubeVertices(i, moving_cubes[i].pos, moving_cubes[i].col);
+        }
+
+        moving_bo.updateBuffer();
+      } else {
+        printf("COLLISIONS!\n");
+      }
     } else {
-      printf("COLLISIONS!\n");
+      // editor
+
+      editor_cube.spot = bx::add(editor_cube.spot, cur_pos);
+      editor_cube.pos = bx::add(bx::mul(editor_cube.spot, 2.0f), spot_offset);
+      editor_bo.writeCubeVertices(0, editor_cube.pos, editor_cube.col);
+      editor_bo.updateBuffer();
     }
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
@@ -458,6 +643,10 @@ int main (int argc, char* args[])
     doors_bo.drawCubes(doors.size());
     winning_doors_bo.drawCubes(winning_doors.size());
 
+    if (editor) {
+      editor_bo.drawCubes(1);
+    }
+
     bgfx::frame();
 
     last_time = current_time;
@@ -468,6 +657,7 @@ int main (int argc, char* args[])
   static_bo.destroy();
   doors_bo.destroy();
   winning_doors_bo.destroy();
+  editor_bo.destroy();
   bgfx::destroy(u_twh);
 
   bgfx::shutdown();
