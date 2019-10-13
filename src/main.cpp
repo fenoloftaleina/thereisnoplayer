@@ -5,6 +5,7 @@
 #include <SDL2/SDL_syswm.h>
 #include <fstream>
 #include <bx/math.h>
+#include "cereal/include/cereal/archives/portable_binary.hpp"
 
 #include "buffer_object.hpp"
 #include "common.hpp"
@@ -17,12 +18,21 @@ const int h = HEIGHT;
 const int w2 = w / 2;
 const int h2 = h / 2;
 
+const int cubes_in_memory_count = 300;
+const int doors_in_memory_count = 30;
+
+int current_level = 0;
+const char* levels[] = {
+  "out.cereal",
+  "second.cereal",
+  "nothing.cereal"
+};
+
 
 BufferObject moving_bo;
 BufferObject static_bo;
 BufferObject doors_bo;
 BufferObject winning_doors_bo;
-
 
 struct Cube
 {
@@ -31,13 +41,19 @@ struct Cube
 
   bx::Vec3 spot {0, 0, 0};
   bx::Vec3 next_spot {0, 0, 0};
+  //
+  // template<class Archive>
+  // void serialize(Archive & archive)
+  // {
+  //   archive(pos, col, spot);
+  // }
 };
 
-static const int moving_count = 10;
-static const int static_count = 10;
+int moving_count = 10;
+int static_count = 10;
 
-Cube moving_cubes[moving_count];
-Cube static_cubes[static_count];
+Cube moving_cubes[cubes_in_memory_count];
+Cube static_cubes[cubes_in_memory_count];
 
 bx::Vec3 spot_offset = {-5, -5, -5};
 
@@ -46,52 +62,86 @@ struct Door
   Cube cube;
   int towards;
   bx::Vec3 collision_face_normal;
+
+  template<class Archive>
+  void serialize(Archive & archive)
+  {
+    archive(cube, towards, collision_face_normal);
+  }
 };
 
-static const int door_count = 2;
-static const int winning_door_count = 2;
-Door doors[door_count];
-Door winning_doors[winning_door_count];
+int doors_count = 2;
+int winning_doors_count = 2;
+
+Door doors[doors_in_memory_count];
+Door winning_doors[doors_in_memory_count];
 
 bx::Vec3 door_colors[1] = {
   {0.7f, 0.1f, 0.5f}
 };
 
+void load(const char* filename)
+{
+  std::ifstream is(filename, std::ios::binary);
+  cereal::PortableBinaryInputArchive ar(is);
+  ar(moving_count, static_count, doors_count, winning_doors_count,
+      cereal::binary_data(moving_cubes, sizeof(Cube) * cubes_in_memory_count),
+      cereal::binary_data(static_cubes, sizeof(Cube) * cubes_in_memory_count),
+      cereal::binary_data(doors, sizeof(Door) * doors_in_memory_count),
+      cereal::binary_data(winning_doors, sizeof(Door) * doors_in_memory_count));
+}
+
+void save(const char* filename)
+{
+  std::ofstream os(filename, std::ios::binary);
+  cereal::PortableBinaryOutputArchive ar(os);
+  ar(moving_count, static_count, doors_count, winning_doors_count,
+      cereal::binary_data(moving_cubes, sizeof(Cube) * cubes_in_memory_count),
+      cereal::binary_data(static_cubes, sizeof(Cube) * cubes_in_memory_count),
+      cereal::binary_data(doors, sizeof(Door) * doors_in_memory_count),
+      cereal::binary_data(winning_doors, sizeof(Door) * doors_in_memory_count));
+}
+
 void initVertices()
 {
-  moving_cubes[0].spot = {0, 0, 0};
-  moving_cubes[1].spot = {1, 0, 0};
-  moving_cubes[2].spot = {2, 0, 0};
-  moving_cubes[3].spot = {3, 0, 0};
-  moving_cubes[4].spot = {4, 0, 0};
-  moving_cubes[5].spot = {5, 0, 0};
-  moving_cubes[6].spot = {6, 0, 0};
-  moving_cubes[7].spot = {7, 0, 0};
-  moving_cubes[8].spot = {8, 0, 0};
-  moving_cubes[9].spot = {9, 0, 0};
+  // moving_cubes[0].spot = {0, 0, 0};
+  // moving_cubes[1].spot = {1, 1, 0};
+  // moving_cubes[2].spot = {2, 0, 0};
+  // moving_cubes[3].spot = {3, 0, 0};
+  // moving_cubes[4].spot = {4, 1, 0};
+  // moving_cubes[5].spot = {5, 0, 0};
+  // moving_cubes[6].spot = {6, 0, 0};
+  // moving_cubes[7].spot = {7, 1, 0};
+  // moving_cubes[8].spot = {8, 0, 0};
+  // moving_cubes[9].spot = {9, 0, 0};
+  //
+  // static_cubes[0].spot = {5, 5, 5};
+  // static_cubes[1].spot = {5, 1, 0};
+  // static_cubes[2].spot = {5, 2, 2};
+  // static_cubes[3].spot = {5, 3, 0};
+  // static_cubes[4].spot = {5, 3, 1};
+  // static_cubes[5].spot = {5, 3, 2};
+  // static_cubes[6].spot = {5, 3, 3};
+  // static_cubes[7].spot = {5, 2, 3};
+  // static_cubes[8].spot = {5, 1, 3};
+  // static_cubes[9].spot = {5, 1, 2};
+  //
+  // doors[0].cube.spot = {1, 1, 1};
+  // doors[0].towards = 1;
+  // doors[0].collision_face_normal = {-1, 0, 0};
+  // doors[1].cube.spot = {3, 3, 3};
+  // doors[1].towards = -1;
+  // doors[1].collision_face_normal = {0, 1, 0};
+  //
+  // winning_doors[0].cube.spot = {-2, 5, 7};
+  // // winning_doors[0].collision_face_normal = {0, 0, -1};
+  // winning_doors[1].cube.spot = {5, 5, 7};
+  // // winning_doors[1].collision_face_normal = {-1, 0, 0};
 
-  static_cubes[0].spot = {5, 5, 5};
-  static_cubes[1].spot = {5, 1, 0};
-  static_cubes[2].spot = {5, 2, 0};
-  static_cubes[3].spot = {5, 3, 0};
-  static_cubes[4].spot = {5, 3, 1};
-  static_cubes[5].spot = {5, 3, 2};
-  static_cubes[6].spot = {5, 3, 3};
-  static_cubes[7].spot = {5, 2, 3};
-  static_cubes[8].spot = {5, 1, 3};
-  static_cubes[9].spot = {5, 1, 2};
+  // load("second.cereal");
+  // moving_count = static_count = doors_count = winning_doors_count = 0;
+  // save("nothing.cereal");
 
-  doors[0].cube.spot = {1, 1, 1};
-  doors[0].towards = 1;
-  doors[0].collision_face_normal = {0, 0, -1};
-  doors[1].cube.spot = {3, 3, 3};
-  doors[1].towards = -1;
-  doors[1].collision_face_normal = {-1, 0, 0};
-
-  winning_doors[0].cube.spot = {-2, 5, 7};
-  // winning_doors[0].collision_face_normal = {0, 0, -1};
-  winning_doors[1].cube.spot = {5, 5, 7};
-  // winning_doors[1].collision_face_normal = {-1, 0, 0};
 
   for (int i = 0; i < moving_count; ++i) {
     moving_cubes[i].col = bx::Vec3(0.85f, 0.2f, 0.32f);
@@ -106,7 +156,7 @@ void initVertices()
   }
 
   int door_face;
-  for (int i = 0; i < door_count; ++i) {
+  for (int i = 0; i < doors_count; ++i) {
     doors[i].cube.col = bx::Vec3(0.1f, 99/255.0f, 15/255.0f);
     doors[i].cube.pos = bx::add(bx::mul(doors[i].cube.spot, 2.0f), spot_offset);
     doors_bo.writeCubeVertices(i, doors[i].cube.pos, doors[i].cube.col);
@@ -121,7 +171,7 @@ void initVertices()
     doors_bo.setFaceColor(i, door_face, door_colors[i - (doors[i].towards == -1)]);
   }
 
-  for (int i = 0; i < door_count; ++i) {
+  for (int i = 0; i < doors_count; ++i) {
     winning_doors[i].cube.col = bx::Vec3(0.5f, 0.5f, 0.5f);
     winning_doors[i].cube.pos = bx::add(bx::mul(winning_doors[i].cube.spot, 2.0f), spot_offset);
     winning_doors_bo.writeCubeVertices(i, winning_doors[i].cube.pos, winning_doors[i].cube.col);
@@ -137,14 +187,12 @@ void initVertices()
   }
 }
 
-void initShit()
+void initBos()
 {
-  moving_bo.initCubes(moving_count);
-  static_bo.initCubes(static_count);
-  doors_bo.initCubes(door_count);
-  winning_doors_bo.initCubes(winning_door_count);
-
-  initVertices();
+  moving_bo.initCubes(cubes_in_memory_count);
+  static_bo.initCubes(cubes_in_memory_count);
+  doors_bo.initCubes(doors_in_memory_count);
+  winning_doors_bo.initCubes(doors_in_memory_count);
 
   moving_bo.createBuffers();
   moving_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
@@ -154,6 +202,14 @@ void initShit()
   doors_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
   winning_doors_bo.createBuffers();
   winning_doors_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
+}
+
+void runLevel(int level)
+{
+  current_level = level;
+  load(levels[current_level]);
+
+  initVertices();
 }
 
 int main (int argc, char* args[])
@@ -215,8 +271,8 @@ int main (int argc, char* args[])
 
 
   PosColorVertex::init();
-  initShit();
-
+  initBos();
+  runLevel(1);
 
 
 
@@ -317,6 +373,14 @@ int main (int argc, char* args[])
           case SDLK_r:
             // reset
             break;
+
+          case SDLK_b:
+            runLevel(--current_level);
+            break;
+
+          case SDLK_n:
+            runLevel(++current_level);
+            break;
         }
       }
     }
@@ -325,22 +389,22 @@ int main (int argc, char* args[])
 
     winning_count = 0;
     for (int i = 0; i < moving_count; ++i) {
-      for (int j = 0; j < winning_door_count; ++j) {
+      for (int j = 0; j < winning_doors_count; ++j) {
         if (Common::sameSpot(moving_cubes[i].spot, winning_doors[j].cube.spot)) {
           winning_count += 1;
         }
       }
     }
 
-    if (winning_count == winning_door_count) {
-      printf("WIN!\n");
+    if (winning_count == winning_doors_count && winning_doors_count > 0) {
+      runLevel(++current_level);
     }
 
     were_collisions = false;
     for (int i = 0; i < moving_count; ++i) {
       moving_cubes[i].next_spot = bx::add(moving_cubes[i].spot, cur_pos);
 
-      for (int j = 0; j < door_count; ++j) {
+      for (int j = 0; j < doors_count; ++j) {
         if (Common::sameSpot(moving_cubes[i].next_spot, doors[j].cube.spot)) {
           if (Common::sameSpot(moving_cubes[i].spot, bx::add(doors[j].cube.spot, doors[j].collision_face_normal))) {
             moving_cubes[i].next_spot = bx::add(doors[j + doors[j].towards].cube.spot, doors[j + doors[j].towards].collision_face_normal);
@@ -406,10 +470,10 @@ int main (int argc, char* args[])
     u_twh_val[0] = current_time;
     bgfx::setUniform(u_twh, &u_twh_val);
 
-    moving_bo.draw();
-    static_bo.draw();
-    doors_bo.draw();
-    winning_doors_bo.draw();
+    moving_bo.drawCubes(moving_count);
+    static_bo.drawCubes(static_count);
+    doors_bo.drawCubes(doors_count);
+    winning_doors_bo.drawCubes(winning_doors_count);
 
     bgfx::frame();
 

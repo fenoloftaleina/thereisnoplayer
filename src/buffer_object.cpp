@@ -128,7 +128,7 @@ void BufferObject::createShaders(const char* vertex_shader_path, const char* fra
   m_program = bgfx::createProgram(vsh, fsh, true);
 }
 
-void BufferObject::draw()
+void BufferObject::draw(uint16_t current_vertices_count, uint16_t current_indices_count)
 {
   bgfx::setState(0
       | BGFX_STATE_WRITE_R
@@ -141,10 +141,15 @@ void BufferObject::draw()
       | BGFX_STATE_MSAA
       );
 
-  bgfx::setVertexBuffer(0, m_vbh);
-  bgfx::setIndexBuffer(m_ibh);
+  bgfx::setVertexBuffer(0, m_vbh, 0, current_vertices_count);
+  bgfx::setIndexBuffer(m_ibh, 0, current_indices_count);
 
   bgfx::submit(0, m_program);
+}
+
+void BufferObject::drawCubes(uint16_t current_cubes_count)
+{
+  draw(current_cubes_count * vertices_per_cube_count, current_cubes_count * indices_per_cube_count);
 }
 
 void BufferObject::destroy()
