@@ -25,9 +25,14 @@ const int doors_in_memory_count = 30;
 
 int current_level = 0;
 const char* levels[] = {
+  "levels/intro1",
+  "levels/intro2",
+  "levels/intro3",
+  "levels/intro4",
+  "levels/intro5",
   "levels/a",
   "levels/second",
-  "levels/nothing"
+  "levels/nothing",
 };
 
 
