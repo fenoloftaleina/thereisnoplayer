@@ -311,14 +311,6 @@ void initBos()
   editor_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
 }
 
-void runLevel(int level)
-{
-  current_level = level;
-  load(levels[current_level]);
-
-  initVertices();
-}
-
 void updateAllVerticesAndBuffers()
 {
   initVertices();
@@ -327,6 +319,14 @@ void updateAllVerticesAndBuffers()
   static_bo.updateBuffer();
   doors_bo.updateBuffer();
   winning_doors_bo.updateBuffer();
+}
+
+void runLevel(int level)
+{
+  current_level = level;
+  load(levels[current_level]);
+
+  updateAllVerticesAndBuffers();
 }
 
 int main (int argc, char* args[])
@@ -484,50 +484,62 @@ int main (int argc, char* args[])
             editor = !editor;
             break;
 
+          case SDLK_ESCAPE:
+            editor = false;
+            break;
+
           case SDLK_u:
             // moving/user
+            if (!editor) break;
             addMovingCube(editor_cube.spot);
             updateAllVerticesAndBuffers();
             break;
 
           case SDLK_i:
             // static
+            if (!editor) break;
             addStaticCube(editor_cube.spot);
             updateAllVerticesAndBuffers();
             break;
 
           case SDLK_o:
             // winnning
+            if (!editor) break;
             addWinningDoor(editor_cube.spot);
             updateAllVerticesAndBuffers();
             break;
 
           case SDLK_j:
             // gate left
+            if (!editor) break;
             addOrUpdateDoor(editor_cube.spot, bx::Vec3(-1, 0, 0));
             updateAllVerticesAndBuffers();
             break;
 
           case SDLK_k:
             // gate top
+            if (!editor) break;
             addOrUpdateDoor(editor_cube.spot, bx::Vec3(0, 1, 0));
             updateAllVerticesAndBuffers();
             break;
 
           case SDLK_l:
             // gate right
+            if (!editor) break;
             addOrUpdateDoor(editor_cube.spot, bx::Vec3(0, 0, -1));
             updateAllVerticesAndBuffers();
             break;
 
           case SDLK_n:
             // remote/no
+            if (!editor) break;
             removeOnSpot(editor_cube.spot);
             updateAllVerticesAndBuffers();
             break;
 
           case SDLK_p:
             // persist
+            if (!editor) break;
             save(levels[current_level]);
             break;
         }
