@@ -22,6 +22,7 @@ const int h2 = h / 2;
 
 const int cubes_in_memory_count = 300;
 const int doors_in_memory_count = 30;
+const int grid_cubes_in_memory_count = 3000;
 
 int current_level = 0;
 const char* levels[] = {
@@ -41,6 +42,7 @@ BufferObject static_bo;
 BufferObject doors_bo;
 BufferObject winning_doors_bo;
 BufferObject editor_bo;
+BufferObject grid_bo;
 
 struct Cube
 {
@@ -60,6 +62,7 @@ struct Cube
 std::vector<Cube> moving_cubes;
 std::vector<Cube> static_cubes;
 Cube editor_cube;
+std::vector<Cube> grid_cubes;
 
 bx::Vec3 spot_offset = {-5, -5, -5};
 bx::Vec3 spot_borders[] = {{-5, -5, -5}, {15, 15, 15}};
@@ -102,6 +105,7 @@ bx::Vec3 posOnSpot(const bx::Vec3& spot)
 bx::Vec3 moving_cubes_color = {0.85f, 0.2f, 0.32f};
 bx::Vec3 static_cubes_color = {0.0f, 99/255.0f, 115/255.0f};
 bx::Vec3 editor_cube_color = {0.3f, 0.3f, 0.3f};
+bx::Vec3 grid_cubes_color = {0.0f, 0.0f, 0.0f};
 bx::Vec3 doors_color = {0.1f, 99/255.0f, 15/255.0f};
 bx::Vec3 winning_doors_color = {0.5f, 0.5f, 0.5f};
 bx::Vec3 gate_colors[] = {
@@ -112,6 +116,25 @@ bx::Vec3 gate_colors[] = {
   {0.5f, 0.5f, 0.5f},
   {0.7f, 0.9f, 0.9f},
 };
+
+void initGrid()
+{
+  int n = 10;
+  grid_cubes.resize(n * n);
+
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < n; ++j) {
+      grid_cubes[i * n + j].spot = {(float)i, (float)j, 10};
+    }
+  }
+
+  for (int i = 0; i < grid_cubes.size(); ++i) {
+    grid_cubes[i].col = grid_cubes_color;
+    grid_cubes[i].pos = posOnSpot(grid_cubes[i].spot);
+    grid_bo.writeCubeLinesVertices(i, grid_cubes[i].pos, grid_cubes[i].col);
+  }
+  grid_bo.updateBuffer();
+}
 
 void initVertices()
 {
@@ -298,6 +321,7 @@ void initBos()
   doors_bo.initCubes(doors_in_memory_count);
   winning_doors_bo.initCubes(doors_in_memory_count);
   editor_bo.initCubes(1);
+  grid_bo.initCubesLines(grid_cubes_in_memory_count);
 
   moving_bo.createBuffers();
   moving_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
@@ -309,6 +333,8 @@ void initBos()
   winning_doors_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
   editor_bo.createBuffers();
   editor_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
+  grid_bo.createBuffers();
+  grid_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
 }
 
 void updateAllVerticesAndBuffers()
@@ -394,6 +420,7 @@ int main (int argc, char* args[])
   editor_cube.spot = {0, 0, 0};
   PosColorVertex::init();
   initBos();
+  initGrid();
   runLevel(0);
 
 
@@ -644,7 +671,11 @@ int main (int argc, char* args[])
         0.1f, 100.0f,
         bgfx::getCaps()->homogeneousDepth);
 
-    // bx::mtxOrtho(proj, 0.0f, w, h, 0.0f, -10.1f, 100.0f, 0.0f, bgfx::getCaps()->homogeneousDepth);
+    // bx::mtxOrtho(proj, -w, w, -h, h, -1000.1f, 1000.0f, 0.0f, bgfx::getCaps()->homogeneousDepth);
+
+    // bx::mtxOrtho(proj, -1000.0f, 1000.0f, 1000.0f, -1000.0f, 0.0f, 1000.0f, 0.0f, bgfx::getCaps()->homogeneousDepth);
+
+			// bx::mtxOrtho(proj, -sizeX, sizeX, sizeY, -sizeY, 0.0f, 1000.0f, 0.0f, caps->homogeneousDepth);
 
     bgfx::setViewTransform(0, view, proj);
 
@@ -655,6 +686,7 @@ int main (int argc, char* args[])
     u_twh_val[0] = current_time;
     bgfx::setUniform(u_twh, &u_twh_val);
 
+    // grid_bo.drawCubesLines(grid_cubes.size());
     moving_bo.drawCubes(moving_cubes.size());
     static_bo.drawCubes(static_cubes.size());
     doors_bo.drawCubes(doors.size());

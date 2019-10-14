@@ -6,12 +6,24 @@ bgfx::VertexLayout PosColorVertex::ms_layout;
 void BufferObject::initCubes(const int cubes_count)
 {
   vertices_count = cubes_count * vertices_per_cube_count;
-  indices_count = cubes_count * indices_per_cube_count;
+  indices_count = cubes_count * indices_per_lines_cube_count;
 
   vertices = new PosColorVertex[vertices_count];
   indices = new uint16_t[indices_count];
 
   writeCubesIndices();
+}
+
+
+void BufferObject::initCubesLines(const int cubes_count)
+{
+  vertices_count = cubes_count * vertices_per_lines_cube_count;
+  indices_count = cubes_count * vertices_per_lines_cube_count;
+
+  vertices = new PosColorVertex[vertices_count];
+  indices = new uint16_t[indices_count];
+
+  writeCubesLinesIndices();
 }
 
 
@@ -24,6 +36,19 @@ void BufferObject::writeCubesIndices()
     indices[i * indices_per_face_count + 3] = i * vertices_per_face_count + 1;
     indices[i * indices_per_face_count + 4] = i * vertices_per_face_count + 2;
     indices[i * indices_per_face_count + 5] = i * vertices_per_face_count + 3;
+  }
+}
+
+
+void BufferObject::writeCubesLinesIndices()
+{
+  for (int i = 0; i < indices_count / indices_per_lines_face_count; ++i) {
+    indices[i * indices_per_lines_face_count + 0] = i * vertices_per_lines_face_count + 0;
+    indices[i * indices_per_lines_face_count + 1] = i * vertices_per_lines_face_count + 1;
+    indices[i * indices_per_lines_face_count + 2] = i * vertices_per_lines_face_count + 0;
+    indices[i * indices_per_lines_face_count + 3] = i * vertices_per_lines_face_count + 3;
+    indices[i * indices_per_lines_face_count + 4] = i * vertices_per_lines_face_count + 1;
+    indices[i * indices_per_lines_face_count + 5] = i * vertices_per_lines_face_count + 2;
   }
 }
 
@@ -88,6 +113,26 @@ void BufferObject::writeCubeVertices(int nth_cube, bx::Vec3 pos, bx::Vec3 col)
   }
 }
 
+void BufferObject::writeCubeLinesVertices(int nth_cube, bx::Vec3 pos, bx::Vec3 col)
+{
+  writeCubeVertices(nth_cube, pos, col);
+  return;
+
+  bx::Vec3 end_pos;
+  int offset = nth_cube * vertices_per_lines_cube_count;
+
+  for (int i = 0; i < vertices_per_lines_cube_count; ++i) {
+    end_pos = bx::add(pos_lines_vertices[i], pos);
+
+    vertices[offset + i].x = end_pos.x;
+    vertices[offset + i].y = end_pos.y;
+    vertices[offset + i].z = end_pos.z;
+    vertices[offset + i].r = col.x;
+    vertices[offset + i].g = col.y;
+    vertices[offset + i].b = col.z;
+  }
+}
+
 void BufferObject::setFaceColor(const int nth_cube, const int nth_face, bx::Vec3 col)
 {
   int offset = nth_cube * vertices_per_cube_count;
@@ -128,7 +173,7 @@ void BufferObject::createShaders(const char* vertex_shader_path, const char* fra
   m_program = bgfx::createProgram(vsh, fsh, true);
 }
 
-void BufferObject::draw(uint16_t current_vertices_count, uint16_t current_indices_count)
+void BufferObject::draw(uint16_t current_vertices_count, uint16_t current_indices_count, uint64_t more_state = 0)
 {
   bgfx::setState(0
       | BGFX_STATE_WRITE_R
@@ -139,6 +184,7 @@ void BufferObject::draw(uint16_t current_vertices_count, uint16_t current_indice
       | BGFX_STATE_DEPTH_TEST_LESS
       | BGFX_STATE_CULL_CCW
       | BGFX_STATE_MSAA
+      | more_state
       );
 
   bgfx::setVertexBuffer(0, m_vbh, 0, current_vertices_count);
@@ -150,6 +196,11 @@ void BufferObject::draw(uint16_t current_vertices_count, uint16_t current_indice
 void BufferObject::drawCubes(uint16_t current_cubes_count)
 {
   draw(current_cubes_count * vertices_per_cube_count, current_cubes_count * indices_per_cube_count);
+}
+
+void BufferObject::drawCubesLines(uint16_t current_cubes_count)
+{
+  draw(current_cubes_count * vertices_per_lines_cube_count, current_cubes_count * indices_per_lines_cube_count, BGFX_STATE_PT_LINES);
 }
 
 void BufferObject::destroy()

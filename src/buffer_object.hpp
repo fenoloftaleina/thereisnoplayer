@@ -40,7 +40,52 @@ static const int vertices_per_cube_count = faces_per_cube_count * vertices_per_f
 static const int indices_per_face_count = 6;
 static const int indices_per_cube_count = indices_per_face_count * faces_per_cube_count;
 
+static const int vertices_per_lines_face_count = 4;
+static const int vertices_per_lines_cube_count = faces_per_cube_count * vertices_per_lines_face_count;
+static const int indices_per_lines_face_count = 6;
+static const int indices_per_lines_cube_count = faces_per_cube_count * indices_per_lines_face_count;
+
 static const bx::Vec3 constexpr pos_vertices[vertices_per_cube_count] = {
+  // CCW culling, indices: 0, 1, 3, 1, 2, 3, means: 'u' shapes starting on the right
+
+  // front
+  {  1.0f,  1.0f, -1.0f,},
+  {  1.0f, -1.0f, -1.0f,},
+  { -1.0f, -1.0f, -1.0f,},
+  { -1.0f,  1.0f, -1.0f,},
+
+  // right
+  {  1.0f,  1.0f,  1.0f,},
+  {  1.0f, -1.0f,  1.0f,},
+  {  1.0f, -1.0f, -1.0f,},
+  {  1.0f,  1.0f, -1.0f,},
+
+  // back
+  { -1.0f,  1.0f,  1.0f,},
+  { -1.0f, -1.0f,  1.0f,},
+  {  1.0f, -1.0f,  1.0f,},
+  {  1.0f,  1.0f,  1.0f,},
+
+  // left
+  { -1.0f,  1.0f, -1.0f,},
+  { -1.0f, -1.0f, -1.0f,},
+  { -1.0f, -1.0f,  1.0f,},
+  { -1.0f,  1.0f,  1.0f,},
+
+  //top
+  {  1.0f,  1.0f,  1.0f,},
+  {  1.0f,  1.0f, -1.0f,},
+  { -1.0f,  1.0f, -1.0f,},
+  { -1.0f,  1.0f,  1.0f,},
+
+  //bottom
+  { -1.0f, -1.0f,  1.0f,},
+  { -1.0f, -1.0f, -1.0f,},
+  {  1.0f, -1.0f, -1.0f,},
+  {  1.0f, -1.0f,  1.0f,},
+};
+
+static const bx::Vec3 constexpr pos_lines_vertices[vertices_per_cube_count] = {
   // CCW culling, indices: 0, 1, 3, 1, 2, 3, means: 'u' shapes starting on the right
 
   // front
@@ -94,14 +139,18 @@ struct BufferObject {
 
 
   void initCubes(const int cubes_count);
+  void initCubesLines(const int cubes_count);
   void writeCubesIndices();
+  void writeCubesLinesIndices();
   void writeCubeVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
+  void writeCubeLinesVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
   void setFaceColor(const int nth_cube, const int nth_face, bx::Vec3 col);
   void createBuffers();
   void updateBuffer();
   void createShaders(const char* vertex_shader_path, const char* fragment_shader_path);
-  void draw(uint16_t current_vertices_count, uint16_t current_indices_count);
+  void draw(uint16_t current_vertices_count, uint16_t current_indices_count, uint64_t more_state);
   void drawCubes(uint16_t current_cubes_count);
+  void drawCubesLines(uint16_t current_cubes_count);
   void destroy();
 };
 
