@@ -62,6 +62,7 @@ std::vector<Cube> static_cubes;
 Cube editor_cube;
 
 bx::Vec3 spot_offset = {-5, -5, -5};
+bx::Vec3 spot_borders[] = {{-5, -5, -5}, {15, 15, 15}};
 
 struct Door
 {
@@ -268,7 +269,11 @@ void addOrUpdateDoor(const bx::Vec3& spot, const bx::Vec3& collision_face_normal
   d.collision_face_normal = collision_face_normal;
   int idx = idxForSpot(doors, spot);
   if (idx == -1) {
-    d.towards = doors.back().towards * -1;
+    if (!doors.empty()) {
+      d.towards = doors.back().towards * -1;
+    } else {
+      d.towards = 1;
+    }
     doors.push_back(d);
   } else {
     d.towards = doors[idx].towards;
@@ -423,7 +428,6 @@ int main (int argc, char* args[])
   bx::Vec3 cur_pos(0.0f, 0.0f, 0.0f);
   float mx = 1.0f, my = 1.0f;
 
-  bool front = true;
   bool were_collisions;
   int winning_count;
   bool editor = false;
@@ -441,35 +445,19 @@ int main (int argc, char* args[])
       } else if (currentEvent.type == SDL_KEYDOWN) {
         switch (currentEvent.key.keysym.sym) {
           case SDLK_q:
-            if (front) {
-              cur_pos.z += mx;
-            } else {
-              cur_pos.x -= mx;
-            }
+            cur_pos.z += mx;
             break;
 
           case SDLK_d:
-            if (front) {
-              cur_pos.z -= mx;
-            } else {
-              cur_pos.x += mx;
-            }
+            cur_pos.z -= mx;
             break;
 
           case SDLK_e:
-            if (front) {
-              cur_pos.x += mx;
-            } else {
-              cur_pos.z += mx;
-            }
+            cur_pos.x += mx;
             break;
 
           case SDLK_a:
-            if (front) {
-              cur_pos.x -= mx;
-            } else {
-              cur_pos.z -= mx;
-            }
+            cur_pos.x -= mx;
             break;
 
           case SDLK_w:
@@ -478,10 +466,6 @@ int main (int argc, char* args[])
 
           case SDLK_s:
             cur_pos.y -= my;
-            break;
-
-          case SDLK_f:
-            // front = !front;
             break;
 
           case SDLK_r:
@@ -581,6 +565,16 @@ int main (int argc, char* args[])
         }
       }
       for (int i = 0; i < moving_cubes.size(); ++i) {
+        if(moving_cubes[i].next_spot.x < spot_borders[0].x ||
+            moving_cubes[i].next_spot.x > spot_borders[1].x ||
+            moving_cubes[i].next_spot.y < spot_borders[0].y ||
+            moving_cubes[i].next_spot.y > spot_borders[1].y ||
+            moving_cubes[i].next_spot.z < spot_borders[0].z ||
+            moving_cubes[i].next_spot.z > spot_borders[1].z) {
+          were_collisions = true;
+        }
+      }
+      for (int i = 0; i < moving_cubes.size(); ++i) {
         for (int j = i + 1; j < moving_cubes.size(); ++j) {
           were_collisions = were_collisions || Common::sameSpot(moving_cubes[i].next_spot, moving_cubes[j].next_spot);
         }
@@ -605,19 +599,27 @@ int main (int argc, char* args[])
     } else {
       // editor
 
-      editor_cube.spot = bx::add(editor_cube.spot, cur_pos);
-      editor_cube.pos = bx::add(bx::mul(editor_cube.spot, 2.0f), spot_offset);
-      editor_bo.writeCubeVertices(0, editor_cube.pos, editor_cube.col);
-      editor_bo.updateBuffer();
+      editor_cube.next_spot = bx::add(editor_cube.spot, cur_pos);
+
+      if(!(editor_cube.next_spot.x < 0 ||
+            editor_cube.next_spot.x > 9 ||
+            editor_cube.next_spot.y < 0 ||
+            editor_cube.next_spot.y > 9 ||
+            editor_cube.next_spot.z < 0 ||
+            editor_cube.next_spot.z > 9)) {
+        editor_cube.spot = editor_cube.next_spot;
+        editor_cube.pos = bx::add(bx::mul(editor_cube.spot, 2.0f), spot_offset);
+        editor_bo.writeCubeVertices(0, editor_cube.pos, editor_cube.col);
+        editor_bo.updateBuffer();
+      }
     }
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
+    // const bx::Vec3 at = bx::neg(spot_offset);
+
     // const bx::Vec3 eye = { -5.0f, 2.0f, -10.0f };
     // const bx::Vec3 eye = { 5.0f, 2.0f, -10.0f };
-    bx::Vec3 eye = {  -15.0f, 15.0f, -15.0f };
-    if (!front) {
-      eye.x *= -1;
-    }
+    bx::Vec3 eye = {  -10.0f, 25.0f, -10.0f };
 
     // Set view and projection matrix for view 0.
     float view[16];
@@ -625,7 +627,7 @@ int main (int argc, char* args[])
 
     float proj[16];
     bx::mtxProj(proj,
-        60.0f,
+        70.0f,
         float(WIDTH)/float(HEIGHT),
         0.1f, 100.0f,
         bgfx::getCaps()->homogeneousDepth);
@@ -634,11 +636,9 @@ int main (int argc, char* args[])
 
     bgfx::setViewTransform(0, view, proj);
 
-    float mtx[16];
-    bx::mtxSRT(mtx, 1, 1, 1, 0, 0, 0, 0.0f, 0.0f, 0);
-
-    // Set model matrix for rendering.
-    bgfx::setTransform(mtx);
+    // float mtx[16];
+    // bx::mtxSRT(mtx, 1, 1, 1, 0, 45, 0, 0.0f, 0.0f, 0);
+    // bgfx::setTransform(mtx);
 
     u_twh_val[0] = current_time;
     bgfx::setUniform(u_twh, &u_twh_val);
