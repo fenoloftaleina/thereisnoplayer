@@ -640,17 +640,17 @@ int main (int argc, char* args[])
 
       editor_cube.next_spot = bx::add(editor_cube.spot, cur_pos);
 
-      if(!(editor_cube.next_spot.x < 0 ||
-            editor_cube.next_spot.x > 9 ||
-            editor_cube.next_spot.y < 0 ||
-            editor_cube.next_spot.y > 9 ||
-            editor_cube.next_spot.z < 0 ||
-            editor_cube.next_spot.z > 9)) {
+      // if(!(editor_cube.next_spot.x < 0 ||
+      //       editor_cube.next_spot.x > 9 ||
+      //       editor_cube.next_spot.y < 0 ||
+      //       editor_cube.next_spot.y > 9 ||
+      //       editor_cube.next_spot.z < 0 ||
+      //       editor_cube.next_spot.z > 9)) {
         editor_cube.spot = editor_cube.next_spot;
         editor_cube.pos = bx::add(bx::mul(editor_cube.spot, 2.0f), spot_offset);
         editor_bo.writeCubeVertices(0, editor_cube.pos, editor_cube.col);
         editor_bo.updateBuffer();
-      }
+      // }
     }
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
