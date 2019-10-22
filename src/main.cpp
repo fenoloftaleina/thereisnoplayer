@@ -26,13 +26,7 @@ const int grid_cubes_in_memory_count = 3000;
 
 int current_level = 0;
 const char* levels[] = {
-  "levels/intro1",
-  "levels/intro2",
-  "levels/intro3",
-  "levels/intro4",
-  "levels/intro5",
-  "levels/a",
-  "levels/second",
+  "levels/simplified",
   "levels/nothing",
 };
 
@@ -110,7 +104,6 @@ bx::Vec3 doors_color = {0.1f, 99/255.0f, 15/255.0f};
 bx::Vec3 winning_doors_color = {0.5f, 0.5f, 0.5f};
 bx::Vec3 gate_colors[] = {
   {0.7f, 0.1f, 0.5f},
-  {0.2f, 1.0f, 0.1f},
   {0.5f, 0.2f, 0.3f},
   {0.1f, 0.1f, 0.1f},
   {0.5f, 0.5f, 0.5f},
@@ -194,18 +187,9 @@ void initVertices()
 
   int door_face;
   for (int i = 0; i < doors.size(); ++i) {
-    doors[i].cube.col = doors_color;
+    doors[i].cube.col = gate_colors[i - (doors[i].towards == -1)];
     doors[i].cube.pos = posOnSpot(doors[i].cube.spot);
     doors_bo.writeCubeVertices(i, doors[i].cube.pos, doors[i].cube.col);
-
-    if (doors[i].collision_face_normal.x) {
-      door_face = 3;
-    } else if(doors[i].collision_face_normal.y) {
-      door_face = 4;
-    } else {
-      door_face = 0;
-    }
-    doors_bo.setFaceColor(i, door_face, gate_colors[i - (doors[i].towards == -1)]);
   }
 
   for (int i = 0; i < winning_doors.size(); ++i) {
@@ -283,13 +267,12 @@ void addStaticCube(const bx::Vec3& spot)
   static_cubes.push_back(c);
 }
 
-void addOrUpdateDoor(const bx::Vec3& spot, const bx::Vec3& collision_face_normal)
+void addOrUpdateDoor(const bx::Vec3& spot)
 {
   Door d;
   d.cube.col = doors_color;
   d.cube.spot = spot;
   d.cube.pos = posOnSpot(d.cube.spot);
-  d.collision_face_normal = collision_face_normal;
   int idx = idxForSpot(doors, spot);
   if (idx == -1) {
     if (!doors.empty()) {
@@ -417,7 +400,7 @@ int main (int argc, char* args[])
   static_cubes.reserve(cubes_in_memory_count);
   doors.reserve(doors_in_memory_count);
   winning_doors.reserve(doors_in_memory_count);
-  editor_cube.spot = {0, 0, 0};
+  editor_cube.spot = {0, 5, 0};
   PosColorVertex::init();
   initBos();
   initGrid();
@@ -471,7 +454,7 @@ int main (int argc, char* args[])
         quit = true;
       } else if (currentEvent.type == SDL_KEYDOWN) {
         switch (currentEvent.key.keysym.sym) {
-          case SDLK_q:
+          case SDLK_a:
             cur_pos.z += mx;
             break;
 
@@ -479,20 +462,12 @@ int main (int argc, char* args[])
             cur_pos.z -= mx;
             break;
 
-          case SDLK_e:
+          case SDLK_w:
             cur_pos.x += mx;
             break;
 
-          case SDLK_a:
-            cur_pos.x -= mx;
-            break;
-
-          case SDLK_w:
-            cur_pos.y += my;
-            break;
-
           case SDLK_s:
-            cur_pos.y -= my;
+            cur_pos.x -= mx;
             break;
 
           case SDLK_r:
@@ -537,23 +512,9 @@ int main (int argc, char* args[])
             break;
 
           case SDLK_j:
-            // gate left
+            // gate
             if (!editor) break;
-            addOrUpdateDoor(editor_cube.spot, bx::Vec3(-1, 0, 0));
-            updateAllVerticesAndBuffers();
-            break;
-
-          case SDLK_k:
-            // gate top
-            if (!editor) break;
-            addOrUpdateDoor(editor_cube.spot, bx::Vec3(0, 1, 0));
-            updateAllVerticesAndBuffers();
-            break;
-
-          case SDLK_l:
-            // gate right
-            if (!editor) break;
-            addOrUpdateDoor(editor_cube.spot, bx::Vec3(0, 0, -1));
+            addOrUpdateDoor(editor_cube.spot);
             updateAllVerticesAndBuffers();
             break;
 
@@ -588,69 +549,69 @@ int main (int argc, char* args[])
       runLevel(++current_level);
     }
 
-    if (!editor) {
-      were_collisions = false;
-      for (int i = 0; i < moving_cubes.size(); ++i) {
-        moving_cubes[i].next_spot = bx::add(moving_cubes[i].spot, cur_pos);
+    if (cur_pos.x != cur_pos.y != cur_pos.z != 0) {
+      if (!editor) {
+        were_collisions = false;
+        for (int i = 0; i < moving_cubes.size(); ++i) {
+          moving_cubes[i].next_spot = bx::add(moving_cubes[i].spot, cur_pos);
 
-        for (int j = 0; j < doors.size(); ++j) {
-          if (Common::sameSpot(moving_cubes[i].next_spot, doors[j].cube.spot)) {
-            if (Common::sameSpot(moving_cubes[i].spot, bx::add(doors[j].cube.spot, doors[j].collision_face_normal))) {
-              moving_cubes[i].next_spot = bx::add(doors[j + doors[j].towards].cube.spot, doors[j + doors[j].towards].collision_face_normal);
-            } else {
-              were_collisions = true;
+          for (int j = 0; j < doors.size(); j += 2) {
+            if (Common::sameSpot(moving_cubes[i].next_spot, doors[j].cube.spot)) {
+              moving_cubes[i].next_spot = doors[j + doors[j].towards].cube.spot;
+            } else if (Common::sameSpot(moving_cubes[i].next_spot, doors[j + 1].cube.spot)) {
+              moving_cubes[i].next_spot = doors[j + 1 + doors[j + 1].towards].cube.spot;
             }
           }
         }
-      }
-      for (int i = 0; i < moving_cubes.size(); ++i) {
-        if(moving_cubes[i].next_spot.x < spot_borders[0].x ||
-            moving_cubes[i].next_spot.x > spot_borders[1].x ||
-            moving_cubes[i].next_spot.y < spot_borders[0].y ||
-            moving_cubes[i].next_spot.y > spot_borders[1].y ||
-            moving_cubes[i].next_spot.z < spot_borders[0].z ||
-            moving_cubes[i].next_spot.z > spot_borders[1].z) {
-          were_collisions = true;
-        }
-      }
-      for (int i = 0; i < moving_cubes.size(); ++i) {
-        for (int j = i + 1; j < moving_cubes.size(); ++j) {
-          were_collisions = were_collisions || Common::sameSpot(moving_cubes[i].next_spot, moving_cubes[j].next_spot);
-        }
-
-        for (int j = 0; j < static_cubes.size(); ++j) {
-          were_collisions = were_collisions || Common::sameSpot(moving_cubes[i].next_spot, static_cubes[j].spot);
-        }
-      }
-
-      if (!were_collisions) {
         for (int i = 0; i < moving_cubes.size(); ++i) {
-          moving_cubes[i].spot = moving_cubes[i].next_spot;
+          if(moving_cubes[i].next_spot.x < spot_borders[0].x ||
+              moving_cubes[i].next_spot.x > spot_borders[1].x ||
+              moving_cubes[i].next_spot.y < spot_borders[0].y ||
+              moving_cubes[i].next_spot.y > spot_borders[1].y ||
+              moving_cubes[i].next_spot.z < spot_borders[0].z ||
+              moving_cubes[i].next_spot.z > spot_borders[1].z) {
+            were_collisions = true;
+          }
+        }
+        for (int i = 0; i < moving_cubes.size(); ++i) {
+          for (int j = i + 1; j < moving_cubes.size(); ++j) {
+            were_collisions = were_collisions || Common::sameSpot(moving_cubes[i].next_spot, moving_cubes[j].next_spot);
+          }
 
-          moving_cubes[i].pos = bx::add(bx::mul(moving_cubes[i].spot, 2.0f), spot_offset);
-          moving_bo.writeCubeVertices(i, moving_cubes[i].pos, moving_cubes[i].col);
+          for (int j = 0; j < static_cubes.size(); ++j) {
+            were_collisions = were_collisions || Common::sameSpot(moving_cubes[i].next_spot, static_cubes[j].spot);
+          }
         }
 
-        moving_bo.updateBuffer();
+        if (!were_collisions) {
+          for (int i = 0; i < moving_cubes.size(); ++i) {
+            moving_cubes[i].spot = moving_cubes[i].next_spot;
+
+            moving_cubes[i].pos = bx::add(bx::mul(moving_cubes[i].spot, 2.0f), spot_offset);
+            moving_bo.writeCubeVertices(i, moving_cubes[i].pos, moving_cubes[i].col);
+          }
+
+          moving_bo.updateBuffer();
+        } else {
+          printf("COLLISIONS!\n");
+        }
       } else {
-        printf("COLLISIONS!\n");
-      }
-    } else {
-      // editor
+        // editor
 
-      editor_cube.next_spot = bx::add(editor_cube.spot, cur_pos);
+        editor_cube.next_spot = bx::add(editor_cube.spot, cur_pos);
 
-      // if(!(editor_cube.next_spot.x < 0 ||
-      //       editor_cube.next_spot.x > 9 ||
-      //       editor_cube.next_spot.y < 0 ||
-      //       editor_cube.next_spot.y > 9 ||
-      //       editor_cube.next_spot.z < 0 ||
-      //       editor_cube.next_spot.z > 9)) {
+        // if(!(editor_cube.next_spot.x < 0 ||
+        //       editor_cube.next_spot.x > 9 ||
+        //       editor_cube.next_spot.y < 0 ||
+        //       editor_cube.next_spot.y > 9 ||
+        //       editor_cube.next_spot.z < 0 ||
+        //       editor_cube.next_spot.z > 9)) {
         editor_cube.spot = editor_cube.next_spot;
         editor_cube.pos = bx::add(bx::mul(editor_cube.spot, 2.0f), spot_offset);
         editor_bo.writeCubeVertices(0, editor_cube.pos, editor_cube.col);
         editor_bo.updateBuffer();
-      // }
+        // }
+      }
     }
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
