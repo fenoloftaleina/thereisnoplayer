@@ -27,6 +27,14 @@ const int grid_cubes_in_memory_count = 3000;
 int current_level = 0;
 const char* levels[] = {
   "levels/simplified",
+  "levels/one",
+  "levels/two",
+  "levels/three",
+  "levels/four",
+  "levels/five",
+  "levels/six",
+  "levels/seven",
+  "levels/eight",
   "levels/nothing",
 };
 
@@ -334,6 +342,7 @@ void runLevel(int level)
 {
   current_level = level;
   load(levels[current_level]);
+  SDL_SetWindowTitle(window, levels[current_level]);
 
   updateAllVerticesAndBuffers();
 }
@@ -455,19 +464,19 @@ int main (int argc, char* args[])
       } else if (currentEvent.type == SDL_KEYDOWN) {
         switch (currentEvent.key.keysym.sym) {
           case SDLK_a:
-            cur_pos.z += mx;
+            cur_pos.x -= mx;
             break;
 
           case SDLK_d:
-            cur_pos.z -= mx;
-            break;
-
-          case SDLK_w:
             cur_pos.x += mx;
             break;
 
+          case SDLK_w:
+            cur_pos.z += mx;
+            break;
+
           case SDLK_s:
-            cur_pos.x -= mx;
+            cur_pos.z -= mx;
             break;
 
           case SDLK_r:
@@ -619,7 +628,8 @@ int main (int argc, char* args[])
 
     // const bx::Vec3 eye = { -5.0f, 2.0f, -10.0f };
     // const bx::Vec3 eye = { 5.0f, 2.0f, -10.0f };
-    bx::Vec3 eye = {  -10.0f, 25.0f, -10.0f };
+    // bx::Vec3 eye = {  -10.0f, 25.0f, -10.0f };
+    bx::Vec3 eye = {  0.0f, 25.0f, -10.0f };
 
     // Set view and projection matrix for view 0.
     float view[16];
