@@ -16,5 +16,5 @@ void main()
   st = st / twh.yz;
   st.x = st.x + twh.x * 0.0001;
 
-	gl_FragColor = vec4(v_color0 - vec3(pow(random(st), 35.0)), 1.0);
+	gl_FragColor = vec4(v_color0.xyz - vec3(pow(random(st), 35.0)), 1.0);
 }

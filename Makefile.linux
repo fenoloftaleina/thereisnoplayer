@@ -1,8 +1,8 @@
 all:
-CXX = clang++
+CXX = g++
 CXXFLAGS = -MMD -MP -Wall -std=c++11 -g `sdl2-config --cflags` -Ibgfx/include -Ibx/include -Ibimg/include
 # LDFLAGS = `sdl2-config --libs` bgfx/.build/osx64_clang/bin/libbgfx-shared-libRelease.dylib
-LDFLAGS = `sdl2-config --libs` bgfx/.build/linux64_gcc/bin/libbgfxDebug.a bgfx/.build/linux64_gcc/bin/libbxDebug.a bgfx/.build/linux64_gcc/bin/libbimgDebug.a -lc++
+LDFLAGS = `sdl2-config --libs` -Lbgfx/.build/linux64_gcc/bin/ -l:libbgfxDebug.a -l:libbimgDebug.a -l:libbxDebug.a -lGL -lX11 -ldl -lpthread -lrt -lstdc++
 SHADERS_PLATFORM = --platform linux
 TARGET = main
 
@@ -12,7 +12,7 @@ SHADERS = $(wildcard src/shaders/f_*.sc) $(wildcard src/shaders/v_*.sc)
 all: $(TARGET) shaders
 
 $(TARGET): $(SOURCES:src/%.cpp=bin/%.o)
-	$(CXX) $(LDFLAGS) $^ -o $(TARGET)
+	$(CXX) $^ -o $(TARGET) $(LDFLAGS)
 
 bin/%.o: src/%.cpp
 	$(CXX) -c $(CXXFLAGS) $< -o $@
@@ -25,7 +25,7 @@ clean:
 shaders: $(SHADERS:src/shaders/%.sc=bin/%.bin)
 
 bin/f_%.bin: src/shaders/f_%.sc
-	bgfx/.build/osx64_clang/bin/shadercDebug -f $< -o $@ -i bgfx/src $(SHADERS_PLATFORM) --type fragment
+	bgfx/.build/linux64_gcc/bin/shadercDebug -f $< -o $@ -i bgfx/src $(SHADERS_PLATFORM) --type fragment
 
 bin/v_%.bin: src/shaders/v_%.sc
-	bgfx/.build/osx64_clang/bin/shadercDebug -f $< -o $@ -i bgfx/src $(SHADERS_PLATFORM) --type vertex
+	bgfx/.build/linux64_gcc/bin/shadercDebug -f $< -o $@ -i bgfx/src $(SHADERS_PLATFORM) --type vertex

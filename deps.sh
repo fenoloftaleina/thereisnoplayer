@@ -1,5 +1,5 @@
-# ./deps.sh linux
-# ./deps.sh osx
+# ./deps.sh linux-debug64
+# ./deps.sh osx-debug64
 
 cd bx
 make $1
