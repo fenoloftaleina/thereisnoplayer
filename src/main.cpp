@@ -34,6 +34,9 @@ const char* levels[] = {
   "levels/five",
   "levels/six",
   "levels/seven",
+  "levels/gratis-1",
+  "levels/gratis-2",
+  "levels/gratis-3",
   "levels/eight",
   "levels/nothing",
 };
