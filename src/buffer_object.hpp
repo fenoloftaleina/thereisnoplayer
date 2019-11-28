@@ -137,7 +137,6 @@ struct BufferObject {
   bgfx::IndexBufferHandle m_ibh;
   bgfx::ProgramHandle m_program;
 
-
   void initCubes(const int cubes_count);
   void initCubesLines(const int cubes_count);
   void writeCubesIndices();

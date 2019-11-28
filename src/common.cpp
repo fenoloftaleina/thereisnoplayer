@@ -30,3 +30,10 @@ bool Common::sameSpot(const bx::Vec3& v1, const bx::Vec3 v2)
 {
   return (int)(v1.x) == (int)(v2.x) && (int)(v1.y) == (int)(v2.y) && (int)(v1.z) == (int)(v2.z);
 }
+
+bx::Vec3 Common::posOnSpot(const bx::Vec3& spot)
+{
+  static const bx::Vec3 constexpr spot_offset = {-5, -5, -5};
+
+  return bx::add(bx::mul(spot, 2.0f), spot_offset);
+}
