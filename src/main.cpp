@@ -267,13 +267,13 @@ int main (int argc, char* args[])
       runLevel(++current_level);
     }
 
-    const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
+    const bx::Vec3 at  = { 0.0f, 0.0f, -3.0f };
     // const bx::Vec3 at = bx::neg(Common::spot_offset);
 
     // const bx::Vec3 eye = { -5.0f, 2.0f, -10.0f };
     // const bx::Vec3 eye = { 5.0f, 2.0f, -10.0f };
     // bx::Vec3 eye = {  -10.0f, 25.0f, -10.0f };
-    bx::Vec3 eye = {  0.0f, 15.0f, -10.0f };
+    bx::Vec3 eye = {  0.0f, 18.0f, -15.0f };
 
     // Set view and projection matrix for view 0.
     float view[16];
