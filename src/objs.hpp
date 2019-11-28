@@ -42,11 +42,13 @@ struct Objs
   BufferObject doors_bo;
   BufferObject winning_doors_bo;
   BufferObject editor_bo;
+  BufferObject bg_bo;
 
   std::vector<Cube> moving_cubes;
   std::vector<Cube> kids_cubes;
   std::vector<Cube> static_cubes;
   Cube editor_cube;
+  Cube bg_cube;
 
   std::vector<Door> doors;
   std::vector<Door> winning_doors;

@@ -125,6 +125,8 @@ static const bx::Vec3 constexpr pos_lines_vertices[vertices_per_cube_count] = {
   {  1.0f, -1.0f,  1.0f,},
 };
 
+const bx::Vec3 identity = {1.0f, 1.0f, 1.0f};
+
 
 struct BufferObject {
   int vertices_count;
@@ -141,7 +143,7 @@ struct BufferObject {
   void initCubesLines(const int cubes_count);
   void writeCubesIndices();
   void writeCubesLinesIndices();
-  void writeCubeVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
+  void writeCubeVertices(const int nth_cube, const bx::Vec3& pos, const bx::Vec3& col, const bx::Vec3& mul = identity);
   void writeCubeLinesVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
   void setFaceColor(const int nth_cube, const int nth_face, bx::Vec3 col);
   void createBuffers();
