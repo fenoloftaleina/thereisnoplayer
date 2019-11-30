@@ -78,7 +78,6 @@ struct Objs
   void initCube(const int i, Cube& cube, bx::Vec3& col, BufferObject& bo);
   void initCubes(const int i, std::vector<Cube>& cubes, BufferObject& bo);
   void initCubes(const int i, std::vector<Cube>& cubes, bx::Vec3& col, BufferObject& bo);
-  void initBgCubes(const int i, std::vector<Cube>& cubes, BufferObject& bo);
   void initDoorsCubes(const int i, std::vector<Door>& doors, BufferObject& bo);
   void initWinningDoorsCubes(const int i, std::vector<Door>& doors, bx::Vec3& col, BufferObject& bo);
 

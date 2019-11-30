@@ -3,7 +3,7 @@
 void Objs::initCube(const int i, Cube& cube, BufferObject& bo)
 {
   cube.pos = Common::posOnSpot(cube.spot);
-  bo.writeCubeVertices(i, cube.pos, cube.col);
+  bo.writeCubeLinesVertices(i, cube.pos, cube.col);
 }
 
 void Objs::initCube(const int i, Cube& cube, bx::Vec3& col, BufferObject& bo)
@@ -17,17 +17,6 @@ void Objs::initCubes
 {
   for (int j = 0; j < cubes.size(); ++j) {
     initCube(i + j, cubes[j], cubes[j].col, bo);
-  }
-
-  bo.updateBuffer();
-}
-
-void Objs::initBgCubes
-(const int i, std::vector<Cube>& cubes, BufferObject& bo)
-{
-  for (int j = 0; j < cubes.size(); ++j) {
-    cubes[j].pos = Common::posOnSpot(cubes[j].spot);
-    bg_bo.writeCubeLinesVertices(i + j, cubes[j].pos, cubes[j].col);
   }
 
   bo.updateBuffer();
@@ -71,13 +60,16 @@ void Objs::preInit()
   winning_doors.reserve(doors_in_memory_count);
   editor_cube.spot = {0, 5, 0};
 
-  printf("dupa\n\n");
-  int n = 40, m = 18;
-  bg_cubes.resize(n * m);
+  int n = 50;
+  bg_cubes.resize(n * n);
   for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < m; ++j) {
-      bg_cubes[i * m + j].spot = {float(i - 10), 5, (float)(j - 5)};
-      bg_cubes[i * m + j].col = bx::Vec3(0.2f, 0.2f, 0.2f);
+    for (int j = 0; j < n; ++j) {
+      bg_cubes[i * n + j].spot = {float(i - (n / 10)), 5, float(j - (n / 10))};
+      // if ((i + j) % 2) {
+        bg_cubes[i * n + j].col = bx::Vec3(0.2f, 0.2f, 0.2f);
+      // } else {
+        // bg_cubes[i * n + j].col = bx::Vec3(0.335f, 0.335f, 0.335f);
+      // }
     }
   }
 
@@ -92,7 +84,7 @@ void Objs::init()
   initCubes(0, moving_cubes, moving_cubes_color, moving_bo);
   initCubes(0, kids_cubes, kids_cubes_color, kids_bo);
   initCubes(0, static_cubes, static_cubes_color, static_bo);
-  initBgCubes(0, bg_cubes, bg_bo);
+  initCubes(0, bg_cubes, bg_bo);
   initDoorsCubes(0, doors, doors_bo);
   initWinningDoorsCubes(0, winning_doors, winning_doors_color, winning_doors_bo);
 }
@@ -102,7 +94,7 @@ void Objs::initBos()
   moving_bo.initCubes(cubes_in_memory_count);
   kids_bo.initCubes(cubes_in_memory_count);
   static_bo.initCubes(cubes_in_memory_count);
-  bg_bo.initCubesLines(20000);
+  bg_bo.initCubesLines(10000);
   doors_bo.initCubes(doors_in_memory_count);
   winning_doors_bo.initCubes(doors_in_memory_count);
   editor_bo.initCubes(1);
