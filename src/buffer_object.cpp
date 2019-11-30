@@ -53,13 +53,13 @@ void BufferObject::writeCubesLinesIndices()
 }
 
 
-void BufferObject::writeCubeVertices(const int nth_cube, const bx::Vec3& pos, const bx::Vec3& col, const bx::Vec3& mul)
+void BufferObject::writeCubeVertices(int nth_cube, bx::Vec3 pos, bx::Vec3 col)
 {
   bx::Vec3 end_pos, normal, a, b, c;
   int offset = nth_cube * vertices_per_cube_count;
 
   for (int i = 0; i < vertices_per_cube_count; ++i) {
-    end_pos = bx::add(bx::mul(pos_vertices[i], mul), pos);
+    end_pos = bx::add(pos_vertices[i], pos);
 
     vertices[offset + i].x = end_pos.x;
     vertices[offset + i].y = end_pos.y;
