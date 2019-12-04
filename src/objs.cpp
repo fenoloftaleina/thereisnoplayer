@@ -53,11 +53,6 @@ void Objs::initWinningDoorsCubes
 
 void Objs::preInit()
 {
-  moving_cubes.reserve(cubes_in_memory_count);
-  kids_cubes.reserve(cubes_in_memory_count);
-  static_cubes.reserve(cubes_in_memory_count);
-  doors.reserve(doors_in_memory_count);
-  winning_doors.reserve(doors_in_memory_count);
   editor_cube.spot = {0, 5, 0};
   PosColorVertex::init();
   initBos();
@@ -67,17 +62,15 @@ void Objs::init()
 {
   initCube(0, editor_cube, editor_cube_color, editor_bo);
   editor_bo.updateBuffer();
-  initCubes(0, moving_cubes, moving_cubes_color, moving_bo);
-  initCubes(0, kids_cubes, kids_cubes_color, kids_bo);
-  initCubes(0, static_cubes, static_cubes_color, static_bo);
-  initDoorsCubes(0, doors, doors_bo);
-  initWinningDoorsCubes(0, winning_doors, winning_doors_color, winning_doors_bo);
+  initCubes(0, level->moving_cubes, moving_cubes_color, moving_bo);
+  initCubes(0, level->static_cubes, static_cubes_color, static_bo);
+  initDoorsCubes(0, level->doors, doors_bo);
+  initWinningDoorsCubes(0, level->winning_doors, winning_doors_color, winning_doors_bo);
 }
 
 void Objs::initBos()
 {
   moving_bo.initCubes(cubes_in_memory_count);
-  kids_bo.initCubes(cubes_in_memory_count);
   static_bo.initCubes(cubes_in_memory_count);
   doors_bo.initCubes(doors_in_memory_count);
   winning_doors_bo.initCubes(doors_in_memory_count);
@@ -85,8 +78,6 @@ void Objs::initBos()
 
   moving_bo.createBuffers();
   moving_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
-  kids_bo.createBuffers();
-  kids_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
   static_bo.createBuffers();
   static_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
   doors_bo.createBuffers();
@@ -99,11 +90,10 @@ void Objs::initBos()
 
 void Objs::draw(const bool in_editor)
 {
-  moving_bo.drawCubes(moving_cubes.size());
-  kids_bo.drawCubes(kids_cubes.size());
-  static_bo.drawCubes(static_cubes.size());
-  doors_bo.drawCubes(doors.size());
-  winning_doors_bo.drawCubes(winning_doors.size());
+  moving_bo.drawCubes(level->moving_cubes.size());
+  static_bo.drawCubes(level->static_cubes.size());
+  doors_bo.drawCubes(level->doors.size());
+  winning_doors_bo.drawCubes(level->winning_doors.size());
 
   if (in_editor) {
     editor_bo.drawCubes(1);
@@ -113,7 +103,6 @@ void Objs::draw(const bool in_editor)
 void Objs::destroy()
 {
   moving_bo.destroy();
-  kids_bo.destroy();
   static_bo.destroy();
   doors_bo.destroy();
   winning_doors_bo.destroy();

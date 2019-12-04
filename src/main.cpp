@@ -7,6 +7,7 @@
 #include <vector>
 #include <fstream>
 #include "cereal/include/cereal/types/vector.hpp"
+#include "cereal/include/cereal/archives/json.hpp"
 #include "cereal/include/cereal/archives/portable_binary.hpp"
 
 #include "common.hpp"
@@ -22,11 +23,14 @@ const int h = HEIGHT;
 const int w2 = w / 2;
 const int h2 = h / 2;
 
-int current_level = 0;
+int current_level_id = 0;
+const char* levels_filename = "levels";
 char level_str[100];
 
+Level* level;
+std::vector<Level> levels;
 Logic logic;
-Objs& objs = logic.objs;
+Objs objs;
 Editor editor;
 
 void updateAllVerticesAndBuffers()
@@ -37,34 +41,26 @@ void updateAllVerticesAndBuffers()
 void load(const char* filename)
 {
   std::ifstream is(filename, std::ios::binary);
-  cereal::PortableBinaryInputArchive ar(is);
-  ar(objs.moving_cubes, objs.static_cubes, objs.doors, objs.winning_doors);
+  cereal::JSONInputArchive ar(is);
+  ar(levels);
 }
 
 void save(const char* filename)
 {
   std::ofstream os(filename, std::ios::binary);
-  cereal::PortableBinaryOutputArchive ar(os);
-  ar(objs.moving_cubes, objs.static_cubes, objs.doors, objs.winning_doors);
+  cereal::JSONOutputArchive ar(os);
+  ar(levels);
 }
 
-void runLevel(int level)
+void runLevel(int level_id)
 {
-  current_level = level;
-  sprintf(level_str, "levels/s%d", current_level);
-  load(level_str);
-  for (int i = 0; i < objs.kids_cubes.size(); ++i) {
-    objs.kids_cubes[i].kids_moves_offset = 0;
-  }
+  current_level_id = level_id;
+  level = &(levels[current_level_id]);
+  logic.level = objs.level = editor.level = level;
+  sprintf(level_str, "level %d", current_level_id);
   SDL_SetWindowTitle(window, level_str);
 
   updateAllVerticesAndBuffers();
-}
-
-void saveLevel(int level)
-{
-  sprintf(level_str, "levels/s%d", level);
-  save(level_str);
 }
 
 int main (int argc, char* args[])
@@ -125,8 +121,10 @@ int main (int argc, char* args[])
   // bgfx::init(bgfx::RendererType::Metal);
 
 
+  logic.objs = &objs;
   editor.objs = &objs;
   objs.preInit();
+  load("levels");
   runLevel(0);
 
   bgfx::UniformHandle u_twh = bgfx::createUniform("twh", bgfx::UniformType::Vec4);
@@ -184,15 +182,15 @@ int main (int argc, char* args[])
             break;
 
           case SDLK_r:
-            runLevel(current_level);
+            runLevel(current_level_id);
             break;
 
           case SDLK_v:
-            runLevel(--current_level);
+            runLevel(--current_level_id);
             break;
 
           case SDLK_b:
-            runLevel(++current_level);
+            runLevel(++current_level_id);
             break;
 
           case SDLK_h:
@@ -231,13 +229,6 @@ int main (int argc, char* args[])
             updateAllVerticesAndBuffers();
             break;
 
-          case SDLK_k:
-            // kids
-            if (!in_editor) break;
-            editor.addKidsCube(objs.editor_cube.spot);
-            updateAllVerticesAndBuffers();
-            break;
-
           case SDLK_n:
             // remote/no
             if (!in_editor) break;
@@ -248,14 +239,32 @@ int main (int argc, char* args[])
           case SDLK_p:
             // persist
             if (!in_editor) break;
-            saveLevel(current_level);
+            save(levels_filename);
+            break;
+
+          case SDLK_k:
+            // klone level on next slot
+            if (!in_editor) break;
+            levels.insert(levels.begin() + current_level_id + 1, *level);
+            save(levels_filename);
+            runLevel(current_level_id + 1);
             break;
 
           case SDLK_m:
-            // save level on next slot
+            // move level to the end
             if (!in_editor) break;
-            saveLevel(current_level + 1);
-            runLevel(current_level + 1);
+            levels.push_back(*level);
+            levels.erase(levels.begin() + current_level_id);
+            save(levels_filename);
+            runLevel(levels.size() - 1);
+            break;
+
+          case SDLK_l:
+            // move level to the end
+            if (!in_editor) break;
+            levels.erase(levels.begin() + current_level_id);
+            save(levels_filename);
+            runLevel(current_level_id);
             break;
         }
       }
@@ -264,7 +273,7 @@ int main (int argc, char* args[])
     dt = current_time - last_time;
 
     if (logic.run(cur_pos, in_editor)) {
-      runLevel(++current_level);
+      runLevel(++current_level_id);
     }
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };

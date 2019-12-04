@@ -33,11 +33,11 @@ bool Logic::collidesWith(const std::vector<Cube>& cubes1, const std::vector<Cube
 
 void Logic::maybeDoors(Cube& cube)
 {
-  for (int j = 0; j < objs.doors.size(); j += 2) {
-    if (Common::sameSpot(cube.next_spot, objs.doors[j].cube.spot)) {
-      cube.next_spot = objs.doors[j + objs.doors[j].towards].cube.spot;
-    } else if (Common::sameSpot(cube.next_spot, objs.doors[j + 1].cube.spot)) {
-      cube.next_spot = objs.doors[j + 1 + objs.doors[j + 1].towards].cube.spot;
+  for (int j = 0; j < level->doors.size(); j += 2) {
+    if (Common::sameSpot(cube.next_spot, level->doors[j].cube.spot)) {
+      cube.next_spot = level->doors[j + level->doors[j].towards].cube.spot;
+    } else if (Common::sameSpot(cube.next_spot, level->doors[j + 1].cube.spot)) {
+      cube.next_spot = level->doors[j + 1 + level->doors[j + 1].towards].cube.spot;
     }
   }
 }
@@ -47,61 +47,27 @@ const bool WITH_MOVING = true;
 
 bool Logic::movement(const bx::Vec3& cur_pos)
 {
-  for (int i = 0; i < objs.moving_cubes.size(); ++i) {
-    objs.moving_cubes[i].next_spot = bx::add(objs.moving_cubes[i].spot, cur_pos);
+  for (int i = 0; i < level->moving_cubes.size(); ++i) {
+    level->moving_cubes[i].next_spot = bx::add(level->moving_cubes[i].spot, cur_pos);
 
-    maybeDoors(objs.moving_cubes[i]);
+    maybeDoors(level->moving_cubes[i]);
   }
 
-  return collidesWith(objs.moving_cubes, objs.static_cubes);
-}
-
-bool Logic::tryKidMovement(Cube& cube)
-{
-  int j;
-  for (int i = 0; i < 4; ++i) {
-    j = cube.kids_moves_offset % 4;
-
-    cube.next_spot = cube.spot;
-    cube.next_spot = bx::add(cube.next_spot, kids_moves[j][i]);
-
-    maybeDoors(cube);
-
-    if (!(collidesWith(cube, objs.static_cubes) ||
-          collidesWith(cube, objs.kids_cubes, SAME, WITH_MOVING) ||
-          collidesWith(cube, objs.moving_cubes, !SAME, WITH_MOVING))) {
-      cube.kids_moves_offset = j;
-
-      return false;
-    }
-  }
-
-  return true;
-}
-
-bool Logic::kidsMovement()
-{
-  for (int i = 0; i < objs.kids_cubes.size(); ++i) {
-    if (tryKidMovement(objs.kids_cubes[i])) {
-      return true;
-    }
-  }
-
-  return false;
+  return collidesWith(level->moving_cubes, level->static_cubes);
 }
 
 bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor)
 {
   winning_count = 0;
-  for (int i = 0; i < objs.moving_cubes.size(); ++i) {
-    for (int j = 0; j < objs.winning_doors.size(); ++j) {
-      if (Common::sameSpot(objs.moving_cubes[i].spot, objs.winning_doors[j].cube.spot)) {
+  for (int i = 0; i < level->moving_cubes.size(); ++i) {
+    for (int j = 0; j < level->winning_doors.size(); ++j) {
+      if (Common::sameSpot(level->moving_cubes[i].spot, level->winning_doors[j].cube.spot)) {
         winning_count += 1;
       }
     }
   }
 
-  if (winning_count == objs.winning_doors.size() && objs.winning_doors.size() > 0) {
+  if (winning_count == level->winning_doors.size() && level->winning_doors.size() > 0) {
     return true;
   }
 
@@ -117,32 +83,26 @@ bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor)
   were_collisions = false;
 
   were_collisions = movement(cur_pos);
-    // || kidsMovement();
 
   if (were_collisions) {
     printf("COLLISIONS!\n");
     return false;
   }
 
-  for (int i = 0; i < objs.moving_cubes.size(); ++i) {
-    objs.moving_cubes[i].spot = objs.moving_cubes[i].next_spot;
+  for (int i = 0; i < level->moving_cubes.size(); ++i) {
+    level->moving_cubes[i].spot = level->moving_cubes[i].next_spot;
   }
 
-  for (int i = 0; i < objs.kids_cubes.size(); ++i) {
-    objs.kids_cubes[i].spot = objs.kids_cubes[i].next_spot;
-  }
-
-  objs.initCubes(0, objs.moving_cubes, objs.moving_bo);
-  objs.initCubes(0, objs.kids_cubes, objs.kids_bo);
+  objs->initCubes(0, level->moving_cubes, objs->moving_bo);
 
   return false;
 }
 
 void Logic::editor(const bx::Vec3& cur_pos)
 {
-  objs.editor_cube.next_spot = bx::add(objs.editor_cube.spot, cur_pos);
-  objs.editor_cube.spot = objs.editor_cube.next_spot;
+  objs->editor_cube.next_spot = bx::add(objs->editor_cube.spot, cur_pos);
+  objs->editor_cube.spot = objs->editor_cube.next_spot;
 
-  objs.initCube(0, objs.editor_cube, objs.editor_bo);
-  objs.editor_bo.updateBuffer();
+  objs->initCube(0, objs->editor_cube, objs->editor_bo);
+  objs->editor_bo.updateBuffer();
 }

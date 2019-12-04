@@ -34,22 +34,30 @@ struct Door
   }
 };
 
+struct Level
+{
+  std::vector<Cube> moving_cubes;
+  std::vector<Cube> static_cubes;
+  std::vector<Door> doors;
+  std::vector<Door> winning_doors;
+
+  template<class Archive>
+  void serialize(Archive& archive)
+  {
+    archive(moving_cubes, static_cubes, doors, winning_doors);
+  }
+};
+
 struct Objs
 {
   BufferObject moving_bo;
-  BufferObject kids_bo;
   BufferObject static_bo;
   BufferObject doors_bo;
   BufferObject winning_doors_bo;
   BufferObject editor_bo;
 
-  std::vector<Cube> moving_cubes;
-  std::vector<Cube> kids_cubes;
-  std::vector<Cube> static_cubes;
   Cube editor_cube;
-
-  std::vector<Door> doors;
-  std::vector<Door> winning_doors;
+  Level* level;
 
   const int cubes_in_memory_count = 300;
   const int doors_in_memory_count = 30;

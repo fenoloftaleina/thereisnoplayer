@@ -45,11 +45,10 @@ bool Editor::removeOnIdx(std::vector<Door>& v, int i)
 
 void Editor::removeOnSpot(const bx::Vec3& spot)
 {
-  removeOnIdx(objs->moving_cubes, idxForSpot(objs->moving_cubes, spot)) ||
-    removeOnIdx(objs->kids_cubes, idxForSpot(objs->kids_cubes, spot)) ||
-    removeOnIdx(objs->static_cubes, idxForSpot(objs->static_cubes, spot)) ||
-    removeOnIdx(objs->doors, idxForSpot(objs->doors, spot)) ||
-    removeOnIdx(objs->winning_doors, idxForSpot(objs->winning_doors, spot));
+  removeOnIdx(level->moving_cubes, idxForSpot(level->moving_cubes, spot)) ||
+    removeOnIdx(level->static_cubes, idxForSpot(level->static_cubes, spot)) ||
+    removeOnIdx(level->doors, idxForSpot(level->doors, spot)) ||
+    removeOnIdx(level->winning_doors, idxForSpot(level->winning_doors, spot));
 }
 
 void Editor::addMovingCube(const bx::Vec3& spot)
@@ -59,17 +58,7 @@ void Editor::addMovingCube(const bx::Vec3& spot)
   c.spot = spot;
   c.next_spot = spot;
   c.pos = Common::posOnSpot(c.spot);
-  objs->moving_cubes.push_back(c);
-}
-
-void Editor::addKidsCube(const bx::Vec3& spot)
-{
-  Cube c;
-  c.col = objs->kids_cubes_color;
-  c.spot = spot;
-  c.next_spot = spot;
-  c.pos = Common::posOnSpot(c.spot);
-  objs->kids_cubes.push_back(c);
+  level->moving_cubes.push_back(c);
 }
 
 void Editor::addStaticCube(const bx::Vec3& spot)
@@ -79,7 +68,7 @@ void Editor::addStaticCube(const bx::Vec3& spot)
   c.spot = spot;
   c.next_spot = spot;
   c.pos = Common::posOnSpot(c.spot);
-  objs->static_cubes.push_back(c);
+  level->static_cubes.push_back(c);
 }
 
 void Editor::addOrUpdateDoor(const bx::Vec3& spot)
@@ -89,17 +78,17 @@ void Editor::addOrUpdateDoor(const bx::Vec3& spot)
   d.cube.spot = spot;
   d.cube.next_spot = spot;
   d.cube.pos = Common::posOnSpot(d.cube.spot);
-  int idx = idxForSpot(objs->doors, spot);
+  int idx = idxForSpot(level->doors, spot);
   if (idx == -1) {
-    if (!objs->doors.empty()) {
-      d.towards = objs->doors.back().towards * -1;
+    if (!level->doors.empty()) {
+      d.towards = level->doors.back().towards * -1;
     } else {
       d.towards = 1;
     }
-    objs->doors.push_back(d);
+    level->doors.push_back(d);
   } else {
-    d.towards = objs->doors[idx].towards;
-    objs->doors[idx] = d;
+    d.towards = level->doors[idx].towards;
+    level->doors[idx] = d;
   }
 }
 
@@ -111,5 +100,5 @@ void Editor::addWinningDoor(const bx::Vec3& spot)
   d.cube.spot = spot;
   d.cube.next_spot = spot;
   d.cube.pos = Common::posOnSpot(d.cube.spot);
-  objs->winning_doors.push_back(d);
+  level->winning_doors.push_back(d);
 }

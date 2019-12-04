@@ -13,11 +13,11 @@
 struct Editor
 {
   Objs* objs;
+  Level* level;
 
   void removeOnSpot(const bx::Vec3& spot);
 
   void addMovingCube(const bx::Vec3& spot);
-  void addKidsCube(const bx::Vec3& spot);
   void addStaticCube(const bx::Vec3& spot);
   void addOrUpdateDoor(const bx::Vec3& spot);
   void addWinningDoor(const bx::Vec3& spot);
