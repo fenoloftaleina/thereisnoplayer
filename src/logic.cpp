@@ -56,7 +56,7 @@ bool Logic::movement(const bx::Vec3& cur_pos)
   return collidesWith(level->moving_cubes, level->static_cubes);
 }
 
-bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor)
+bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor, const bool back)
 {
   winning_count = 0;
   for (int i = 0; i < level->moving_cubes.size(); ++i) {
@@ -80,7 +80,7 @@ bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor)
     return false;
   }
 
-  were_collisions = false;
+  if (!back) objs->moves.push_back(cur_pos);
 
   were_collisions = movement(cur_pos);
 

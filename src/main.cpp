@@ -43,6 +43,9 @@ void load(const char* filename)
   std::ifstream is(filename, std::ios::binary);
   cereal::JSONInputArchive ar(is);
   ar(levels);
+  for(Level& l : levels) {
+    l.beginning_moving_cubes = l.moving_cubes;
+  }
 }
 
 void save(const char* filename)
@@ -52,15 +55,22 @@ void save(const char* filename)
   ar(levels);
 }
 
+void resetLevel()
+{
+  level->moving_cubes = level->beginning_moving_cubes;
+  objs.moves.clear();
+
+  updateAllVerticesAndBuffers();
+}
+
 void runLevel(int level_id)
 {
   current_level_id = level_id;
   level = &(levels[current_level_id]);
   logic.level = objs.level = editor.level = level;
+  resetLevel();
   sprintf(level_str, "level %d", current_level_id);
   SDL_SetWindowTitle(window, level_str);
-
-  updateAllVerticesAndBuffers();
 }
 
 int main (int argc, char* args[])
@@ -148,6 +158,7 @@ int main (int argc, char* args[])
   float mx = 1.0f, my = 1.0f;
 
   bool in_editor = false;
+  bool back = false;
 
   // Poll for events and wait till user closes window
   bool quit = false;
@@ -155,6 +166,7 @@ int main (int argc, char* args[])
   SDL_Event currentEvent;
   while(!quit) {
     cur_pos.x = cur_pos.y = cur_pos.z = 0.0f;
+    back = false;
 
     while(SDL_PollEvent(&currentEvent)) {
       if(currentEvent.type == SDL_QUIT) {
@@ -182,7 +194,14 @@ int main (int argc, char* args[])
             break;
 
           case SDLK_r:
-            runLevel(current_level_id);
+            resetLevel();
+            break;
+
+          case SDLK_z:
+            if (objs.moves.empty()) break;
+            back = true;
+            cur_pos = bx::mul(objs.moves.back(), -1);
+            objs.moves.pop_back();
             break;
 
           case SDLK_v:
@@ -272,7 +291,7 @@ int main (int argc, char* args[])
 
     dt = current_time - last_time;
 
-    if (logic.run(cur_pos, in_editor)) {
+    if (logic.run(cur_pos, in_editor, back)) {
       runLevel(++current_level_id);
     }
 
