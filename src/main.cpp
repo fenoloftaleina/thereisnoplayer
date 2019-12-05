@@ -66,13 +66,15 @@ void runLevel(int level_id)
 {
   if (!objs.previous_moving_cubes.empty()) {
     levels[current_level_id].moving_cubes = objs.previous_moving_cubes.front();
+    objs.previous_moving_cubes.clear();
   }
   current_level_id = level_id;
   level = &(levels[current_level_id]);
   logic.level = objs.level = editor.level = level;
-  resetLevel();
   sprintf(level_str, "level %d", current_level_id);
   SDL_SetWindowTitle(window, level_str);
+
+  updateAllVerticesAndBuffers();
 }
 
 int main (int argc, char* args[])
@@ -298,7 +300,7 @@ int main (int argc, char* args[])
     dt = current_time - last_time;
 
     if (logic.run(cur_pos, in_editor, back)) {
-      runLevel(++current_level_id);
+      runLevel(current_level_id + 1);
     }
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
