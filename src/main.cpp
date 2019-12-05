@@ -43,32 +43,30 @@ void load(const char* filename)
   std::ifstream is(filename, std::ios::binary);
   cereal::JSONInputArchive ar(is);
   ar(levels);
-  for(Level& l : levels) {
-    l.beginning_moving_cubes = l.moving_cubes;
-  }
 }
 
 void save(const char* filename)
 {
   std::ofstream os(filename, std::ios::binary);
   cereal::JSONOutputArchive ar(os);
-  for(Level& l : levels) {
-    l.beginning_moving_cubes = l.moving_cubes;
-  }
   ar(levels);
 }
 
 void resetLevel()
 {
-  level->moving_cubes = level->beginning_moving_cubes;
-  objs.moves.clear();
+  if (!objs.previous_moving_cubes.empty()) {
+    level->moving_cubes = objs.previous_moving_cubes.front();
+    objs.previous_moving_cubes.clear();
+  }
 
   updateAllVerticesAndBuffers();
 }
 
 void runLevel(int level_id)
 {
-  levels[current_level_id].moving_cubes = levels[current_level_id].beginning_moving_cubes;
+  if (!objs.previous_moving_cubes.empty()) {
+    levels[current_level_id].moving_cubes = objs.previous_moving_cubes.front();
+  }
   current_level_id = level_id;
   level = &(levels[current_level_id]);
   logic.level = objs.level = editor.level = level;
@@ -206,10 +204,10 @@ int main (int argc, char* args[])
             break;
 
           case SDLK_z:
-            if (objs.moves.empty()) break;
+            if (objs.previous_moving_cubes.empty()) break;
             back = true;
-            cur_pos = bx::mul(objs.moves.back(), -1);
-            objs.moves.pop_back();
+            level->moving_cubes = objs.previous_moving_cubes.back();
+            objs.previous_moving_cubes.pop_back();
             break;
 
           case SDLK_v:

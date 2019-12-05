@@ -73,6 +73,7 @@ bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor, const bool back)
   }
 
   if (cur_pos.x == 0.0f && cur_pos.y == 0.0f && cur_pos.z == 0.0f) {
+    if (back) objs->initCubes(0, level->moving_cubes, objs->moving_bo);
     return false;
   }
 
@@ -81,7 +82,7 @@ bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor, const bool back)
     return false;
   }
 
-  if (!back) objs->moves.push_back(cur_pos);
+  if (!back) objs->previous_moving_cubes.push_back(level->moving_cubes);
 
   were_collisions = movement(cur_pos);
 

@@ -42,8 +42,6 @@ struct Level
   std::vector<Door> doors;
   std::vector<Door> winning_doors;
 
-  std::vector<Cube> beginning_moving_cubes;
-
   template<class Archive>
   void serialize(Archive& archive)
   {
@@ -61,7 +59,7 @@ struct Objs
 
   Cube editor_cube;
   Level* level;
-  std::vector<bx::Vec3> moves;
+  std::vector<std::vector<Cube>> previous_moving_cubes;
 
   const int cubes_in_memory_count = 300;
   const int doors_in_memory_count = 30;
