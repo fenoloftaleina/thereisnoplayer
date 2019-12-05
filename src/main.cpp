@@ -287,11 +287,29 @@ int main (int argc, char* args[])
             break;
 
           case SDLK_l:
-            // move level to the end
+            // lose level
             if (!in_editor) break;
             levels.erase(levels.begin() + current_level_id);
             save(levels_filename);
             runLevel(current_level_id);
+            break;
+
+          case SDLK_9:
+            // move level back
+            if (!in_editor) break;
+            levels.insert(levels.begin() + current_level_id - 1, *level);
+            levels.erase(levels.begin() + current_level_id + 1);
+            save(levels_filename);
+            runLevel(current_level_id - 1);
+            break;
+
+          case SDLK_0:
+            // move level forward
+            if (!in_editor) break;
+            levels.insert(levels.begin() + current_level_id + 2, *level);
+            levels.erase(levels.begin() + current_level_id);
+            save(levels_filename);
+            runLevel(current_level_id + 1);
             break;
         }
       }
