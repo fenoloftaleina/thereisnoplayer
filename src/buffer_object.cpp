@@ -193,9 +193,9 @@ void BufferObject::draw(uint16_t current_vertices_count, uint16_t current_indice
   bgfx::submit(0, m_program);
 }
 
-void BufferObject::drawCubes(uint16_t current_cubes_count)
+void BufferObject::drawCubes(uint16_t current_cubes_count, uint64_t more_state)
 {
-  draw(current_cubes_count * vertices_per_cube_count, current_cubes_count * indices_per_cube_count);
+  draw(current_cubes_count * vertices_per_cube_count, current_cubes_count * indices_per_cube_count, more_state);
 }
 
 void BufferObject::drawCubesLines(uint16_t current_cubes_count)

@@ -148,7 +148,7 @@ struct BufferObject {
   void updateBuffer();
   void createShaders(const char* vertex_shader_path, const char* fragment_shader_path);
   void draw(uint16_t current_vertices_count, uint16_t current_indices_count, uint64_t more_state);
-  void drawCubes(uint16_t current_cubes_count);
+  void drawCubes(uint16_t current_cubes_count, uint64_t more_state = 0);
   void drawCubesLines(uint16_t current_cubes_count);
   void destroy();
 };

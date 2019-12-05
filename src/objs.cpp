@@ -91,10 +91,10 @@ void Objs::initBos()
 
 void Objs::draw(const bool in_editor)
 {
-  moving_bo.drawCubes(level->moving_cubes.size());
+  moving_bo.drawCubes(level->moving_cubes.size(), BGFX_STATE_BLEND_ALPHA);
   static_bo.drawCubes(level->static_cubes.size());
-  doors_bo.drawCubes(level->doors.size());
-  winning_doors_bo.drawCubes(level->winning_doors.size());
+  doors_bo.drawCubes(level->doors.size(), BGFX_STATE_BLEND_ALPHA);
+  winning_doors_bo.drawCubes(level->winning_doors.size(), BGFX_STATE_BLEND_ALPHA);
 
   if (in_editor) {
     editor_bo.drawCubes(1);
