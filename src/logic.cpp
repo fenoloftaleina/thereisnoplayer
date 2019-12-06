@@ -33,13 +33,21 @@ bool Logic::collidesWith(const std::vector<Cube>& cubes1, const std::vector<Cube
 
 void Logic::maybeDoors(Cube& cube)
 {
+  cube.on_door = true;
+
   for (int j = 0; j < level->doors.size(); j += 2) {
     if (Common::sameSpot(cube.next_spot, level->doors[j].cube.spot)) {
       cube.next_spot = level->doors[j + level->doors[j].towards].cube.spot;
+      cube.cur_spot = level->doors[j].cube.spot;
+      return;
     } else if (Common::sameSpot(cube.next_spot, level->doors[j + 1].cube.spot)) {
       cube.next_spot = level->doors[j + 1 + level->doors[j + 1].towards].cube.spot;
+      cube.cur_spot = level->doors[j + 1].cube.spot;
+      return;
     }
   }
+
+  cube.on_door = false;
 }
 
 const bool SAME = true;
@@ -56,7 +64,7 @@ bool Logic::movement(const bx::Vec3& cur_pos)
   return collidesWith(level->moving_cubes, level->static_cubes);
 }
 
-bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor, const bool back)
+bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor, const bool back, const float dt)
 {
   winning_count = 0;
   for (int i = 0; i < level->moving_cubes.size(); ++i) {
@@ -65,6 +73,16 @@ bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor, const bool back)
         winning_count += 1;
       }
     }
+  }
+
+  for (auto& cube : level->moving_cubes) {
+    if (cube.anim_fraction > 0.5f) {
+      cube.cur_spot = cube.spot;
+    }
+
+    cube.anim_fraction += dt * 0.003;
+    if (cube.anim_fraction > 1.0f) cube.anim_fraction = 1.0f;
+    objs->initCubes(0, level->moving_cubes, objs->moving_bo);
   }
 
   if (winning_count == level->winning_doors.size() && level->winning_doors.size() > 0) {
@@ -92,6 +110,11 @@ bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor, const bool back)
   }
 
   for (int i = 0; i < level->moving_cubes.size(); ++i) {
+    if (level->moving_cubes[i].on_door) {
+      level->moving_cubes[i].anim_fraction = 0.0f;
+    } else {
+      level->moving_cubes[i].cur_spot = level->moving_cubes[i].next_spot;
+    }
     level->moving_cubes[i].spot = level->moving_cubes[i].next_spot;
   }
 

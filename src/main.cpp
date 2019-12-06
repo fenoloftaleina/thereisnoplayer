@@ -43,6 +43,20 @@ void load(const char* filename)
   std::ifstream is(filename, std::ios::binary);
   cereal::JSONInputArchive ar(is);
   ar(levels);
+  for (auto& l : levels) {
+    for (auto& c : l.moving_cubes) {
+      c.cur_spot = c.spot;
+    }
+    for (auto& c : l.static_cubes) {
+      c.cur_spot = c.spot;
+    }
+    for (auto& d : l.doors) {
+      d.cube.cur_spot = d.cube.spot;
+    }
+    for (auto& d : l.winning_doors) {
+      d.cube.cur_spot = d.cube.spot;
+    }
+  }
 }
 
 void save(const char* filename)
@@ -317,7 +331,7 @@ int main (int argc, char* args[])
 
     dt = current_time - last_time;
 
-    if (logic.run(cur_pos, in_editor, back)) {
+    if (logic.run(cur_pos, in_editor, back, dt)) {
       runLevel(current_level_id + 1);
     }
 

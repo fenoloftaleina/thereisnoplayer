@@ -57,6 +57,7 @@ void Editor::addMovingCube(const bx::Vec3& spot)
   c.col = objs->moving_cubes_color;
   c.spot = spot;
   c.next_spot = spot;
+  c.cur_spot = spot;
   c.pos = Common::posOnSpot(c.spot);
   level->moving_cubes.push_back(c);
 }
@@ -67,6 +68,7 @@ void Editor::addStaticCube(const bx::Vec3& spot)
   c.col = objs->static_cubes_color;
   c.spot = spot;
   c.next_spot = spot;
+  c.cur_spot = spot;
   c.pos = Common::posOnSpot(c.spot);
   level->static_cubes.push_back(c);
 }
@@ -77,6 +79,7 @@ void Editor::addOrUpdateDoor(const bx::Vec3& spot)
   d.cube.col = objs->doors_color;
   d.cube.spot = spot;
   d.cube.next_spot = spot;
+  d.cube.cur_spot = spot;
   d.cube.pos = Common::posOnSpot(d.cube.spot);
   int idx = idxForSpot(level->doors, spot);
   if (idx == -1) {
@@ -99,6 +102,7 @@ void Editor::addWinningDoor(const bx::Vec3& spot)
   d.cube.col = objs->winning_doors_color;
   d.cube.spot = spot;
   d.cube.next_spot = spot;
+  d.cube.cur_spot = spot;
   d.cube.pos = Common::posOnSpot(d.cube.spot);
   level->winning_doors.push_back(d);
 }

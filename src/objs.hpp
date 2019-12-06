@@ -12,8 +12,10 @@ struct Cube {
 
   bx::Vec3 spot {0, 0, 0};
   bx::Vec3 next_spot {0, 0, 0};
+  bx::Vec3 cur_spot {0, 0, 0};
 
-  int kids_moves_offset = 0;
+  float anim_fraction = 1.0f;
+  bool on_door = false;
 
   template<class Archive>
   void serialize(Archive& archive)

@@ -2,8 +2,8 @@
 
 void Objs::initCube(const int i, Cube& cube, BufferObject& bo)
 {
-  cube.pos = Common::posOnSpot(cube.spot);
-  bo.writeCubeVertices(i, cube.pos, cube.col);
+  cube.pos = Common::posOnSpot(cube.cur_spot);
+  bo.writeCubeVertices(i, cube.pos, bx::mul(cube.col, cube.anim_fraction));
 }
 
 void Objs::initCube(const int i, Cube& cube, bx::Vec3& col, BufferObject& bo)
