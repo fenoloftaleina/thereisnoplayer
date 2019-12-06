@@ -156,7 +156,6 @@ int main (int argc, char* args[])
   runLevel(0);
 
   bgfx::UniformHandle u_twh = bgfx::createUniform("twh", bgfx::UniformType::Vec4);
-  bgfx::UniformHandle u_alpha = bgfx::createUniform("alpha", bgfx::UniformType::Vec4);
 
   bgfx::reset(WIDTH, HEIGHT, BGFX_RESET_VSYNC);
   bgfx::setDebug(BGFX_DEBUG_TEXT /*| BGFX_DEBUG_STATS*/);
@@ -171,9 +170,6 @@ int main (int argc, char* args[])
   float u_twh_val[4];
   u_twh_val[1] = w;
   u_twh_val[2] = h;
-
-  float u_alpha_val[4];
-  u_alpha_val[0] = 1.0f;
 
   bx::Vec3 cur_pos(0.0f, 0.0f, 0.0f);
   bx::Vec3 cur_pos2(0.0f, 0.0f, 0.0f);
@@ -366,7 +362,6 @@ int main (int argc, char* args[])
 
     u_twh_val[0] = current_time;
     bgfx::setUniform(u_twh, &u_twh_val);
-    bgfx::setUniform(u_alpha, &u_alpha_val);
 
     objs.draw(in_editor);
     bgfx::frame();
@@ -377,7 +372,6 @@ int main (int argc, char* args[])
 
   objs.destroy();
   bgfx::destroy(u_twh);
-  bgfx::destroy(u_alpha);
 
   bgfx::shutdown();
   // Free up window

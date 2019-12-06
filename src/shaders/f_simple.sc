@@ -3,7 +3,6 @@ $input v_color0, v_normal0, v_position0
 #include <bgfx_shader.sh>
 
 uniform vec4 twh;
-uniform vec4 alpha;
 
 void main()
 {
