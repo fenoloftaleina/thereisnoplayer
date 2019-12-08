@@ -1750,107 +1750,6 @@
         {
             "value0": [
                 {
-                    "value0": -2.0,
-                    "value1": 5.0,
-                    "value2": -1.0
-                },
-                {
-                    "value0": -1.0,
-                    "value1": 5.0,
-                    "value2": -1.0
-                },
-                {
-                    "value0": 0.0,
-                    "value1": 5.0,
-                    "value2": -1.0
-                }
-            ],
-            "value1": [],
-            "value2": [
-                {
-                    "value0": {
-                        "value0": -5.0,
-                        "value1": 5.0,
-                        "value2": 2.0
-                    },
-                    "value1": 1,
-                    "value2": 0.0,
-                    "value3": 0.0,
-                    "value4": 0.0
-                },
-                {
-                    "value0": {
-                        "value0": -4.0,
-                        "value1": 5.0,
-                        "value2": 4.0
-                    },
-                    "value1": -1,
-                    "value2": 0.0,
-                    "value3": 0.0,
-                    "value4": 0.0
-                },
-                {
-                    "value0": {
-                        "value0": 2.0,
-                        "value1": 5.0,
-                        "value2": 2.0
-                    },
-                    "value1": 1,
-                    "value2": 0.0,
-                    "value3": 0.0,
-                    "value4": 0.0
-                },
-                {
-                    "value0": {
-                        "value0": 1.0,
-                        "value1": 5.0,
-                        "value2": 2.0
-                    },
-                    "value1": -1,
-                    "value2": 0.0,
-                    "value3": 0.0,
-                    "value4": 0.0
-                }
-            ],
-            "value3": [
-                {
-                    "value0": {
-                        "value0": 6.0,
-                        "value1": 5.0,
-                        "value2": -1.0
-                    },
-                    "value1": 1,
-                    "value2": 0.0,
-                    "value3": 0.0,
-                    "value4": 0.0
-                },
-                {
-                    "value0": {
-                        "value0": 8.0,
-                        "value1": 5.0,
-                        "value2": -1.0
-                    },
-                    "value1": 1,
-                    "value2": 0.0,
-                    "value3": 0.0,
-                    "value4": 0.0
-                },
-                {
-                    "value0": {
-                        "value0": 7.0,
-                        "value1": 5.0,
-                        "value2": 1.0
-                    },
-                    "value1": 1,
-                    "value2": 0.0,
-                    "value3": 0.0,
-                    "value4": 0.0
-                }
-            ]
-        },
-        {
-            "value0": [
-                {
                     "value0": -3.0,
                     "value1": 5.0,
                     "value2": -1.0
@@ -3073,6 +2972,107 @@
                 {
                     "value0": {
                         "value0": 6.0,
+                        "value1": 5.0,
+                        "value2": 1.0
+                    },
+                    "value1": 1,
+                    "value2": 0.0,
+                    "value3": 0.0,
+                    "value4": 0.0
+                }
+            ]
+        },
+        {
+            "value0": [
+                {
+                    "value0": -2.0,
+                    "value1": 5.0,
+                    "value2": -1.0
+                },
+                {
+                    "value0": -1.0,
+                    "value1": 5.0,
+                    "value2": -1.0
+                },
+                {
+                    "value0": 0.0,
+                    "value1": 5.0,
+                    "value2": -1.0
+                }
+            ],
+            "value1": [],
+            "value2": [
+                {
+                    "value0": {
+                        "value0": -5.0,
+                        "value1": 5.0,
+                        "value2": 2.0
+                    },
+                    "value1": 1,
+                    "value2": 0.0,
+                    "value3": 0.0,
+                    "value4": 0.0
+                },
+                {
+                    "value0": {
+                        "value0": -4.0,
+                        "value1": 5.0,
+                        "value2": 4.0
+                    },
+                    "value1": -1,
+                    "value2": 0.0,
+                    "value3": 0.0,
+                    "value4": 0.0
+                },
+                {
+                    "value0": {
+                        "value0": 2.0,
+                        "value1": 5.0,
+                        "value2": 2.0
+                    },
+                    "value1": 1,
+                    "value2": 0.0,
+                    "value3": 0.0,
+                    "value4": 0.0
+                },
+                {
+                    "value0": {
+                        "value0": 1.0,
+                        "value1": 5.0,
+                        "value2": 2.0
+                    },
+                    "value1": -1,
+                    "value2": 0.0,
+                    "value3": 0.0,
+                    "value4": 0.0
+                }
+            ],
+            "value3": [
+                {
+                    "value0": {
+                        "value0": 6.0,
+                        "value1": 5.0,
+                        "value2": -1.0
+                    },
+                    "value1": 1,
+                    "value2": 0.0,
+                    "value3": 0.0,
+                    "value4": 0.0
+                },
+                {
+                    "value0": {
+                        "value0": 8.0,
+                        "value1": 5.0,
+                        "value2": -1.0
+                    },
+                    "value1": 1,
+                    "value2": 0.0,
+                    "value3": 0.0,
+                    "value4": 0.0
+                },
+                {
+                    "value0": {
+                        "value0": 7.0,
                         "value1": 5.0,
                         "value2": 1.0
                     },
