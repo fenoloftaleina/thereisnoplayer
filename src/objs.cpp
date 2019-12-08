@@ -1,9 +1,18 @@
 #include "objs.hpp"
+#include <cmath>
 
 void Objs::initCube(const int i, Cube& cube, BufferObject& bo)
 {
   cube.pos = Common::posOnSpot(cube.cur_spot);
-  bo.writeCubeVertices(i, cube.pos, bx::mul(cube.col, cube.anim_fraction));
+
+  fraction = pow(2 * cube.anim_fraction - 1, 2);
+  bo.writeCubeVertices(
+      i,
+      cube.pos,
+      bx::add(
+        bx::mul(cube.col, fraction),
+        bx::mul(cube.on_door_col, (1.0f - fraction))
+      ));
 }
 
 void Objs::initCube(const int i, Cube& cube, bx::Vec3& col, BufferObject& bo)

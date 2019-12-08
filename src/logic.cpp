@@ -39,10 +39,12 @@ void Logic::maybeDoors(Cube& cube)
     if (Common::sameSpot(cube.next_spot, level->doors[j].cube.spot)) {
       cube.next_spot = level->doors[j + level->doors[j].towards].cube.spot;
       cube.cur_spot = level->doors[j].cube.spot;
+      cube.on_door_col = level->doors[j].cube.col;
       return;
     } else if (Common::sameSpot(cube.next_spot, level->doors[j + 1].cube.spot)) {
       cube.next_spot = level->doors[j + 1 + level->doors[j + 1].towards].cube.spot;
       cube.cur_spot = level->doors[j + 1].cube.spot;
+      cube.on_door_col = level->doors[j + 1].cube.col;
       return;
     }
   }
@@ -80,7 +82,7 @@ bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor, const bool back, 
       cube.cur_spot = cube.spot;
     }
 
-    cube.anim_fraction += dt * 0.003;
+    cube.anim_fraction += dt * 0.0025;
     if (cube.anim_fraction > 1.0f) cube.anim_fraction = 1.0f;
     objs->initCubes(0, level->moving_cubes, objs->moving_bo);
   }

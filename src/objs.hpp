@@ -16,6 +16,7 @@ struct Cube {
 
   float anim_fraction = 1.0f;
   bool on_door = false;
+  bx::Vec3 on_door_col {0.0f, 0.0f, 0.0f};
 
   template<class Archive>
   void serialize(Archive& archive)
@@ -79,6 +80,7 @@ struct Objs
     {0.2f, 0.3f, 0.8f},
     {0.1f, 0.6f, 1.0f},
   };
+  float fraction;
 
   void preInit();
   void init();
