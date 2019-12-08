@@ -128,6 +128,7 @@ void Logic::editor(const bx::Vec3& cur_pos)
 {
   objs->editor_cube.next_spot = bx::add(objs->editor_cube.spot, cur_pos);
   objs->editor_cube.spot = objs->editor_cube.next_spot;
+  objs->editor_cube.cur_spot = objs->editor_cube.spot;
 
   objs->initCube(0, objs->editor_cube, objs->editor_bo);
   objs->editor_bo.updateBuffer();

@@ -63,6 +63,7 @@ void Objs::initWinningDoorsCubes
 void Objs::preInit()
 {
   editor_cube.spot = {0, 5, 0};
+  editor_cube.cur_spot = editor_cube.spot;
   previous_moving_cubes.reserve(10000);
   PosColorVertex::init();
   initBos();
