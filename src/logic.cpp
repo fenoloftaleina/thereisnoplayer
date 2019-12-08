@@ -82,7 +82,8 @@ bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor, const bool back, 
       cube.cur_spot = cube.spot;
     }
 
-    cube.anim_fraction += dt * 0.0025;
+    // cube.anim_fraction += dt * 0.0025;
+    cube.anim_fraction += dt * 0.004;
     if (cube.anim_fraction > 1.0f) cube.anim_fraction = 1.0f;
     objs->initCubes(0, level->moving_cubes, objs->moving_bo);
   }
