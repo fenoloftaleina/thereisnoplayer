@@ -88,7 +88,6 @@ bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor, const bool back, 
   }
 
   if (winning_count == level->winning_doors.size() && level->winning_doors.size() > 0) {
-    printf("WIN!!!!!!!!! - %d\n", winning_count);
     return true;
   }
 
@@ -107,7 +106,6 @@ bool Logic::run(const bx::Vec3& cur_pos, const bool in_editor, const bool back, 
   were_collisions = movement(cur_pos);
 
   if (were_collisions) {
-    printf("COLLISIONS!\n");
     return false;
   }
 
