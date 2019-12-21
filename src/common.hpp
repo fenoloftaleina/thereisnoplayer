@@ -8,8 +8,8 @@
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include <bx/math.h>
-#include "cereal/include/cereal/types/vector.hpp"
-#include "cereal/include/cereal/archives/portable_binary.hpp"
+#include "../cereal/include/cereal/types/vector.hpp"
+#include "../cereal/include/cereal/archives/portable_binary.hpp"
 
 struct Common
 {

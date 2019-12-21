@@ -6,9 +6,9 @@
 #include <bx/math.h>
 #include <vector>
 #include <fstream>
-#include "cereal/include/cereal/types/vector.hpp"
-#include "cereal/include/cereal/archives/json.hpp"
-#include "cereal/include/cereal/archives/portable_binary.hpp"
+#include "../cereal/include/cereal/types/vector.hpp"
+#include "../cereal/include/cereal/archives/json.hpp"
+#include "../cereal/include/cereal/archives/portable_binary.hpp"
 
 #include "common.hpp"
 #include "objs.hpp"
