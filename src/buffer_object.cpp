@@ -115,9 +115,6 @@ void BufferObject::writeCubeVertices(int nth_cube, bx::Vec3 pos, bx::Vec3 col)
 
 void BufferObject::writeCubeLinesVertices(int nth_cube, bx::Vec3 pos, bx::Vec3 col)
 {
-  writeCubeVertices(nth_cube, pos, col);
-  return;
-
   bx::Vec3 end_pos;
   int offset = nth_cube * vertices_per_lines_cube_count;
 
