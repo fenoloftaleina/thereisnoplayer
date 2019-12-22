@@ -1,125 +1,5 @@
-#include "objs.hpp"
+#include "world.hpp"
 #include <cmath>
-
-void Objs::initCube(const int i, Cube& cube, BufferObject& bo)
-{
-  cube.pos = Common::posOnSpot(cube.cur_spot);
-
-  fraction = pow(2 * cube.anim_fraction - 1, 2);
-  bo.writeCubeVertices(
-      i,
-      cube.pos,
-      bx::add(
-        bx::mul(cube.col, fraction),
-        bx::mul(cube.on_door_col, (1.0f - fraction))
-      ));
-}
-
-void Objs::initCube(const int i, Cube& cube, bx::Vec3& col, BufferObject& bo)
-{
-  cube.col = col;
-  initCube(i, cube, bo);
-}
-
-void Objs::initCubes
-(const int i, std::vector<Cube>& cubes, BufferObject& bo)
-{
-  for (int j = 0; j < cubes.size(); ++j) {
-    initCube(i + j, cubes[j], cubes[j].col, bo);
-  }
-
-  bo.updateBuffer();
-}
-
-void Objs::initCubes
-(const int i, std::vector<Cube>& cubes, bx::Vec3& col, BufferObject& bo)
-{
-  for (int j = 0; j < cubes.size(); ++j) {
-    cubes[j].col = col;
-  }
-
-  initCubes(i, cubes, bo);
-}
-
-void Objs::initDoorsCubes(const int i, std::vector<Door>& doors, BufferObject& bo)
-{
-  for (int j = 0; j < doors.size(); ++j) {
-    initCube(i + j, doors[j].cube, gate_colors[j / 2], bo);
-  }
-
-  bo.updateBuffer();
-}
-
-void Objs::initWinningDoorsCubes
-(const int i, std::vector<Door>& doors, bx::Vec3& col, BufferObject& bo)
-{
-  for (int j = 0; j < doors.size(); ++j) {
-    initCube(i + j, doors[j].cube, col, bo);
-  }
-
-  bo.updateBuffer();
-}
-
-void Objs::preInit()
-{
-  editor_cube.spot = {0, 5, 0};
-  editor_cube.cur_spot = editor_cube.spot;
-  previous_moving_cubes.reserve(10000);
-  PosColorVertex::init();
-  initBos();
-}
-
-void Objs::init()
-{
-  initCube(0, editor_cube, editor_cube_color, editor_bo);
-  editor_bo.updateBuffer();
-  initCubes(0, level->moving_cubes, moving_cubes_color, moving_bo);
-  initCubes(0, level->static_cubes, static_cubes_color, static_bo);
-  initDoorsCubes(0, level->doors, doors_bo);
-  initWinningDoorsCubes(0, level->winning_doors, winning_doors_color, winning_doors_bo);
-}
-
-void Objs::initBos()
-{
-  moving_bo.initCubes(cubes_in_memory_count);
-  static_bo.initCubes(cubes_in_memory_count);
-  doors_bo.initCubes(doors_in_memory_count);
-  winning_doors_bo.initCubes(doors_in_memory_count);
-  editor_bo.initCubes(1);
-
-  moving_bo.createBuffers();
-  moving_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
-  static_bo.createBuffers();
-  static_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
-  doors_bo.createBuffers();
-  doors_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
-  winning_doors_bo.createBuffers();
-  winning_doors_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
-  editor_bo.createBuffers();
-  editor_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
-}
-
-void Objs::draw(const bool in_editor)
-{
-  moving_bo.drawCubes(level->moving_cubes.size(), BGFX_STATE_BLEND_ALPHA);
-  static_bo.drawCubes(level->static_cubes.size());
-  doors_bo.drawCubes(level->doors.size(), BGFX_STATE_BLEND_ALPHA);
-  winning_doors_bo.drawCubes(level->winning_doors.size(), BGFX_STATE_BLEND_ALPHA);
-
-  if (in_editor) {
-    editor_bo.drawCubes(1);
-  }
-}
-
-void Objs::destroy()
-{
-  moving_bo.destroy();
-  static_bo.destroy();
-  doors_bo.destroy();
-  winning_doors_bo.destroy();
-  editor_bo.destroy();
-}
-
 
 void World::prepare()
 {
@@ -129,6 +9,10 @@ void World::prepare()
   static_spots.reserve(1000);
   doors_spots.reserve(1000);
   winning_doors_spots.reserve(100);
+  editor_spot.reserve(1);
+  editor_spot.resize(1);
+
+  all_moving_spots.reserve(1000);
 
   moving_positions.reserve(100);
   moving_colors.reserve(100);
@@ -138,6 +22,8 @@ void World::prepare()
   doors_colors.reserve(1000);
   winning_doors_positions.reserve(100);
   winning_doors_colors.reserve(100);
+  editor_position.reserve(1);
+  editor_color.reserve(1);
 
   PosColorVertex::init();
 
@@ -166,25 +52,69 @@ void World::init()
   static_positions.resize(static_spots.size());
   doors_positions.resize(doors_spots.size());
   winning_doors_positions.resize(winning_doors_spots.size());
+  editor_position.resize(1);
   moving_colors.resize(moving_spots.size());
   static_colors.resize(static_spots.size());
   doors_colors.resize(doors_spots.size());
   winning_doors_colors.resize(winning_doors_spots.size());
+  editor_color.resize(1);
 
   setPositionsFromSpots(moving_positions, moving_spots);
   setPositionsFromSpots(static_positions, static_spots);
   setPositionsFromSpots(doors_positions, doors_spots);
   setPositionsFromSpots(winning_doors_positions, winning_doors_spots);
+  setPositionsFromSpots(editor_position, editor_spot);
 
   setColors(moving_colors, moving_color);
   setColors(static_colors, static_color);
   setColors(doors_colors, doors_color);
   setColors(winning_doors_colors, winning_doors_color);
+  setColors(editor_color, editor_thing_color);
 
   writeCubesVertices(moving_bo, moving_positions, moving_colors);
   writeCubesVertices(static_bo, static_positions, static_colors);
   writeCubesVertices(doors_bo, doors_positions, doors_colors);
   writeCubesVertices(winning_doors_bo, winning_doors_positions, winning_doors_colors);
+  writeCubesVertices(editor_bo, editor_position, editor_color);
+
+  moving_next_spots = moving_spots;
+}
+
+void World::resolve(const Spot& move, const bool in_editor, const bool back)
+{
+  if (maybe_won()) {
+    return;
+  }
+
+  if (in_editor) {
+    make_editor_move(move);
+    return;
+  }
+
+  if (back) {
+    execute_back();
+    return;
+  }
+
+  maybe_make_move(move);
+  maybe_doors();
+}
+
+
+void World::update(const float dt)
+{
+  setPositionsFromSpots(moving_positions, moving_spots);
+  writeCubesVertices(moving_bo, moving_positions, moving_colors);
+  moving_bo.updateBuffer();
+}
+
+
+void World::reset()
+{
+  if (!all_moving_spots.empty()) {
+    moving_spots = all_moving_spots.front();
+    all_moving_spots.clear();
+  }
 }
 
 
@@ -208,6 +138,88 @@ void World::destroy()
   doors_bo.destroy();
   winning_doors_bo.destroy();
   editor_bo.destroy();
+}
+
+
+bool World::same(const Spot& s1, const Spot& s2) {return s1.x == s2.x && s1.y == s2.y;}
+void World::equals_sum(Spot& e, const Spot& s1, const Spot& s2) { e.x = s1.x + s2.x; e.y = s1.y + s2.y; }
+
+bool World::maybe_won()
+{
+  winning_count = 0;
+
+  fr(i, moving_spots) {
+    fr(j, winning_doors_spots) {
+      winning_count += same(moving_spots[i], winning_doors_spots[j]);
+    }
+  }
+
+  won = winning_count == winning_doors_spots.size();
+
+  return won;
+}
+
+
+void World::maybe_make_move(const Spot& move)
+{
+  made_move = false;
+
+  if (move.x == 0 && move.y == 0) {
+    return;
+  }
+
+  fr(i, moving_next_spots) {
+    equals_sum(moving_next_spots[i], moving_spots[i], move);
+  }
+
+  fr(i, moving_next_spots) {
+    fr(j, static_spots) {
+      if (same(moving_next_spots[i], static_spots[j])) {
+        return;
+      }
+    }
+  }
+
+  made_move = true;
+
+  maybe_doors();
+
+  moving_spots = moving_next_spots;
+  all_moving_spots.push_back(moving_spots);
+}
+
+
+void World::maybe_doors()
+{
+  fr(i, moving_next_spots) {
+    fr(j, doors_spots) {
+      if (same(moving_next_spots[i], doors_spots[j])) {
+        towards = (((j + 1) % 2) * 2) - 1;
+        moving_next_spots[i] = doors_spots[j + towards];
+        j += (j + 1) % 2;
+      }
+    }
+  }
+}
+
+
+void World::execute_back()
+{
+  moving_spots = all_moving_spots.back();
+  all_moving_spots.pop_back();
+}
+
+
+void World::make_editor_move(const Spot& move)
+{
+  if (move.x == move.y == 0) {
+    return;
+  }
+
+  equals_sum(editor_spot[0], editor_spot[0], move);
+  setPositionsFromSpots(editor_position, editor_spot);
+  writeCubesVertices(editor_bo, editor_position, editor_color);
+  editor_bo.updateBuffer();
 }
 
 

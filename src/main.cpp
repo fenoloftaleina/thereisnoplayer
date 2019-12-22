@@ -11,9 +11,8 @@
 #include "../cereal/include/cereal/archives/portable_binary.hpp"
 
 #include "common.hpp"
-#include "objs.hpp"
+#include "world.hpp"
 #include "editor.hpp"
-#include "logic.hpp"
 
 SDL_Window* window = NULL;
 const int WIDTH = 1600;
@@ -27,18 +26,10 @@ int current_level_id = 0;
 const char* levels_filename = "levels";
 char level_str[100];
 
-Level* level;
-std::vector<Level> levels;
-Logic logic;
-Objs objs;
-Editor editor;
 
 World world;
+Editor editor;
 
-void updateAllVerticesAndBuffers()
-{
-  objs.init();
-}
 
 void load(const char* filename)
 {
@@ -71,29 +62,8 @@ void save(const char* filename)
   ar(world);
 }
 
-void resetLevel()
-{
-  if (!objs.previous_moving_cubes.empty()) {
-    level->moving_cubes = objs.previous_moving_cubes.front();
-    objs.previous_moving_cubes.clear();
-  }
-
-  updateAllVerticesAndBuffers();
-}
-
 void runLevel(int level_id)
 {
-  if (!objs.previous_moving_cubes.empty()) {
-    levels[current_level_id].moving_cubes = objs.previous_moving_cubes.front();
-    objs.previous_moving_cubes.clear();
-  }
-  current_level_id = level_id;
-  level = &(levels[current_level_id]);
-  logic.level = objs.level = editor.level = level;
-  sprintf(level_str, "level %d", current_level_id);
-  SDL_SetWindowTitle(window, level_str);
-
-  updateAllVerticesAndBuffers();
 }
 
 int main (int argc, char* args[])
@@ -154,30 +124,11 @@ int main (int argc, char* args[])
   // bgfx::init(bgfx::RendererType::Metal);
 
 
-  // logic.objs = &objs;
-  // editor.objs = &objs;
-  // objs.preInit();
-  // load("levels");
-  // runLevel(0);
 
+  editor.world = &world;
   world.prepare();
   load("level0");
   world.init();
-
-  // for (auto& a : level->moving_cubes) {
-  //   world.moving_spots.push_back({(int)a.spot.x, (int)a.spot.z});
-  // }
-  // for (auto& a : level->static_cubes) {
-  //   world.static_spots.push_back({(int)a.spot.x, (int)a.spot.z});
-  // }
-  // for (auto& a : level->doors) {
-  //   world.doors_spots.push_back({(int)a.cube.spot.x, (int)a.cube.spot.z});
-  // }
-  // for (auto& a : level->winning_doors) {
-  //   world.winning_doors_spots.push_back({(int)a.cube.spot.x, (int)a.cube.spot.z});
-  // }
-  //
-  // save("level0");
 
 
 
@@ -197,9 +148,7 @@ int main (int argc, char* args[])
   u_twh_val[1] = w;
   u_twh_val[2] = h;
 
-  bx::Vec3 cur_pos(0.0f, 0.0f, 0.0f);
-  bx::Vec3 cur_pos2(0.0f, 0.0f, 0.0f);
-  float mx = 1.0f, my = 1.0f;
+  Spot move;
 
   bool in_editor = false;
   bool back = false;
@@ -209,7 +158,7 @@ int main (int argc, char* args[])
   uint32_t last_time = SDL_GetTicks(), current_time = SDL_GetTicks(), dt;
   SDL_Event currentEvent;
   while(!quit) {
-    cur_pos.x = cur_pos.y = cur_pos.z = 0.0f;
+    move.x = move.y = 0;
     back = false;
 
     while(SDL_PollEvent(&currentEvent)) {
@@ -219,41 +168,39 @@ int main (int argc, char* args[])
         switch (currentEvent.key.keysym.sym) {
           case SDLK_a:
           case SDLK_LEFT:
-            cur_pos.x -= mx;
+            move.x = -1;
             break;
 
           case SDLK_d:
           case SDLK_RIGHT:
-            cur_pos.x += mx;
+            move.x = 1;
             break;
 
           case SDLK_w:
           case SDLK_UP:
-            cur_pos.z += mx;
+            move.y = 1;
             break;
 
           case SDLK_s:
           case SDLK_DOWN:
-            cur_pos.z -= mx;
+            move.y = -1;
             break;
 
           case SDLK_r:
-            resetLevel();
+            world.reset();
             break;
 
           case SDLK_z:
-            if (objs.previous_moving_cubes.empty()) break;
+            if (world.all_moving_spots.empty()) break;
             back = true;
-            level->moving_cubes = objs.previous_moving_cubes.back();
-            objs.previous_moving_cubes.pop_back();
             break;
 
           case SDLK_v:
-            runLevel(current_level_id - 1);
+            // runLevel(current_level_id - 1);
             break;
 
           case SDLK_b:
-            runLevel(current_level_id + 1);
+            // runLevel(current_level_id + 1);
             break;
 
           case SDLK_h:
@@ -267,85 +214,80 @@ int main (int argc, char* args[])
           case SDLK_u:
             // moving/user
             if (!in_editor) break;
-            editor.addMovingCube(objs.editor_cube.spot);
-            updateAllVerticesAndBuffers();
+            // editor.addMovingCube(objs.editor_cube.spot);
             break;
 
           case SDLK_i:
             // static
             if (!in_editor) break;
-            editor.addStaticCube(objs.editor_cube.spot);
-            updateAllVerticesAndBuffers();
+            // editor.addStaticCube(objs.editor_cube.spot);
             break;
 
           case SDLK_o:
             // winnning
             if (!in_editor) break;
-            editor.addWinningDoor(objs.editor_cube.spot);
-            updateAllVerticesAndBuffers();
+            // editor.addWinningDoor(objs.editor_cube.spot);
             break;
 
           case SDLK_j:
             // gate
             if (!in_editor) break;
-            editor.addOrUpdateDoor(objs.editor_cube.spot);
-            updateAllVerticesAndBuffers();
+            // editor.addOrUpdateDoor(objs.editor_cube.spot);
             break;
 
           case SDLK_n:
             // remote/no
             if (!in_editor) break;
-            editor.removeOnSpot(objs.editor_cube.spot);
-            updateAllVerticesAndBuffers();
+            // editor.removeOnSpot(objs.editor_cube.spot);
             break;
 
           case SDLK_p:
             // persist
             if (!in_editor) break;
-            save(levels_filename);
+            // save(levels_filename);
             break;
 
           case SDLK_k:
             // klone level on next slot
             if (!in_editor) break;
-            levels.insert(levels.begin() + current_level_id + 1, *level);
-            save(levels_filename);
-            runLevel(current_level_id + 1);
+            // levels.insert(levels.begin() + current_level_id + 1, *level);
+            // save(levels_filename);
+            // runLevel(current_level_id + 1);
             break;
 
           case SDLK_m:
             // move level to the end
             if (!in_editor) break;
-            levels.push_back(*level);
-            levels.erase(levels.begin() + current_level_id);
-            save(levels_filename);
-            runLevel(levels.size() - 1);
+            // levels.push_back(*level);
+            // levels.erase(levels.begin() + current_level_id);
+            // save(levels_filename);
+            // runLevel(levels.size() - 1);
             break;
 
           case SDLK_l:
             // lose level
             if (!in_editor) break;
-            levels.erase(levels.begin() + current_level_id);
-            save(levels_filename);
-            runLevel(current_level_id);
+            // levels.erase(levels.begin() + current_level_id);
+            // save(levels_filename);
+            // runLevel(current_level_id);
             break;
 
           case SDLK_9:
             // move level back
             if (!in_editor) break;
-            levels.insert(levels.begin() + current_level_id - 1, *level);
-            levels.erase(levels.begin() + current_level_id + 1);
-            save(levels_filename);
-            runLevel(current_level_id - 1);
+            // levels.insert(levels.begin() + current_level_id - 1, *level);
+            // levels.erase(levels.begin() + current_level_id + 1);
+            // save(levels_filename);
+            // runLevel(current_level_id - 1);
             break;
 
           case SDLK_0:
             // move level forward
             if (!in_editor) break;
-            levels.insert(levels.begin() + current_level_id + 2, *level);
-            levels.erase(levels.begin() + current_level_id);
-            save(levels_filename);
-            runLevel(current_level_id + 1);
+            // levels.insert(levels.begin() + current_level_id + 2, *level);
+            // levels.erase(levels.begin() + current_level_id);
+            // save(levels_filename);
+            // runLevel(current_level_id + 1);
             break;
         }
       }
@@ -356,6 +298,9 @@ int main (int argc, char* args[])
     // if (logic.run(cur_pos, in_editor, back, dt)) {
     //   runLevel(current_level_id + 1);
     // }
+
+    world.resolve(move, in_editor, back);
+    world.update(dt);
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
     // const bx::Vec3 at = bx::neg(Common::spot_offset);

@@ -7,25 +7,20 @@
 #include <bx/math.h>
 #include <vector>
 
-#include "objs.hpp"
+#include "world.hpp"
 
 
 struct Editor
 {
-  Objs* objs;
-  Level* level;
+  World* world;
 
-  void removeOnSpot(const bx::Vec3& spot);
+  void add(std::vector<Spot>& spots, const Spot& spot);
+  void remove(const Spot& spot);
 
-  void addMovingCube(const bx::Vec3& spot);
-  void addStaticCube(const bx::Vec3& spot);
-  void addOrUpdateDoor(const bx::Vec3& spot);
-  void addWinningDoor(const bx::Vec3& spot);
+  int find(const std::vector<Spot>& spots, const Spot& spot);
+  bool remove_for(std::vector<Spot>& spots, const Spot& spot);
 
-  int idxForSpot(const std::vector<Cube>& v, const bx::Vec3& spot);
-  int idxForSpot(const std::vector<Door>& v, const bx::Vec3& spot);
-  bool removeOnIdx(std::vector<Cube>& v, int i);
-  bool removeOnIdx(std::vector<Door>& v, int i);
+  int id;
 };
 
 #endif
