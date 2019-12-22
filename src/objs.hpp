@@ -52,6 +52,66 @@ struct Level
   }
 };
 
+struct Spot
+{
+  int x;
+  int y;
+};
+
+struct World
+{
+  std::vector<Spot> moving_spots;
+  std::vector<Spot> moving_next_spots;
+  std::vector<Spot> moving_cur_spots;
+  std::vector<Spot> static_spots;
+  std::vector<Spot> doors_spots;
+  std::vector<Spot> winning_doors_spots;
+  Spot editor_spot {5, 5};
+
+  std::vector<bx::Vec3> moving_positions;
+  std::vector<bx::Vec3> moving_colors;
+  std::vector<bx::Vec3> static_positions;
+  std::vector<bx::Vec3> static_colors;
+  std::vector<bx::Vec3> doors_positions;
+  std::vector<bx::Vec3> doors_colors;
+  std::vector<bx::Vec3> winning_doors_positions;
+  std::vector<bx::Vec3> winning_doors_colors;
+  bx::Vec3 editor_position;
+  bx::Vec3 editor_color = {0.3f, 0.3f, 0.3f};
+
+  BufferObject moving_bo;
+  BufferObject static_bo;
+  BufferObject doors_bo;
+  BufferObject winning_doors_bo;
+  BufferObject editor_bo;
+
+  bx::Vec3 moving_color = {0.85f, 0.2f, 0.32f};
+  bx::Vec3 static_color = {0.0f, 99/255.0f, 115/255.0f};
+  bx::Vec3 doors_color = {0.1f, 99/255.0f, 15/255.0f};
+  bx::Vec3 winning_doors_color = {0.5f, 0.5f, 0.5f};
+  bx::Vec3 gate_colors[5] = {
+    {0.5f, 0.2f, 0.4f},
+    {0.6f, 0.8f, 0.4f},
+    {0.3f, 0.9f, 0.8f},
+    {0.2f, 0.3f, 0.8f},
+    {0.1f, 0.6f, 1.0f},
+  };
+
+  void prepare();
+  void init();
+  void setPositionsFromSpots(std::vector<bx::Vec3>& positions, const std::vector<Spot>& spots);
+  void setColors(std::vector<bx::Vec3>& colors, const bx::Vec3& color);
+  void writeCubesVertices(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors);
+  void draw(const bool in_editor);
+  void destroy();
+
+  template<class Archive>
+  void serialize(Archive& archive)
+  {
+    archive(moving_spots, static_spots, doors_spots, winning_doors_spots);
+  }
+};
+
 struct Objs
 {
   BufferObject moving_bo;

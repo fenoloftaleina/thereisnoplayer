@@ -33,6 +33,8 @@ Logic logic;
 Objs objs;
 Editor editor;
 
+World world;
+
 void updateAllVerticesAndBuffers()
 {
   objs.init();
@@ -42,20 +44,23 @@ void load(const char* filename)
 {
   std::ifstream is(filename, std::ios::binary);
   cereal::JSONInputArchive ar(is);
-  ar(levels);
-  for (auto& l : levels) {
-    for (auto& c : l.moving_cubes) {
-      c.cur_spot = c.spot;
-    }
-    for (auto& c : l.static_cubes) {
-      c.cur_spot = c.spot;
-    }
-    for (auto& d : l.doors) {
-      d.cube.cur_spot = d.cube.spot;
-    }
-    for (auto& d : l.winning_doors) {
-      d.cube.cur_spot = d.cube.spot;
-    }
+  ar(world);
+}
+
+namespace cereal
+{
+  template<class Archive>
+  void serialize(Archive& archive,
+      bx::Vec3& m)
+  {
+    archive(m.x, m.y, m.z);
+  }
+
+  template<class Archive>
+  void serialize(Archive& archive,
+      Spot& m)
+  {
+    archive(m.x, m.y);
   }
 }
 
@@ -63,7 +68,7 @@ void save(const char* filename)
 {
   std::ofstream os(filename, std::ios::binary);
   cereal::JSONOutputArchive ar(os);
-  ar(levels);
+  ar(world);
 }
 
 void resetLevel()
@@ -149,11 +154,32 @@ int main (int argc, char* args[])
   // bgfx::init(bgfx::RendererType::Metal);
 
 
-  logic.objs = &objs;
-  editor.objs = &objs;
-  objs.preInit();
-  load("levels");
-  runLevel(0);
+  // logic.objs = &objs;
+  // editor.objs = &objs;
+  // objs.preInit();
+  // load("levels");
+  // runLevel(0);
+
+  world.prepare();
+  load("level0");
+  world.init();
+
+  // for (auto& a : level->moving_cubes) {
+  //   world.moving_spots.push_back({(int)a.spot.x, (int)a.spot.z});
+  // }
+  // for (auto& a : level->static_cubes) {
+  //   world.static_spots.push_back({(int)a.spot.x, (int)a.spot.z});
+  // }
+  // for (auto& a : level->doors) {
+  //   world.doors_spots.push_back({(int)a.cube.spot.x, (int)a.cube.spot.z});
+  // }
+  // for (auto& a : level->winning_doors) {
+  //   world.winning_doors_spots.push_back({(int)a.cube.spot.x, (int)a.cube.spot.z});
+  // }
+  //
+  // save("level0");
+
+
 
   bgfx::UniformHandle u_twh = bgfx::createUniform("twh", bgfx::UniformType::Vec4);
 
@@ -327,9 +353,9 @@ int main (int argc, char* args[])
 
     dt = current_time - last_time;
 
-    if (logic.run(cur_pos, in_editor, back, dt)) {
-      runLevel(current_level_id + 1);
-    }
+    // if (logic.run(cur_pos, in_editor, back, dt)) {
+    //   runLevel(current_level_id + 1);
+    // }
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
     // const bx::Vec3 at = bx::neg(Common::spot_offset);
@@ -363,14 +389,14 @@ int main (int argc, char* args[])
     u_twh_val[0] = current_time;
     bgfx::setUniform(u_twh, &u_twh_val);
 
-    objs.draw(in_editor);
+    world.draw(in_editor);
     bgfx::frame();
 
     last_time = current_time;
     current_time = SDL_GetTicks();
   }
 
-  objs.destroy();
+  world.destroy();
   bgfx::destroy(u_twh);
 
   bgfx::shutdown();
