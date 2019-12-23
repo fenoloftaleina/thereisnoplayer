@@ -9,6 +9,7 @@
 #include "../cereal/include/cereal/types/vector.hpp"
 #include "../cereal/include/cereal/archives/json.hpp"
 #include "../cereal/include/cereal/archives/portable_binary.hpp"
+#include <string>
 
 #include "common.hpp"
 #include "world.hpp"
@@ -23,20 +24,25 @@ const int w2 = w / 2;
 const int h2 = h / 2;
 
 int current_level_id = 0;
-const char* levels_filename = "levels";
-char level_str[100];
+char level_str[255];
 
+struct Level
+{
+  std::string filename;
+  std::string note;
+
+  template<class Archive>
+  void serialize(Archive& archive)
+  {
+    archive(filename, note);
+  }
+};
+
+std::vector<Level> levels;
 
 World world;
 Editor editor;
 
-
-void load(const char* filename)
-{
-  std::ifstream is(filename, std::ios::binary);
-  cereal::JSONInputArchive ar(is);
-  ar(world);
-}
 
 namespace cereal
 {
@@ -55,6 +61,27 @@ namespace cereal
   }
 }
 
+void loadLevels()
+{
+  std::ifstream is("levels/levels_list", std::ios::binary);
+  cereal::JSONInputArchive ar(is);
+  ar(levels);
+}
+
+void saveLevels()
+{
+  std::ofstream os("levels/levels_list", std::ios::binary);
+  cereal::JSONOutputArchive ar(os);
+  ar(levels);
+}
+
+void load(const char* filename)
+{
+  std::ifstream is(filename, std::ios::binary);
+  cereal::JSONInputArchive ar(is);
+  ar(world);
+}
+
 void save(const char* filename)
 {
   std::ofstream os(filename, std::ios::binary);
@@ -64,6 +91,11 @@ void save(const char* filename)
 
 void runLevel(int level_id)
 {
+  current_level_id = level_id;
+  sprintf(level_str, "levels/%s", levels[current_level_id].filename.c_str());
+  load(level_str);
+
+  world.init();
 }
 
 int main (int argc, char* args[])
@@ -127,8 +159,9 @@ int main (int argc, char* args[])
 
   editor.world = &world;
   world.prepare();
-  load("level0");
-  world.init();
+
+  loadLevels();
+  runLevel(0);
 
 
 
