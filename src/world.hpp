@@ -3,6 +3,7 @@
 #pragma once
 
 #include "buffer_object.hpp"
+#include "nimate.hpp"
 #include "common.hpp"
 #include <bx/math.h>
 
@@ -42,6 +43,8 @@ struct World
   BufferObject doors_bo;
   BufferObject winning_doors_bo;
   BufferObject editor_bo;
+
+  Nimate nimate;
 
   bx::Vec3 moving_color = {0.85f, 0.2f, 0.32f};
   bx::Vec3 static_color = {0.0f, 99/255.0f, 115/255.0f};
@@ -92,6 +95,9 @@ struct World
   bool made_move;
   bool won;
   bool finished;
+  std::vector<bx::Vec3> positions_temp;
+  std::vector<bx::Vec3> colors_temp;
+  std::vector<float> lengths_temp;
 };
 
 #endif

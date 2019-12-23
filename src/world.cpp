@@ -25,6 +25,10 @@ void World::prepare()
   editor_position.reserve(1);
   editor_color.reserve(1);
 
+  positions_temp.reserve(100);
+  colors_temp.reserve(100);
+  lengths_temp.reserve(100);
+
   PosColorVertex::init();
 
   moving_bo.initCubes(1000);
@@ -94,6 +98,8 @@ void World::updateBuffers()
 
 void World::resolve(const Spot& move, const bool in_editor, const bool back)
 {
+  made_move = false;
+
   if (maybe_won()) {
     return;
   }
@@ -115,7 +121,32 @@ void World::resolve(const Spot& move, const bool in_editor, const bool back)
 
 void World::update(const float dt)
 {
-  setPositionsFromSpots(moving_positions, moving_spots);
+  if (made_move) {
+    positions_temp.resize(moving_spots.size());
+    setPositionsFromSpots(positions_temp, moving_spots);
+    lengths_temp.resize(moving_spots.size());
+    fr(i, lengths_temp) { lengths_temp[i] = 1000.0f; }
+
+    nimate.next_moving_positions.clear();
+    nimate.next_moving_positions_lengths.clear();
+
+    nimate.schedule(
+        nimate.next_moving_positions,
+        positions_temp,
+        nimate.next_moving_positions_lengths,
+        lengths_temp,
+        nimate.moving_positions_times
+        );
+  } else if (!nimate.next_moving_positions.empty()) {
+    nimate.run(
+        dt,
+        moving_positions,
+        nimate.next_moving_positions,
+        nimate.moving_positions_times,
+        nimate.next_moving_positions_lengths
+        );
+  }
+
   writeCubesVertices(moving_bo, moving_positions, moving_colors);
   moving_bo.updateBuffer();
 }
@@ -174,8 +205,6 @@ bool World::maybe_won()
 
 void World::maybe_make_move(const Spot& move)
 {
-  made_move = false;
-
   if (move.x == 0 && move.y == 0) {
     return;
   }
