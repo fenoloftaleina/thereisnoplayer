@@ -107,79 +107,8 @@ void persistLevel(int level_id)
   save(level_str);
 }
 
-
-
-struct D
-{
-  bx::Vec3 p;
-  int i;
-  float f1, f2, f3;
-
-  template<class Archive>
-    void serialize(Archive& archive)
-    {
-      archive(p, i, f1, f2, f3);
-    }
-};
-
-struct Lvl
-{
-  std::vector<bx::Vec3> m;
-  std::vector<bx::Vec3> s;
-  std::vector<D> d;
-  std::vector<D> wd;
-
-  template<class Archive>
-    void serialize(Archive& archive)
-    {
-      archive(m, s, d, wd);
-    }
-};
-
 int main (int argc, char* args[])
 {
-  std::vector<Lvl> lvls;
-
-  std::ifstream is("lvls", std::ios::binary);
-  cereal::JSONInputArchive ar(is);
-  ar(lvls);
-
-  fr(i, lvls) {
-    world.moving_spots.clear();
-    fr(j, lvls[i].m) {
-      world.moving_spots.push_back(
-          {(int)(lvls[i].m[j].x), (int)(lvls[i].m[j].z)}
-          );
-    }
-
-    world.static_spots.clear();
-    fr(j, lvls[i].s) {
-      world.static_spots.push_back(
-          {(int)(lvls[i].s[j].x), (int)(lvls[i].s[j].z)}
-          );
-    }
-
-    world.doors_spots.clear();
-    fr(j, lvls[i].d) {
-      world.doors_spots.push_back(
-          {(int)(lvls[i].d[j].p.x), (int)(lvls[i].d[j].p.z)}
-          );
-    }
-
-    world.winning_doors_spots.clear();
-    fr(j, lvls[i].wd) {
-      world.winning_doors_spots.push_back(
-          {(int)(lvls[i].wd[j].p.x), (int)(lvls[i].wd[j].p.z)}
-          );
-    }
-
-    sprintf(level_str, "levels/level%d", i);
-    save(level_str);
-  }
-
-  return 0;
-
-
   // Initialize SDL systems
   if(SDL_Init( SDL_INIT_VIDEO ) < 0) {
     printf("SDL could not initialize! SDL_Error: %s\n",
