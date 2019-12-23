@@ -196,8 +196,8 @@ void World::maybe_make_move(const Spot& move)
 
   maybe_doors();
 
-  moving_spots = moving_next_spots;
   all_moving_spots.push_back(moving_spots);
+  moving_spots = moving_next_spots;
 }
 
 

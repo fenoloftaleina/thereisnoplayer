@@ -99,6 +99,7 @@ void runLevel(int level_id)
 
   world.init();
   world.updateBuffers();
+  world.all_moving_spots.clear();
 }
 
 void persistLevel(int level_id)
