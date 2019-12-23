@@ -10,6 +10,7 @@
 #include "../cereal/include/cereal/archives/json.hpp"
 #include "../cereal/include/cereal/archives/portable_binary.hpp"
 #include <string>
+#include <ctime>
 
 #include "common.hpp"
 #include "world.hpp"
@@ -20,11 +21,6 @@ const int WIDTH = 1600;
 const int HEIGHT = 1000;
 const int w = WIDTH;
 const int h = HEIGHT;
-const int w2 = w / 2;
-const int h2 = h / 2;
-
-int current_level_id = 0;
-char level_str[255];
 
 struct Level
 {
@@ -37,6 +33,11 @@ struct Level
     archive(filename, note);
   }
 };
+
+
+int current_level_id = 0;
+char level_str[255];
+Level new_level;
 
 std::vector<Level> levels;
 
@@ -94,8 +95,16 @@ void runLevel(int level_id)
   current_level_id = level_id;
   sprintf(level_str, "levels/%s", levels[current_level_id].filename.c_str());
   load(level_str);
+  SDL_SetWindowTitle(window, level_str);
 
   world.init();
+  world.updateBuffers();
+}
+
+void persistLevel(int level_id)
+{
+  sprintf(level_str, "levels/%s", levels[level_id].filename.c_str());
+  save(level_str);
 }
 
 
@@ -300,11 +309,11 @@ int main (int argc, char* args[])
             break;
 
           case SDLK_v:
-            // runLevel(current_level_id - 1);
+            runLevel(current_level_id - 1);
             break;
 
           case SDLK_b:
-            // runLevel(current_level_id + 1);
+            runLevel(current_level_id + 1);
             break;
 
           case SDLK_h:
@@ -318,80 +327,86 @@ int main (int argc, char* args[])
           case SDLK_u:
             // moving/user
             if (!in_editor) break;
-            // editor.addMovingCube(objs.editor_cube.spot);
+            editor.add(world.moving_spots, world.editor_spot[0], world.moving_bo);
             break;
 
           case SDLK_i:
             // static
             if (!in_editor) break;
-            // editor.addStaticCube(objs.editor_cube.spot);
+            editor.add(world.static_spots, world.editor_spot[0], world.static_bo);
             break;
 
           case SDLK_o:
             // winnning
             if (!in_editor) break;
-            // editor.addWinningDoor(objs.editor_cube.spot);
+            editor.add(world.winning_doors_spots, world.editor_spot[0], world.winning_doors_bo);
             break;
 
           case SDLK_j:
             // gate
             if (!in_editor) break;
-            // editor.addOrUpdateDoor(objs.editor_cube.spot);
+            editor.add(world.doors_spots, world.editor_spot[0], world.doors_bo);
             break;
 
           case SDLK_n:
             // remote/no
             if (!in_editor) break;
-            // editor.removeOnSpot(objs.editor_cube.spot);
+            editor.remove(world.editor_spot[0]);
             break;
 
           case SDLK_p:
             // persist
             if (!in_editor) break;
-            // save(levels_filename);
+            persistLevel(current_level_id);
             break;
 
           case SDLK_k:
             // klone level on next slot
             if (!in_editor) break;
-            // levels.insert(levels.begin() + current_level_id + 1, *level);
-            // save(levels_filename);
-            // runLevel(current_level_id + 1);
+            time_t rawtime;
+            time(&rawtime);
+            sprintf(level_str, "%s-%s", levels[current_level_id].filename.c_str(), ctime(&rawtime));
+            new_level.note = "";
+            new_level.filename = level_str;
+            levels.insert(levels.begin() + current_level_id + 1, new_level);
+            persistLevel(current_level_id + 1);
+            saveLevels();
+            runLevel(current_level_id + 1);
             break;
 
           case SDLK_m:
             // move level to the end
             if (!in_editor) break;
-            // levels.push_back(*level);
-            // levels.erase(levels.begin() + current_level_id);
-            // save(levels_filename);
-            // runLevel(levels.size() - 1);
+            levels.push_back(levels[current_level_id]);
+            levels.erase(levels.begin() + current_level_id);
+            saveLevels();
+            runLevel(levels.size() - 1);
             break;
 
           case SDLK_l:
             // lose level
             if (!in_editor) break;
-            // levels.erase(levels.begin() + current_level_id);
-            // save(levels_filename);
-            // runLevel(current_level_id);
+            levels.erase(levels.begin() + current_level_id);
+            saveLevels();
+            runLevel(current_level_id);
             break;
 
           case SDLK_9:
             // move level back
             if (!in_editor) break;
-            // levels.insert(levels.begin() + current_level_id - 1, *level);
-            // levels.erase(levels.begin() + current_level_id + 1);
-            // save(levels_filename);
-            // runLevel(current_level_id - 1);
+            levels.insert(levels.begin() + current_level_id - 1, levels[current_level_id]);
+            levels.erase(levels.begin() + current_level_id + 1);
+            saveLevels();
+            runLevel(current_level_id - 1);
             break;
 
           case SDLK_0:
             // move level forward
             if (!in_editor) break;
-            // levels.insert(levels.begin() + current_level_id + 2, *level);
-            // levels.erase(levels.begin() + current_level_id);
-            // save(levels_filename);
-            // runLevel(current_level_id + 1);
+            levels.insert(levels.begin() + current_level_id + 2, levels[current_level_id]);
+            levels.erase(levels.begin() + current_level_id);
+            saveLevels();
+            runLevel(current_level_id + 1);
             break;
         }
       }

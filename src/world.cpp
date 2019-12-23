@@ -67,7 +67,9 @@ void World::init()
 
   setColors(moving_colors, moving_color);
   setColors(static_colors, static_color);
-  setColors(doors_colors, doors_color);
+  for (int i = 0; i < doors_colors.size(); ++i) {
+    doors_colors[i] = gate_colors[(int)(i / 2)];
+  }
   setColors(winning_doors_colors, winning_doors_color);
   setColors(editor_color, editor_thing_color);
 
@@ -79,6 +81,16 @@ void World::init()
 
   moving_next_spots = moving_spots;
 }
+
+
+void World::updateBuffers()
+{
+  moving_bo.updateBuffer();
+  static_bo.updateBuffer();
+  doors_bo.updateBuffer();
+  winning_doors_bo.updateBuffer();
+}
+
 
 void World::resolve(const Spot& move, const bool in_editor, const bool back)
 {
@@ -212,7 +224,7 @@ void World::execute_back()
 
 void World::make_editor_move(const Spot& move)
 {
-  if (move.x == move.y == 0) {
+  if (move.x == 0 && move.y == 0) {
     return;
   }
 

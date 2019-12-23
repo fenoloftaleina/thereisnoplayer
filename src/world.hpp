@@ -45,7 +45,6 @@ struct World
 
   bx::Vec3 moving_color = {0.85f, 0.2f, 0.32f};
   bx::Vec3 static_color = {0.0f, 99/255.0f, 115/255.0f};
-  bx::Vec3 doors_color = {0.1f, 99/255.0f, 15/255.0f};
   bx::Vec3 winning_doors_color = {0.5f, 0.5f, 0.5f};
   bx::Vec3 gate_colors[5] = {
     {0.5f, 0.2f, 0.4f},
@@ -58,6 +57,7 @@ struct World
 
   void prepare();
   void init();
+  void updateBuffers();
 
   void resolve(const Spot& move, const bool in_editor, const bool back);
   void update(const float dt);
@@ -80,9 +80,6 @@ struct World
   void setPositionsFromSpots(std::vector<bx::Vec3>& positions, const std::vector<Spot>& spots);
   void setColors(std::vector<bx::Vec3>& colors, const bx::Vec3& color);
   void writeCubesVertices(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors);
-
-  void add(std::vector<Spot>& spots, const Spot& spot, std::vector<bx::Vec3>& positions, BufferObject& bo);
-  void remove(const Spot& spot);
 
   template<class Archive>
   void serialize(Archive& archive)

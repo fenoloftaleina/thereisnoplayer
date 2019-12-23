@@ -14,7 +14,7 @@ struct Editor
 {
   World* world;
 
-  void add(std::vector<Spot>& spots, const Spot& spot);
+  void add(std::vector<Spot>& spots, const Spot& spot, BufferObject& bo);
   void remove(const Spot& spot);
 
   int find(const std::vector<Spot>& spots, const Spot& spot);
