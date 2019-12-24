@@ -31,6 +31,10 @@ struct Nimate
       std::vector<float>& times,
       std::vector<std::vector<float>>& next_lenghts
       );
+  void abort(
+      std::vector<std::vector<bx::Vec3>>& next_values,
+      std::vector<float>& times
+      );
 
   float fraction;
   int finished_count;

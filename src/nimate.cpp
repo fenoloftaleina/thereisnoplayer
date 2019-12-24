@@ -59,3 +59,16 @@ void Nimate::run(
     }
   }
 }
+
+
+void Nimate::abort(
+    std::vector<std::vector<bx::Vec3>>& next_values,
+    std::vector<float>& times
+    )
+{
+  if (!next_values.empty()) {
+    fr(i, times) {
+      times[i] = 999999.0f;
+    }
+  }
+}

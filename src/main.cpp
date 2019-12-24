@@ -195,13 +195,16 @@ int main (int argc, char* args[])
 
   bool in_editor = false;
   bool back = false;
+  bool moved = false;
 
   // Poll for events and wait till user closes window
   bool quit = false;
   uint32_t last_time = SDL_GetTicks(), current_time = SDL_GetTicks(), dt;
   SDL_Event currentEvent;
   while(!quit) {
-    move.x = move.y = 0;
+    move.x = 0;
+    move.y = 0;
+    moved = false;
     back = false;
 
     while(SDL_PollEvent(&currentEvent)) {
@@ -211,21 +214,29 @@ int main (int argc, char* args[])
         switch (currentEvent.key.keysym.sym) {
           case SDLK_a:
           case SDLK_LEFT:
+            if (moved) break;
+            moved = true;
             move.x = -1;
             break;
 
           case SDLK_d:
           case SDLK_RIGHT:
+            if (moved) break;
+            moved = true;
             move.x = 1;
             break;
 
           case SDLK_w:
           case SDLK_UP:
+            if (moved) break;
+            moved = true;
             move.y = 1;
             break;
 
           case SDLK_s:
           case SDLK_DOWN:
+            if (moved) break;
+            moved = true;
             move.y = -1;
             break;
 

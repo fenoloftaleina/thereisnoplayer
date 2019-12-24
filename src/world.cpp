@@ -125,10 +125,16 @@ void World::update(const float dt)
     positions_temp.resize(moving_spots.size());
     setPositionsFromSpots(positions_temp, moving_spots);
     lengths_temp.resize(moving_spots.size());
-    fr(i, lengths_temp) { lengths_temp[i] = 1000.0f; }
+    fr(i, lengths_temp) { lengths_temp[i] = 100.0f; }
 
-    nimate.next_moving_positions.clear();
-    nimate.next_moving_positions_lengths.clear();
+    // nimate.abort(
+    //     nimate.next_moving_positions,
+    //     nimate.moving_positions_times
+    //     );
+
+    // fr(i, nimate.moving_positions_times) {
+    //   nimate.moving_positions_times[i] += 50.0f;
+    // }
 
     nimate.schedule(
         nimate.next_moving_positions,
