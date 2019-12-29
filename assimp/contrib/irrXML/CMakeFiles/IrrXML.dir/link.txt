@@ -1,0 +1,1 @@
+/Library/Developer/CommandLineTools/usr/bin/c++ -g -fvisibility=hidden -fno-strict-aliasing -Wall -Wno-long-long -fPIC -std=c++11  -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk -dynamiclib -Wl,-headerpad_max_install_names  -o ../../lib/libIrrXML.dylib -install_name @rpath/libIrrXML.dylib CMakeFiles/IrrXML.dir/irrXML.cpp.o 
