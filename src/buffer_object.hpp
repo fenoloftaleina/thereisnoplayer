@@ -8,8 +8,9 @@
 #include <bx/math.h>
 
 #include "common.hpp"
-#include "porter.hpp"
 
+
+struct Models;
 
 struct PosColorVertex {
   float x;
@@ -138,14 +139,15 @@ struct BufferObject {
   bgfx::IndexBufferHandle m_ibh;
   bgfx::ProgramHandle m_program;
 
-  Porter porter;
-
   void initCubes(const int cubes_count);
   void initCubesLines(const int cubes_count);
+  void initModels(const int models_count);
   void writeCubesIndices();
   void writeCubesLinesIndices();
   void writeCubeVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
   void writeCubeLinesVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
+  void writeModelVertices(const int offset, bx::Vec3 pos, bx::Vec3 col, const Models& models, const int nth);
+  void writeModelIndices(const int offset, const Models& models, const int nth);
   void setFaceColor(const int nth_cube, const int nth_face, bx::Vec3 col);
   void createBuffers();
   void updateBuffer();
@@ -153,10 +155,14 @@ struct BufferObject {
   void draw(uint16_t current_vertices_count, uint16_t current_indices_count, uint64_t more_state);
   void drawCubes(uint16_t current_cubes_count, uint64_t more_state = 0);
   void drawCubesLines(uint16_t current_cubes_count);
+  void drawModels(const int models_count, const Models& models, const int nth);
+  void drawModels();
   void destroy();
 
-  void initModel(const char* filename);
-  void drawModel();
+  int models_vertices_count = 0;
+  int models_indices_count = 0;
 };
+
+#include "models.hpp"
 
 #endif

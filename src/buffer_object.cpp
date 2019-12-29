@@ -209,13 +209,73 @@ void BufferObject::destroy()
 
 
 
-void BufferObject::initModel(const char* filename)
+void BufferObject::initModels(const int models_count)
 {
-  porter.import(filename, *this);
+  vertices_count = models_count * 10000;
+  indices_count = models_count * 10000;
+
+  vertices = new PosColorVertex[vertices_count];
+  indices = new uint16_t[indices_count];
 }
 
 
-void BufferObject::drawModel()
+void BufferObject::drawModels
+(const int models_count, const Models& models, const int nth)
 {
-  draw(vertices_count, indices_count);
+  draw(
+      (models.vertices_offsets[nth + 1] - models.vertices_offsets[nth]) * models_count,
+      (models.indices_offsets[nth + 1] - models.indices_offsets[nth]) * models_count
+      );
+}
+
+
+void BufferObject::drawModels()
+{
+  draw(models_vertices_count, models_indices_count);
+}
+
+
+void BufferObject::writeModelVertices
+(const int offset, bx::Vec3 pos, bx::Vec3 col, const Models& models, const int nth)
+{
+  int nth_model_vertices_count =
+    models.vertices_offsets[nth + 1] - models.vertices_offsets[nth];
+
+  for (int i = 0; i < nth_model_vertices_count; ++i) {
+    vertices[offset + i].x =
+      models.vertices[models.vertices_offsets[nth] + i].x + pos.x;
+    vertices[offset + i].y =
+      models.vertices[models.vertices_offsets[nth] + i].y + pos.y;
+    vertices[offset + i].z =
+      models.vertices[models.vertices_offsets[nth] + i].z + pos.z;
+    vertices[offset + i].r = col.x;
+    vertices[offset + i].g = col.y;
+    vertices[offset + i].b = col.z;
+    vertices[offset + i].normal_x =
+      models.vertices[models.vertices_offsets[nth] + i].normal_x;
+    vertices[offset + i].normal_y =
+      models.vertices[models.vertices_offsets[nth] + i].normal_y;
+    vertices[offset + i].normal_z =
+      models.vertices[models.vertices_offsets[nth] + i].normal_z;
+  }
+
+  if (nth_model_vertices_count + offset > models_vertices_count) {
+    models_vertices_count = nth_model_vertices_count + offset;
+  }
+}
+
+
+void BufferObject::writeModelIndices
+(const int offset, const Models& models, const int nth)
+{
+  int nth_model_indices_count =
+    models.indices_offsets[nth + 1] - models.indices_offsets[nth];
+
+  for (int i = 0; i < nth_model_indices_count; ++i) {
+    indices[offset + i] = models.indices[models.indices_offsets[nth] + i];
+  }
+
+  if (nth_model_indices_count + offset > models_indices_count) {
+    models_indices_count = nth_model_indices_count + offset;
+  }
 }

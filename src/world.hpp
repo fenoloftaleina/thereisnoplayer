@@ -4,6 +4,7 @@
 
 #include "buffer_object.hpp"
 #include "nimate.hpp"
+#include "models.hpp"
 #include "common.hpp"
 #include <bx/math.h>
 
@@ -45,9 +46,10 @@ struct World
   BufferObject editor_bo;
 
 
-  BufferObject model_bo;
+  BufferObject models_bo;
 
 
+  Models models;
   Nimate nimate;
 
   bx::Vec3 moving_color = {0.85f, 0.2f, 0.32f};

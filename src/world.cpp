@@ -48,9 +48,11 @@ void World::prepare()
   editor_bo.createBuffers();
   editor_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
 
-  model_bo.initModel("test.obj");
-  model_bo.createBuffers();
-  model_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+  models.init();
+
+  models_bo.initModels(100);
+  models_bo.createBuffers();
+  models_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
 }
 
 
@@ -88,6 +90,16 @@ void World::init()
   writeCubesVertices(editor_bo, editor_position, editor_color);
 
   moving_next_spots = moving_spots;
+
+
+  models_bo.writeModelVertices(
+      0,
+      bx::Vec3(0.0f, 0.0f, 0.0f),
+      bx::Vec3(0.5f, 0.3f, 0.9f),
+      models,
+      0
+      );
+  models_bo.writeModelIndices(0, models, 0);
 }
 
 
@@ -97,6 +109,8 @@ void World::updateBuffers()
   static_bo.updateBuffer();
   doors_bo.updateBuffer();
   winning_doors_bo.updateBuffer();
+
+  models_bo.updateBuffer();
 }
 
 
@@ -183,7 +197,7 @@ void World::draw(const bool in_editor)
   }
 
 
-  model_bo.drawModel();
+  models_bo.drawModels();
 }
 
 
@@ -196,7 +210,7 @@ void World::destroy()
   editor_bo.destroy();
 
 
-  model_bo.destroy();
+  models_bo.destroy();
 }
 
 
