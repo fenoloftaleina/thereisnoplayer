@@ -8,6 +8,7 @@
 #include <bx/math.h>
 
 #include "common.hpp"
+#include "porter.hpp"
 
 
 struct PosColorVertex {
@@ -137,6 +138,8 @@ struct BufferObject {
   bgfx::IndexBufferHandle m_ibh;
   bgfx::ProgramHandle m_program;
 
+  Porter porter;
+
   void initCubes(const int cubes_count);
   void initCubesLines(const int cubes_count);
   void writeCubesIndices();
@@ -151,6 +154,9 @@ struct BufferObject {
   void drawCubes(uint16_t current_cubes_count, uint64_t more_state = 0);
   void drawCubesLines(uint16_t current_cubes_count);
   void destroy();
+
+  void initModel(const char* filename);
+  void drawModel();
 };
 
 #endif

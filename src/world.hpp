@@ -44,6 +44,10 @@ struct World
   BufferObject winning_doors_bo;
   BufferObject editor_bo;
 
+
+  BufferObject model_bo;
+
+
   Nimate nimate;
 
   bx::Vec3 moving_color = {0.85f, 0.2f, 0.32f};

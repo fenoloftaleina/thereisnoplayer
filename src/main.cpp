@@ -15,7 +15,6 @@
 #include "common.hpp"
 #include "world.hpp"
 #include "editor.hpp"
-#include "porter.hpp"
 
 SDL_Window* window = NULL;
 const int WIDTH = 1600;
@@ -44,7 +43,6 @@ std::vector<Level> levels;
 
 World world;
 Editor editor;
-Porter porter;
 
 
 namespace cereal
@@ -112,10 +110,6 @@ void persistLevel(int level_id)
 
 int main (int argc, char* args[])
 {
-
-  porter.import("test.obj");
-
-
   // Initialize SDL systems
   if(SDL_Init( SDL_INIT_VIDEO ) < 0) {
     printf("SDL could not initialize! SDL_Error: %s\n",

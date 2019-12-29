@@ -206,3 +206,16 @@ void BufferObject::destroy()
   bgfx::destroy(m_ibh);
   bgfx::destroy(m_program);
 }
+
+
+
+void BufferObject::initModel(const char* filename)
+{
+  porter.import(filename, *this);
+}
+
+
+void BufferObject::drawModel()
+{
+  draw(vertices_count, indices_count);
+}

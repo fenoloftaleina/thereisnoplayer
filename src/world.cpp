@@ -47,6 +47,10 @@ void World::prepare()
   winning_doors_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
   editor_bo.createBuffers();
   editor_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+
+  model_bo.initModel("test.obj");
+  model_bo.createBuffers();
+  model_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
 }
 
 
@@ -169,14 +173,17 @@ void World::reset()
 
 void World::draw(const bool in_editor)
 {
-  moving_bo.drawCubes(moving_spots.size(), BGFX_STATE_BLEND_ALPHA);
-  static_bo.drawCubes(static_spots.size());
-  doors_bo.drawCubes(doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
-  winning_doors_bo.drawCubes(winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
+  // moving_bo.drawCubes(moving_spots.size(), BGFX_STATE_BLEND_ALPHA);
+  // static_bo.drawCubes(static_spots.size());
+  // doors_bo.drawCubes(doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
+  // winning_doors_bo.drawCubes(winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
 
   if (in_editor) {
     editor_bo.drawCubes(1);
   }
+
+
+  model_bo.drawModel();
 }
 
 
@@ -187,6 +194,9 @@ void World::destroy()
   doors_bo.destroy();
   winning_doors_bo.destroy();
   editor_bo.destroy();
+
+
+  model_bo.destroy();
 }
 
 

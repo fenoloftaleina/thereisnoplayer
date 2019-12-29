@@ -9,11 +9,15 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+struct BufferObject;
+
 struct Porter
 {
-  void import(const char* filename);
+  void import(const char* filename, BufferObject& bo);
 
   char filename_str[255];
 };
+
+#include "buffer_object.hpp"
 
 #endif
