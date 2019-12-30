@@ -97,9 +97,9 @@ void runLevel(int level_id)
   load(level_str);
   SDL_SetWindowTitle(window, level_str);
 
+  world.all_moving_spots.clear();
   world.init();
   world.updateBuffers();
-  world.all_moving_spots.clear();
 }
 
 void persistLevel(int level_id)
@@ -171,7 +171,7 @@ int main (int argc, char* args[])
   world.prepare();
 
   loadLevels();
-  runLevel(4);
+  runLevel(0);
 
 
 
@@ -355,11 +355,11 @@ int main (int argc, char* args[])
 
     dt = current_time - last_time;
 
-    // if (logic.run(cur_pos, in_editor, back, dt)) {
-    //   runLevel(current_level_id + 1);
-    // }
-
     world.resolve(move, in_editor, back);
+    if (world.won) {
+      runLevel(current_level_id + 1);
+    }
+
     world.update(dt);
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };

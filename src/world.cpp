@@ -58,6 +58,9 @@ void World::prepare()
 
 void World::init()
 {
+  won = false;
+  nimate.reset();
+
   moving_positions.resize(moving_spots.size());
   static_positions.resize(static_spots.size());
   doors_positions.resize(doors_spots.size());
@@ -131,7 +134,7 @@ void World::resolve(const Spot& move, const bool in_editor, const bool back)
 {
   made_move = false;
 
-  if (maybe_won()) {
+  if (won || maybe_won()) {
     return;
   }
 

@@ -72,3 +72,12 @@ void Nimate::abort(
     }
   }
 }
+
+
+void Nimate::reset()
+{
+  next_moving_positions.clear();
+  next_moving_colors.clear();
+  next_moving_positions_lengths.clear();
+  next_moving_colors_lengths.clear();
+}

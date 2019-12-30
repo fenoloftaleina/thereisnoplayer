@@ -36,6 +36,8 @@ struct Nimate
       std::vector<float>& times
       );
 
+  void reset();
+
   float fraction;
   int finished_count;
 };
