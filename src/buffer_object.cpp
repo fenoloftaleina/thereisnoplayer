@@ -150,7 +150,7 @@ void BufferObject::createBuffers()
               PosColorVertex::ms_layout
           );
 
-  m_ibh = bgfx::createIndexBuffer(
+  m_ibh = bgfx::createDynamicIndexBuffer(
               // Static data can be passed with bgfx::makeRef
               bgfx::makeRef(indices, indices_count * sizeof(indices[0]))
               // bgfx::makeRef(indices, 6 * sizeof(indices[0]))
@@ -160,6 +160,7 @@ void BufferObject::createBuffers()
 void BufferObject::updateBuffer()
 {
   bgfx::update(m_vbh, 0, bgfx::makeRef(vertices, vertices_count * sizeof(vertices[0])));
+  bgfx::update(m_ibh, 0, bgfx::makeRef(indices, indices_count * sizeof(indices[0])));
 }
 
 void BufferObject::createShaders(const char* vertex_shader_path, const char* fragment_shader_path)
@@ -220,26 +221,26 @@ void BufferObject::initModels(const int models_count)
 
 
 void BufferObject::drawModels
-(const int models_count, const Models& models, const int nth)
+(const int models_count, const Models& models, const int nth, uint64_t more_state = 0)
 {
   draw(
-      (models.vertices_offsets[nth + 1] - models.vertices_offsets[nth]) * models_count,
-      (models.indices_offsets[nth + 1] - models.indices_offsets[nth]) * models_count
+      models.nth_model_vertices_count(nth) * models_count,
+      models.nth_model_indices_count(nth) * models_count,
+      more_state
       );
 }
 
 
-void BufferObject::drawModels()
+void BufferObject::drawModels(uint64_t more_state = 0)
 {
-  draw(models_vertices_count, models_indices_count);
+  draw(models_vertices_count, models_indices_count, more_state);
 }
 
 
 void BufferObject::writeModelVertices
 (const int offset, bx::Vec3 pos, bx::Vec3 col, const Models& models, const int nth)
 {
-  int nth_model_vertices_count =
-    models.vertices_offsets[nth + 1] - models.vertices_offsets[nth];
+  int nth_model_vertices_count = models.nth_model_vertices_count(nth);
 
   for (int i = 0; i < nth_model_vertices_count; ++i) {
     vertices[offset + i].x =
@@ -266,13 +267,12 @@ void BufferObject::writeModelVertices
 
 
 void BufferObject::writeModelIndices
-(const int offset, const Models& models, const int nth)
+(const int offset, const int vertices_num_offset, const Models& models, const int nth)
 {
-  int nth_model_indices_count =
-    models.indices_offsets[nth + 1] - models.indices_offsets[nth];
+  int nth_model_indices_count = models.nth_model_indices_count(nth);
 
   for (int i = 0; i < nth_model_indices_count; ++i) {
-    indices[offset + i] = models.indices[models.indices_offsets[nth] + i];
+    indices[offset + i] = vertices_num_offset + models.indices[models.indices_offsets[nth] + i];
   }
 
   if (nth_model_indices_count + offset > models_indices_count) {

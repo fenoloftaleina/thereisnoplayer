@@ -26,6 +26,9 @@ struct Models
   void import(const char* filename, const int nth);
   void put(const int nth, BufferObject& bo);
 
+  int nth_model_vertices_count(int nth) const;
+  int nth_model_indices_count(int nth) const;
+
   int processNode(aiNode* node, const aiScene* scene, int& vertices_offset, int& indices_offset);
   void processMesh(aiMesh *mesh, const aiScene *scene, int& vertices_offset, int& indices_offset);
 

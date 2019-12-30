@@ -31,7 +31,7 @@ void World::prepare()
 
   PosColorVertex::init();
 
-  moving_bo.initCubes(1000);
+  moving_bo.initModels(100);
   static_bo.initCubes(1000);
   doors_bo.initCubes(1000);
   winning_doors_bo.initCubes(1000);
@@ -83,7 +83,7 @@ void World::init()
   setColors(winning_doors_colors, winning_doors_color);
   setColors(editor_color, editor_thing_color);
 
-  writeCubesVertices(moving_bo, moving_positions, moving_colors);
+  writeModelsVertices(moving_bo, moving_positions, moving_colors, 0);
   writeCubesVertices(static_bo, static_positions, static_colors);
   writeCubesVertices(doors_bo, doors_positions, doors_colors);
   writeCubesVertices(winning_doors_bo, winning_doors_positions, winning_doors_colors);
@@ -94,12 +94,25 @@ void World::init()
 
   models_bo.writeModelVertices(
       0,
-      bx::Vec3(0.0f, 0.0f, 0.0f),
+      bx::Vec3(-2.0f, 3.0f, 0.0f),
       bx::Vec3(0.5f, 0.3f, 0.9f),
       models,
       0
       );
-  models_bo.writeModelIndices(0, models, 0);
+  models_bo.writeModelIndices(0, 0, models, 0);
+  models_bo.writeModelVertices(
+      models.nth_model_vertices_count(0),
+      bx::Vec3(2.0f, 0.0f, 0.0f),
+      bx::Vec3(0.1f, 0.3f, 0.9f),
+      models,
+      0
+      );
+  models_bo.writeModelIndices(
+      models.nth_model_indices_count(0),
+      models.nth_model_vertices_count(0),
+      models,
+      0
+      );
 }
 
 
@@ -171,7 +184,7 @@ void World::update(const float dt)
         );
   }
 
-  writeCubesVertices(moving_bo, moving_positions, moving_colors);
+  writeModelsVertices(moving_bo, moving_positions, moving_colors, 0);
   moving_bo.updateBuffer();
 }
 
@@ -187,17 +200,17 @@ void World::reset()
 
 void World::draw(const bool in_editor)
 {
-  // moving_bo.drawCubes(moving_spots.size(), BGFX_STATE_BLEND_ALPHA);
-  // static_bo.drawCubes(static_spots.size());
-  // doors_bo.drawCubes(doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
-  // winning_doors_bo.drawCubes(winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
+  moving_bo.drawModels(moving_spots.size(), models, 0, BGFX_STATE_BLEND_ALPHA);
+  static_bo.drawCubes(static_spots.size());
+  doors_bo.drawCubes(doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
+  winning_doors_bo.drawCubes(winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
 
   if (in_editor) {
     editor_bo.drawCubes(1);
   }
 
 
-  models_bo.drawModels();
+  // models_bo.drawModels(0);
 }
 
 
@@ -318,5 +331,29 @@ void World::writeCubesVertices
 {
   for (int i = 0; i < positions.size(); ++i) {
     bo.writeCubeVertices(i, positions[i], colors[i]);
+  }
+}
+
+
+void World::writeModelsVertices
+(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors, const int nth_model)
+{
+  int nth_model_vertices_count = models.nth_model_vertices_count(nth_model);
+  int nth_model_indices_count = models.nth_model_indices_count(nth_model);
+
+  for (int i = 0; i < positions.size(); ++i) {
+    bo.writeModelVertices(
+        nth_model_vertices_count * i,
+        positions[i],
+        colors[i],
+        models,
+        nth_model
+        );
+    bo.writeModelIndices(
+        nth_model_indices_count * i,
+        nth_model_vertices_count * i,
+        models,
+        nth_model
+        );
   }
 }

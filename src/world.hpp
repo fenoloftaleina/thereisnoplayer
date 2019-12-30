@@ -89,6 +89,7 @@ struct World
   void setPositionsFromSpots(std::vector<bx::Vec3>& positions, const std::vector<Spot>& spots);
   void setColors(std::vector<bx::Vec3>& colors, const bx::Vec3& color);
   void writeCubesVertices(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors);
+  void writeModelsVertices(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors, const int nth_model);
 
   template<class Archive>
   void serialize(Archive& archive)

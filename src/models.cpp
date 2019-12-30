@@ -83,3 +83,15 @@ void Models::import(const char* filename, const int nth)
 
   aiReleaseImport(scene);
 }
+
+
+int Models::nth_model_vertices_count(int nth) const
+{
+  return vertices_offsets[nth + 1] - vertices_offsets[nth];
+}
+
+
+int Models::nth_model_indices_count(int nth) const
+{
+  return indices_offsets[nth + 1] - indices_offsets[nth];
+}

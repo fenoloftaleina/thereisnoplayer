@@ -171,7 +171,7 @@ int main (int argc, char* args[])
   world.prepare();
 
   loadLevels();
-  runLevel(0);
+  runLevel(4);
 
 
 
