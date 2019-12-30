@@ -68,10 +68,8 @@ struct World
   void init();
   void updateBuffers();
 
-  void resolve(const Spot& move, const bool in_editor, const bool back);
+  void resolve(const Spot& move, const bool in_editor, const bool back, const bool reset);
   void update(const float dt);
-
-  void reset();
 
   void draw(const bool in_editor);
   void destroy();
@@ -84,6 +82,7 @@ struct World
   void maybe_make_move(const Spot& move);
   void maybe_doors();
   void execute_back();
+  void execute_reset();
   void make_editor_move(const Spot& move);
 
   void setPositionsFromSpots(std::vector<bx::Vec3>& positions, const std::vector<Spot>& spots);
@@ -100,6 +99,8 @@ struct World
   int towards;
   int winning_count;
   bool made_move;
+  bool travel;
+  float animation_length;
   bool won;
   bool finished;
   std::vector<bx::Vec3> positions_temp;

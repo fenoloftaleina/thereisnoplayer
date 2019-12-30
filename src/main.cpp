@@ -195,6 +195,7 @@ int main (int argc, char* args[])
 
   bool in_editor = false;
   bool back = false;
+  bool reset = false;
   bool moved = false;
 
   // Poll for events and wait till user closes window
@@ -206,6 +207,7 @@ int main (int argc, char* args[])
     move.y = 0;
     moved = false;
     back = false;
+    reset = false;
 
     while(SDL_PollEvent(&currentEvent)) {
       if(currentEvent.type == SDL_QUIT) {
@@ -241,7 +243,8 @@ int main (int argc, char* args[])
             break;
 
           case SDLK_r:
-            world.reset();
+            if (world.all_moving_spots.empty()) break;
+            reset = true;
             break;
 
           case SDLK_z:
@@ -355,7 +358,7 @@ int main (int argc, char* args[])
 
     dt = current_time - last_time;
 
-    world.resolve(move, in_editor, back);
+    world.resolve(move, in_editor, back, reset);
     if (world.won) {
       runLevel(current_level_id + 1);
     }

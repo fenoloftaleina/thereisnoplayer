@@ -130,9 +130,11 @@ void World::updateBuffers()
 }
 
 
-void World::resolve(const Spot& move, const bool in_editor, const bool back)
+void World::resolve
+(const Spot& move, const bool in_editor, const bool back, const bool reset)
 {
   made_move = false;
+  travel = false;
 
   if (won || maybe_won()) {
     return;
@@ -140,6 +142,11 @@ void World::resolve(const Spot& move, const bool in_editor, const bool back)
 
   if (in_editor) {
     make_editor_move(move);
+    return;
+  }
+
+  if (reset) {
+    execute_reset();
     return;
   }
 
@@ -159,7 +166,10 @@ void World::update(const float dt)
     positions_temp.resize(moving_spots.size());
     setPositionsFromSpots(positions_temp, moving_spots);
     lengths_temp.resize(moving_spots.size());
-    fr(i, lengths_temp) { lengths_temp[i] = 100.0f; }
+
+    animation_length = 100.0f;
+    if (travel) { animation_length = 0.0f; }
+    fr(i, lengths_temp) { lengths_temp[i] = animation_length; }
 
     // nimate.abort(
     //     nimate.next_moving_positions,
@@ -189,15 +199,6 @@ void World::update(const float dt)
 
   writeModelsVertices(moving_bo, moving_positions, moving_colors, 0);
   moving_bo.updateBuffer();
-}
-
-
-void World::reset()
-{
-  if (!all_moving_spots.empty()) {
-    moving_spots = all_moving_spots.front();
-    all_moving_spots.clear();
-  }
 }
 
 
@@ -292,8 +293,19 @@ void World::maybe_doors()
 
 void World::execute_back()
 {
+  made_move = true;
   moving_spots = all_moving_spots.back();
   all_moving_spots.pop_back();
+}
+
+
+void World::execute_reset()
+{
+  made_move = true;
+  travel = true;
+  nimate.reset();
+  moving_spots = all_moving_spots.front();
+  all_moving_spots.clear();
 }
 
 
