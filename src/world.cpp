@@ -32,7 +32,7 @@ void World::prepare()
   PosColorVertex::init();
 
   moving_bo.initModels(100);
-  static_bo.initCubes(1000);
+  static_bo.initModels(100);
   doors_bo.initCubes(1000);
   winning_doors_bo.initCubes(1000);
   editor_bo.initCubes(1);
@@ -86,8 +86,15 @@ void World::init()
   setColors(winning_doors_colors, winning_doors_color);
   setColors(editor_color, editor_thing_color);
 
+
+  static_models_list.resize(static_positions.size());
+  fr(i, static_positions) {
+    static_models_list[i] = 1;
+  }
+
+
   writeModelsVertices(moving_bo, moving_positions, moving_colors, 0);
-  writeCubesVertices(static_bo, static_positions, static_colors);
+  writeModelsVertices(static_bo, static_positions, static_colors, static_models_list);
   writeCubesVertices(doors_bo, doors_positions, doors_colors);
   writeCubesVertices(winning_doors_bo, winning_doors_positions, winning_doors_colors);
   writeCubesVertices(editor_bo, editor_position, editor_color);
@@ -205,7 +212,7 @@ void World::update(const float dt)
 void World::draw(const bool in_editor)
 {
   moving_bo.drawModels(moving_spots.size(), models, 0, BGFX_STATE_BLEND_ALPHA);
-  static_bo.drawCubes(static_spots.size());
+  static_bo.drawModels(0);
   doors_bo.drawCubes(doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
   winning_doors_bo.drawCubes(winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
 
@@ -370,5 +377,32 @@ void World::writeModelsVertices
         models,
         nth_model
         );
+  }
+}
+
+
+void World::writeModelsVertices
+(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors, const std::vector<int>& models_list)
+{
+  int acc_vertices_offset = 0;
+  int acc_indices_offset = 0;
+
+  for (int i = 0; i < positions.size(); ++i) {
+    bo.writeModelVertices(
+        acc_vertices_offset,
+        positions[i],
+        colors[i],
+        models,
+        models_list[i]
+        );
+    bo.writeModelIndices(
+        acc_indices_offset,
+        acc_vertices_offset,
+        models,
+        models_list[i]
+        );
+
+    acc_vertices_offset += models.nth_model_vertices_count(models_list[i]);
+    acc_indices_offset += models.nth_model_indices_count(models_list[i]);
   }
 }

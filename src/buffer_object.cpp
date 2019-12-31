@@ -185,6 +185,16 @@ void BufferObject::draw(uint16_t current_vertices_count, uint16_t current_indice
       | more_state
       );
 
+  // printf("\nvertices:\n");
+  // for(int i = 0; i < current_vertices_count; ++i) {
+  //   printf("%f %f %f\n", vertices[i].x, vertices[i].y, vertices[i].z);
+  // }
+  // printf("\nindices:\n");
+  // for(int i = 0; i < current_indices_count; ++i) {
+  //   printf("%d, ", indices[i]);
+  // }
+  // printf("\n\n");
+
   bgfx::setVertexBuffer(0, m_vbh, 0, current_vertices_count);
   bgfx::setIndexBuffer(m_ibh, 0, current_indices_count);
 
@@ -260,9 +270,8 @@ void BufferObject::writeModelVertices
       models.vertices[models.vertices_offsets[nth] + i].normal_z;
   }
 
-  if (nth_model_vertices_count + offset > models_vertices_count) {
-    models_vertices_count = nth_model_vertices_count + offset;
-  }
+  // if (nth_model_vertices_count + offset > models_vertices_count) {
+  models_vertices_count = nth_model_vertices_count + offset;
 }
 
 
@@ -275,7 +284,6 @@ void BufferObject::writeModelIndices
     indices[offset + i] = vertices_num_offset + models.indices[models.indices_offsets[nth] + i];
   }
 
-  if (nth_model_indices_count + offset > models_indices_count) {
-    models_indices_count = nth_model_indices_count + offset;
-  }
+  // if (nth_model_indices_count + offset > models_indices_count) {
+  models_indices_count = nth_model_indices_count + offset;
 }

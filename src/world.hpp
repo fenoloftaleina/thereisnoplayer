@@ -49,6 +49,9 @@ struct World
   BufferObject models_bo;
 
 
+  std::vector<int> static_models_list;
+
+
   Models models;
   Nimate nimate;
 
@@ -89,6 +92,7 @@ struct World
   void setColors(std::vector<bx::Vec3>& colors, const bx::Vec3& color);
   void writeCubesVertices(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors);
   void writeModelsVertices(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors, const int nth_model);
+  void writeModelsVertices(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors, const std::vector<int>& models_list);
 
   template<class Archive>
   void serialize(Archive& archive)

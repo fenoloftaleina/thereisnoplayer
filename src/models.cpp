@@ -2,6 +2,7 @@
 
 void Models::processMesh(aiMesh *mesh, const aiScene *scene, int& vertices_offset, int& indices_offset)
 {
+  // printf("Mesh with %d vertices and %d faces.\n", mesh->mNumVertices, mesh->mNumFaces);
   for(int i = 0; i < mesh->mNumVertices; i++) {
     vertices[vertices_offset + i].x = mesh->mVertices[i].x;
     vertices[vertices_offset + i].y = mesh->mVertices[i].y;
@@ -14,8 +15,6 @@ void Models::processMesh(aiMesh *mesh, const aiScene *scene, int& vertices_offse
     vertices[vertices_offset + i].normal_z = mesh->mNormals[i].z;
   }
 
-  vertices_offset += mesh->mNumVertices;
-
   int n = 0;
   for(int j = 0; j < mesh->mNumFaces; j++) {
     for(int k = 0; k < mesh->mFaces[j].mNumIndices; k++) {
@@ -24,6 +23,7 @@ void Models::processMesh(aiMesh *mesh, const aiScene *scene, int& vertices_offse
     }
   }
 
+  vertices_offset += mesh->mNumVertices;
   indices_offset += n;
 
   // if(mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
@@ -38,6 +38,7 @@ void Models::processMesh(aiMesh *mesh, const aiScene *scene, int& vertices_offse
 
 int Models::processNode(aiNode* node, const aiScene* scene, int& vertices_offset, int& indices_offset)
 {
+  // printf("Node with %d meshes and %d children.\n", node->mNumMeshes, node->mNumChildren);
   for(int i = 0; i < node->mNumMeshes; ++i) {
     processMesh(scene->mMeshes[node->mMeshes[i]], scene, vertices_offset, indices_offset);
   }
@@ -56,6 +57,7 @@ void Models::init()
   indices_offsets[0] = 0;
 
   import("test.obj", 0);
+  import("untitled.obj", 1);
 }
 
 
@@ -63,18 +65,20 @@ void Models::import(const char* filename, const int nth)
 {
   sprintf(filename_str, "assets/%s", filename);
   const aiScene* scene = aiImportFile(filename_str,
-    aiProcess_CalcTangentSpace       |
-    aiProcess_Triangulate            |
-    aiProcess_JoinIdenticalVertices  |
-    aiProcess_SortByPType);
+      aiProcess_Triangulate | aiProcess_FlipUVs
+    // aiProcess_CalcTangentSpace |
+    // aiProcess_Triangulate |
+    // // aiProcess_JoinIdenticalVertices
+    // aiProcess_SortByPType
+    );
 
   if (!scene) {
     printf("Errors: %s\n", aiGetErrorString());
     return;
   }
 
-  int acc_next_vertices_offset = 0;
-  int acc_next_indices_offset = 0;
+  int acc_next_vertices_offset = vertices_offsets[nth];
+  int acc_next_indices_offset = indices_offsets[nth];
 
   processNode(scene->mRootNode, scene, acc_next_vertices_offset, acc_next_indices_offset);
 
