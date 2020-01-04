@@ -57,7 +57,8 @@ void Models::init()
   indices_offsets[0] = 0;
 
   import("test.obj", 0);
-  import("untitled.obj", 1);
+  import("test-keyframe2.obj", 1);
+  import("untitled.obj", 2);
 }
 
 

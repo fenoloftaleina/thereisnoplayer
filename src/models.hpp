@@ -5,6 +5,7 @@
 #include "common.hpp"
 #include <bx/math.h>
 #include <stdio.h>
+#include <vector>
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
