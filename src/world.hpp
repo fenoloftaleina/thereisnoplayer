@@ -72,7 +72,7 @@ struct World
   void updateBuffers();
 
   void resolve(const Spot& move, const bool in_editor, const bool back, const bool reset);
-  void update(const float dt);
+  void update(const float t, const float dt);
 
   void draw(const bool in_editor);
   void destroy();
@@ -93,6 +93,17 @@ struct World
   void writeCubesVertices(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors);
   void writeModelsVertices(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors, const int nth_model);
   void writeModelsVertices(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors, const std::vector<int>& models_list);
+  void writeAnimatedModelsVertices
+    (BufferObject& bo,
+     const std::vector<bx::Vec3>& positions1,
+     const std::vector<bx::Vec3>& positions2,
+     const std::vector<bx::Vec3>& colors1,
+     const std::vector<bx::Vec3>& colors2,
+     const int nth1,
+     const int nth2,
+     const std::vector<bx::Vec3>& froms,
+     const std::vector<bx::Vec3>& tos
+    );
 
   template<class Archive>
   void serialize(Archive& archive)
@@ -109,7 +120,8 @@ struct World
   bool finished;
   std::vector<bx::Vec3> positions_temp;
   std::vector<bx::Vec3> colors_temp;
-  std::vector<float> lengths_temp;
+  std::vector<bx::Vec3> froms_temp;
+  std::vector<bx::Vec3> tos_temp;
 };
 
 #endif

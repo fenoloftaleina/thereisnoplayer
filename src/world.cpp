@@ -27,9 +27,10 @@ void World::prepare()
 
   positions_temp.reserve(100);
   colors_temp.reserve(100);
-  lengths_temp.reserve(100);
+  froms_temp.reserve(100);
+  tos_temp.reserve(100);
 
-  PosColorVertex::init();
+  AnimatedPosColorVertex::init();
 
   moving_bo.initModels(100);
   static_bo.initModels(100);
@@ -38,7 +39,7 @@ void World::prepare()
   editor_bo.initCubes(1);
 
   moving_bo.createBuffers();
-  moving_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+  moving_bo.createShaders("bin/v_animated_simple.bin", "bin/f_simple.bin");
   static_bo.createBuffers();
   static_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
   doors_bo.createBuffers();
@@ -167,45 +168,53 @@ void World::resolve
 }
 
 
-void World::update(const float dt)
+void World::update(const float t, const float dt)
 {
   if (made_move) {
     positions_temp.resize(moving_spots.size());
     setPositionsFromSpots(positions_temp, moving_spots);
-    lengths_temp.resize(moving_spots.size());
+
+    froms_temp.resize(moving_spots.size());
+    tos_temp.resize(moving_spots.size());
 
     animation_length = 100.0f;
     if (travel) { animation_length = 0.0f; }
-    fr(i, lengths_temp) { lengths_temp[i] = animation_length; }
+    fr(i, froms_temp) {
+      froms_temp[i] = bx::Vec3(0.0f, 0.0f, t);
+      tos_temp[i] = bx::Vec3(0.0f, 0.0f, t + animation_length);
+    }
 
-    // nimate.abort(
+    // nimate.schedule(
     //     nimate.next_moving_positions,
+    //     positions_temp,
+    //     nimate.next_moving_positions_lengths,
+    //     lengths_temp,
     //     nimate.moving_positions_times
     //     );
 
-    // fr(i, nimate.moving_positions_times) {
-    //   nimate.moving_positions_times[i] += 50.0f;
-    // }
-
-    nimate.schedule(
-        nimate.next_moving_positions,
-        positions_temp,
-        nimate.next_moving_positions_lengths,
-        lengths_temp,
-        nimate.moving_positions_times
-        );
-  } else if (!nimate.next_moving_positions.empty()) {
-    nimate.run(
-        dt,
+    writeAnimatedModelsVertices(
+        moving_bo,
         moving_positions,
-        nimate.next_moving_positions,
-        nimate.moving_positions_times,
-        nimate.next_moving_positions_lengths
+        positions_temp,
+        moving_colors,
+        moving_colors,
+        0,
+        0,
+        froms_temp,
+        tos_temp
         );
-  }
+    moving_bo.updateBuffer();
 
-  writeModelsVertices(moving_bo, moving_positions, moving_colors, 0);
-  moving_bo.updateBuffer();
+    moving_positions = positions_temp;
+  } else if (!nimate.next_moving_positions.empty()) {
+    // nimate.run(
+    //     dt,
+    //     moving_positions,
+    //     nimate.next_moving_positions,
+    //     nimate.moving_positions_times,
+    //     nimate.next_moving_positions_lengths
+    //     );
+  }
 }
 
 
@@ -404,5 +413,46 @@ void World::writeModelsVertices
 
     acc_vertices_offset += models.nth_model_vertices_count(models_list[i]);
     acc_indices_offset += models.nth_model_indices_count(models_list[i]);
+  }
+}
+
+
+void World::writeAnimatedModelsVertices
+(BufferObject& bo,
+ const std::vector<bx::Vec3>& positions1,
+ const std::vector<bx::Vec3>& positions2,
+ const std::vector<bx::Vec3>& colors1,
+ const std::vector<bx::Vec3>& colors2,
+ const int nth1,
+ const int nth2,
+ const std::vector<bx::Vec3>& froms,
+ const std::vector<bx::Vec3>& tos
+ )
+{
+  int acc_vertices_offset = 0;
+  int acc_indices_offset = 0;
+
+  for (int i = 0; i < positions1.size(); ++i) {
+    bo.writeModelVertices(
+        acc_vertices_offset,
+        positions1[i],
+        positions2[i],
+        colors1[i],
+        colors2[i],
+        models,
+        nth1,
+        nth2,
+        froms[i],
+        tos[i]
+        );
+    bo.writeModelIndices(
+        acc_indices_offset,
+        acc_vertices_offset,
+        models,
+        nth1
+        );
+
+    acc_vertices_offset += models.nth_model_vertices_count(nth1);
+    acc_indices_offset += models.nth_model_indices_count(nth2);
   }
 }

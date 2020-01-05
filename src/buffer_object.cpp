@@ -1,6 +1,6 @@
 #include "buffer_object.hpp"
 
-bgfx::VertexLayout PosColorVertex::ms_layout;
+bgfx::VertexLayout AnimatedPosColorVertex::ms_layout;
 
 
 void BufferObject::initCubes(const int cubes_count)
@@ -8,7 +8,7 @@ void BufferObject::initCubes(const int cubes_count)
   vertices_count = cubes_count * vertices_per_cube_count;
   indices_count = cubes_count * indices_per_lines_cube_count;
 
-  vertices = new PosColorVertex[vertices_count];
+  vertices = new AnimatedPosColorVertex[vertices_count];
   indices = new uint16_t[indices_count];
 
   writeCubesIndices();
@@ -20,7 +20,7 @@ void BufferObject::initCubesLines(const int cubes_count)
   vertices_count = cubes_count * vertices_per_lines_cube_count;
   indices_count = cubes_count * vertices_per_lines_cube_count;
 
-  vertices = new PosColorVertex[vertices_count];
+  vertices = new AnimatedPosColorVertex[vertices_count];
   indices = new uint16_t[indices_count];
 
   writeCubesLinesIndices();
@@ -147,7 +147,7 @@ void BufferObject::createBuffers()
   m_vbh = bgfx::createDynamicVertexBuffer(
               // Static data can be passed with bgfx::makeRef
               bgfx::makeRef(vertices, vertices_count * sizeof(vertices[0])),
-              PosColorVertex::ms_layout
+              AnimatedPosColorVertex::ms_layout
           );
 
   m_ibh = bgfx::createDynamicIndexBuffer(
@@ -225,7 +225,7 @@ void BufferObject::initModels(const int models_count)
   vertices_count = models_count * 10000;
   indices_count = models_count * 10000;
 
-  vertices = new PosColorVertex[vertices_count];
+  vertices = new AnimatedPosColorVertex[vertices_count];
   indices = new uint16_t[indices_count];
 }
 
@@ -254,11 +254,11 @@ void BufferObject::writeModelVertices
 
   for (int i = 0; i < nth_model_vertices_count; ++i) {
     vertices[offset + i].x =
-      models.vertices[models.vertices_offsets[nth] + i].x + pos.x;
+      models.vertices[models.vertices_offsets[nth] + i].x;
     vertices[offset + i].y =
-      models.vertices[models.vertices_offsets[nth] + i].y + pos.y;
+      models.vertices[models.vertices_offsets[nth] + i].y;
     vertices[offset + i].z =
-      models.vertices[models.vertices_offsets[nth] + i].z + pos.z;
+      models.vertices[models.vertices_offsets[nth] + i].z;
     vertices[offset + i].r = col.x;
     vertices[offset + i].g = col.y;
     vertices[offset + i].b = col.z;
@@ -268,6 +268,52 @@ void BufferObject::writeModelVertices
       models.vertices[models.vertices_offsets[nth] + i].normal_y;
     vertices[offset + i].normal_z =
       models.vertices[models.vertices_offsets[nth] + i].normal_z;
+
+    vertices[offset + i].pos_x1 = pos.x;
+    vertices[offset + i].pos_y1 = pos.y;
+    vertices[offset + i].pos_z1 = pos.z;
+
+    vertices[offset + i].pos_x2 = pos.x;
+    vertices[offset + i].pos_y2 = pos.y;
+    vertices[offset + i].pos_z2 = pos.z;
+
+    vertices[offset + i].pos_from = 0;
+    vertices[offset + i].pos_to = 0;
+  }
+
+  // if (nth_model_vertices_count + offset > models_vertices_count) {
+  models_vertices_count = nth_model_vertices_count + offset;
+}
+
+
+void BufferObject::writeModelVertices
+(const int offset, const bx::Vec3 pos1, const bx::Vec3 pos2,
+ const bx::Vec3 col1, const bx::Vec3 col2, const Models& models,
+ const int nth1, const int nth2, const bx::Vec3 from, const bx::Vec3 to)
+{
+  int nth_model_vertices_count = models.nth_model_vertices_count(nth1);
+
+  for (int i = 0; i < nth_model_vertices_count; ++i) {
+    vertices[offset + i].x = models.vertices[models.vertices_offsets[nth1] + i].x;
+    vertices[offset + i].y = models.vertices[models.vertices_offsets[nth1] + i].y;
+    vertices[offset + i].z = models.vertices[models.vertices_offsets[nth1] + i].z;
+    vertices[offset + i].r = col1.x;
+    vertices[offset + i].g = col1.y;
+    vertices[offset + i].b = col1.z;
+    vertices[offset + i].normal_x = models.vertices[models.vertices_offsets[nth1] + i].normal_x;
+    vertices[offset + i].normal_y = models.vertices[models.vertices_offsets[nth1] + i].normal_y;
+    vertices[offset + i].normal_z = models.vertices[models.vertices_offsets[nth1] + i].normal_z;
+
+    vertices[offset + i].pos_x1 = pos1.x;
+    vertices[offset + i].pos_y1 = pos1.y;
+    vertices[offset + i].pos_z1 = pos1.z;
+
+    vertices[offset + i].pos_x2 = pos2.x;
+    vertices[offset + i].pos_y2 = pos2.y;
+    vertices[offset + i].pos_z2 = pos2.z;
+
+    vertices[offset + i].pos_from = from.z;
+    vertices[offset + i].pos_to = to.z;
   }
 
   // if (nth_model_vertices_count + offset > models_vertices_count) {

@@ -35,6 +35,59 @@ struct PosColorVertex {
   static bgfx::VertexLayout ms_layout;
 };
 
+struct AnimatedPosColorVertex {
+  float x;
+  float y;
+  float z;
+  float r;
+  float g;
+  float b;
+  float normal_x;
+  float normal_y;
+  float normal_z;
+
+  float pos_x1;
+  float pos_y1;
+  float pos_z1;
+
+  // float x2;
+  // float y2;
+  // float z2;
+  // float r2;
+  // float g2;
+  // float b2;
+  // float normal_x2;
+  // float normal_y2;
+  // float normal_z2;
+
+  float pos_x2;
+  float pos_y2;
+  float pos_z2;
+
+  float vertex_from;
+  float color_from;
+  float pos_from;
+  float vertex_to;
+  float color_to;
+  float pos_to;
+
+
+  static void init() {
+    ms_layout
+      .begin()
+      .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+      .add(bgfx::Attrib::Color0,   3, bgfx::AttribType::Float)
+      .add(bgfx::Attrib::Normal,   3, bgfx::AttribType::Float)
+      .add(bgfx::Attrib::Color2,   3, bgfx::AttribType::Float)
+      .add(bgfx::Attrib::Color3,   3, bgfx::AttribType::Float)
+      .add(bgfx::Attrib::Indices,  3, bgfx::AttribType::Float)
+      .add(bgfx::Attrib::Weight,   3, bgfx::AttribType::Float)
+      .end();
+  };
+
+  static bgfx::VertexLayout ms_layout;
+};
+
 
 static const int faces_per_cube_count = 6;
 static const int vertices_per_face_count = 4;
@@ -132,7 +185,7 @@ struct BufferObject {
   int vertices_count;
   int indices_count;
 
-  PosColorVertex* vertices;
+  AnimatedPosColorVertex* vertices;
   uint16_t* indices;
 
   bgfx::DynamicVertexBufferHandle m_vbh;
@@ -147,6 +200,10 @@ struct BufferObject {
   void writeCubeVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
   void writeCubeLinesVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
   void writeModelVertices(const int offset, bx::Vec3 pos, bx::Vec3 col, const Models& models, const int nth);
+  void writeModelVertices
+    (const int offset, const bx::Vec3 pos1, const bx::Vec3 pos2,
+     const bx::Vec3 col1, const bx::Vec3 col2, const Models& models,
+     const int nth1, const int nth2, const bx::Vec3 from, const bx::Vec3 to);
   void writeModelIndices(const int offset, const int vertices_num_offset, const Models& models, const int nth);
   void setFaceColor(const int nth_cube, const int nth_face, bx::Vec3 col);
   void createBuffers();

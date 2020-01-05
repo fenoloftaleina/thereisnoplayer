@@ -5,3 +5,7 @@ vec3 v_position0 : POSITION;
 vec3 a_position  : POSITION;
 vec4 a_color0    : COLOR0;
 vec3 a_normal    : NORMAL;
+vec3 a_color2    : COLOR2;
+vec3 a_color3    : COLOR3;
+vec3 a_indices   : INDICES;
+vec3 a_weight    : WEIGHT;

@@ -363,7 +363,7 @@ int main (int argc, char* args[])
       runLevel(current_level_id + 1);
     }
 
-    world.update(dt);
+    world.update(current_time, dt);
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
     // const bx::Vec3 at = bx::neg(Common::spot_offset);
