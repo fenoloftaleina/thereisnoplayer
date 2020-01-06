@@ -253,21 +253,15 @@ void BufferObject::writeModelVertices
   int nth_model_vertices_count = models.nth_model_vertices_count(nth);
 
   for (int i = 0; i < nth_model_vertices_count; ++i) {
-    vertices[offset + i].x =
-      models.vertices[models.vertices_offsets[nth] + i].x;
-    vertices[offset + i].y =
-      models.vertices[models.vertices_offsets[nth] + i].y;
-    vertices[offset + i].z =
-      models.vertices[models.vertices_offsets[nth] + i].z;
+    vertices[offset + i].x = models.vertices[models.vertices_offsets[nth] + i].x;
+    vertices[offset + i].y = models.vertices[models.vertices_offsets[nth] + i].y;
+    vertices[offset + i].z = models.vertices[models.vertices_offsets[nth] + i].z;
     vertices[offset + i].r = col.x;
     vertices[offset + i].g = col.y;
     vertices[offset + i].b = col.z;
-    vertices[offset + i].normal_x =
-      models.vertices[models.vertices_offsets[nth] + i].normal_x;
-    vertices[offset + i].normal_y =
-      models.vertices[models.vertices_offsets[nth] + i].normal_y;
-    vertices[offset + i].normal_z =
-      models.vertices[models.vertices_offsets[nth] + i].normal_z;
+    vertices[offset + i].normal_x = models.vertices[models.vertices_offsets[nth] + i].normal_x;
+    vertices[offset + i].normal_y = models.vertices[models.vertices_offsets[nth] + i].normal_y;
+    vertices[offset + i].normal_z = models.vertices[models.vertices_offsets[nth] + i].normal_z;
 
     vertices[offset + i].pos_x1 = pos.x;
     vertices[offset + i].pos_y1 = pos.y;

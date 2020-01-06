@@ -177,7 +177,7 @@ void World::update(const float t, const float dt)
     froms_temp.resize(moving_spots.size());
     tos_temp.resize(moving_spots.size());
 
-    animation_length = 100.0f;
+    animation_length = 200.0f;
     if (travel) { animation_length = 0.0f; }
     fr(i, froms_temp) {
       froms_temp[i] = bx::Vec3(0.0f, 0.0f, t);
