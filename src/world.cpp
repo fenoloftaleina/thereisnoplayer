@@ -11,6 +11,8 @@ void World::prepare()
   winning_doors_spots.reserve(100);
   editor_spot.reserve(1);
   editor_spot.resize(1);
+  through_door.reserve(100);
+  maybe_door_spots.reserve(100);
 
   all_moving_spots.reserve(1000);
 
@@ -27,8 +29,10 @@ void World::prepare()
 
   positions_temp.reserve(100);
   colors_temp.reserve(100);
-  froms_temp.reserve(100);
-  tos_temp.reserve(100);
+  positions_from_temp.reserve(100);
+  positions_to_temp.reserve(100);
+  colors_from_temp.reserve(100);
+  colors_to_temp.reserve(100);
 
   AnimatedPosColorVertex::init();
 
@@ -51,6 +55,8 @@ void World::prepare()
 
   models.init();
 
+  moving_nimate.prepare(this, &moving_bo, &moving_positions, &moving_colors);
+
   models_bo.initModels(100);
   models_bo.createBuffers();
   models_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
@@ -60,7 +66,7 @@ void World::prepare()
 void World::init()
 {
   won = false;
-  nimate.reset();
+  moving_nimate.reset();
 
   moving_positions.resize(moving_spots.size());
   static_positions.resize(static_spots.size());
@@ -72,6 +78,8 @@ void World::init()
   doors_colors.resize(doors_spots.size());
   winning_doors_colors.resize(winning_doors_spots.size());
   editor_color.resize(1);
+  through_door.resize(moving_spots.size());
+  maybe_door_spots.resize(moving_spots.size());
 
   setPositionsFromSpots(moving_positions, moving_spots);
   setPositionsFromSpots(static_positions, static_spots);
@@ -143,6 +151,7 @@ void World::resolve
 {
   made_move = false;
   travel = false;
+  any_through_door = false;
 
   if (won || maybe_won()) {
     return;
@@ -164,7 +173,6 @@ void World::resolve
   }
 
   maybe_make_move(move);
-  maybe_doors();
 }
 
 
@@ -172,49 +180,62 @@ void World::update(const float t, const float dt)
 {
   if (made_move) {
     positions_temp.resize(moving_spots.size());
-    setPositionsFromSpots(positions_temp, moving_spots);
+    positions_from_temp.resize(moving_spots.size());
+    positions_to_temp.resize(moving_spots.size());
+    colors_from_temp.resize(moving_spots.size());
+    colors_to_temp.resize(moving_spots.size());
 
-    froms_temp.resize(moving_spots.size());
-    tos_temp.resize(moving_spots.size());
+    setPositionsFromSpots(positions_temp, maybe_door_spots);
 
     animation_length = 200.0f;
     if (travel) { animation_length = 0.0f; }
-    fr(i, froms_temp) {
-      froms_temp[i] = bx::Vec3(0.0f, 0.0f, t);
-      tos_temp[i] = bx::Vec3(0.0f, 0.0f, t + animation_length);
+    fr(i, positions_from_temp) {
+      positions_from_temp[i] = t;
+      positions_to_temp[i] = t + animation_length;
+
+      colors_from_temp[i] = 0.0f;
+      colors_to_temp[i] = 0.0f;
     }
 
-    // nimate.schedule(
-    //     nimate.next_moving_positions,
-    //     positions_temp,
-    //     nimate.next_moving_positions_lengths,
-    //     lengths_temp,
-    //     nimate.moving_positions_times
-    //     );
-
-    writeAnimatedModelsVertices(
-        moving_bo,
-        moving_positions,
+    moving_nimate.schedule(
         positions_temp,
         moving_colors,
-        moving_colors,
-        0,
-        0,
-        froms_temp,
-        tos_temp
+        positions_from_temp,
+        positions_to_temp,
+        colors_from_temp,
+        colors_to_temp
         );
-    moving_bo.updateBuffer();
 
-    moving_positions = positions_temp;
-  } else if (!nimate.next_moving_positions.empty()) {
-    // nimate.run(
-    //     dt,
-    //     moving_positions,
-    //     nimate.next_moving_positions,
-    //     nimate.moving_positions_times,
-    //     nimate.next_moving_positions_lengths
-    //     );
+    if (any_through_door) {
+      setPositionsFromSpots(positions_temp, moving_spots);
+
+      animation_length = 0.0f;
+      fr(i, positions_from_temp) {
+        if (through_door[i]) {
+          printf("%d went through door\n");
+          positions_from_temp[i] = positions_to_temp[i];
+          positions_to_temp[i] = positions_from_temp[i] + animation_length;
+        } else {
+          positions_from_temp[i] = -1;
+          positions_to_temp[i] = -1;
+        }
+
+        colors_from_temp[i] = 0.0f;
+        colors_to_temp[i] = 0.0f;
+      }
+
+      moving_nimate.schedule(
+          positions_temp,
+          moving_colors,
+          positions_from_temp,
+          positions_to_temp,
+          colors_from_temp,
+          colors_to_temp
+          );
+    }
   }
+
+  moving_nimate.run(t);
 }
 
 
@@ -296,11 +317,15 @@ void World::maybe_make_move(const Spot& move)
 void World::maybe_doors()
 {
   fr(i, moving_next_spots) {
+    through_door[i] = false;
+    maybe_door_spots[i] = moving_next_spots[i];
     fr(j, doors_spots) {
       if (same(moving_next_spots[i], doors_spots[j])) {
         towards = (((j + 1) % 2) * 2) - 1;
         moving_next_spots[i] = doors_spots[j + towards];
         j += (j + 1) % 2;
+        through_door[i] = true;
+        any_through_door = true;
       }
     }
   }
@@ -319,7 +344,7 @@ void World::execute_reset()
 {
   made_move = true;
   travel = true;
-  nimate.reset();
+  moving_nimate.reset();
   moving_spots = all_moving_spots.front();
   all_moving_spots.clear();
 }

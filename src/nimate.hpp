@@ -3,43 +3,65 @@
 #pragma once
 
 #include "common.hpp"
+#include "buffer_object.hpp"
 #include <bx/math.h>
 #include <vector>
 
+struct World;
+
 struct Nimate
 {
-  std::vector<std::vector<bx::Vec3>> next_moving_positions;
-  std::vector<std::vector<bx::Vec3>> next_moving_colors;
+  World* world;
+  BufferObject* bo;
+  std::vector<bx::Vec3>* positions;
+  std::vector<bx::Vec3>* colors;
 
-  std::vector<float> moving_positions_times;
-  std::vector<std::vector<float>> next_moving_positions_lengths;
+  std::vector<bx::Vec3> next_positions;
+  std::vector<bx::Vec3> next_colors;
 
-  std::vector<float> moving_colors_times;
-  std::vector<std::vector<float>> next_moving_colors_lengths;
+  std::vector<float> positions_from;
+  std::vector<float> positions_to;
+  std::vector<float> colors_from;
+  std::vector<float> colors_to;
+
+  std::vector<int> ids_positions;
+  std::vector<int> ids_colors;
+
+  std::vector<bool> updated_positions;
+  std::vector<bool> updated_colors;
+
+  void prepare(
+      World* _world,
+      BufferObject* _bo,
+      std::vector<bx::Vec3>* _positions,
+      std::vector<bx::Vec3>* _colors
+      );
 
   void schedule(
-      std::vector<std::vector<bx::Vec3>>& next_values,
-      const std::vector<bx::Vec3>& goal,
-      std::vector<std::vector<float>>& next_lengths,
-      std::vector<float>& lengths,
-      std::vector<float>& times
+      const std::vector<bx::Vec3>& positions_goal,
+      const std::vector<bx::Vec3>& colors_goal,
+      const std::vector<float>& new_positions_from,
+      const std::vector<float>& new_positions_to,
+      const std::vector<float>& new_colors_from,
+      const std::vector<float>& new_colors_to
       );
-  void run(
-      const float dt,
-      std::vector<bx::Vec3>& output_value,
-      std::vector<std::vector<bx::Vec3>>& next_values,
-      std::vector<float>& times,
-      std::vector<std::vector<float>>& next_lenghts
-      );
-  void abort(
-      std::vector<std::vector<bx::Vec3>>& next_values,
-      std::vector<float>& times
-      );
+  void run(const float t, const bool update_anyway = false);
 
   void reset();
 
   float fraction;
   int finished_count;
+
+  int positions_size;
+  int colors_size;
+  int new_positions_size;
+  int new_colors_size;
+  bool needs_update;
+  bool bool_temp;
+  std::vector<bx::Vec3> positions_temp;
+  std::vector<bx::Vec3> colors_temp;
+  std::vector<bx::Vec3> froms_temp;
+  std::vector<bx::Vec3> tos_temp;
 };
 
 #include "world.hpp"

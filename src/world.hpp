@@ -26,6 +26,9 @@ struct World
   std::vector<Spot> winning_doors_spots;
   std::vector<Spot> editor_spot;
 
+  std::vector<bool> through_door;
+  std::vector<Spot> maybe_door_spots;
+
   std::vector<std::vector<Spot>> all_moving_spots;
 
   std::vector<bx::Vec3> moving_positions;
@@ -53,7 +56,9 @@ struct World
 
 
   Models models;
-  Nimate nimate;
+
+  Nimate moving_nimate;
+
 
   bx::Vec3 moving_color = {0.85f, 0.2f, 0.32f};
   bx::Vec3 static_color = {0.0f, 99/255.0f, 115/255.0f};
@@ -115,13 +120,17 @@ struct World
   int winning_count;
   bool made_move;
   bool travel;
+  bool any_through_door;
   float animation_length;
   bool won;
   bool finished;
+  std::vector<Spot> spots_temp;
   std::vector<bx::Vec3> positions_temp;
   std::vector<bx::Vec3> colors_temp;
-  std::vector<bx::Vec3> froms_temp;
-  std::vector<bx::Vec3> tos_temp;
+  std::vector<float> positions_from_temp;
+  std::vector<float> positions_to_temp;
+  std::vector<float> colors_from_temp;
+  std::vector<float> colors_to_temp;
 };
 
 #endif
