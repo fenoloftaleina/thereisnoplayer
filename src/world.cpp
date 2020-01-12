@@ -91,6 +91,8 @@ void World::init()
   setColors(winning_doors_colors, winning_doors_color);
   setColors(editor_color, editor_thing_color);
 
+  moving_nimate.init();
+
 
   static_models_list.resize(static_positions.size());
   fr(i, static_positions) {

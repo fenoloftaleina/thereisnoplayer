@@ -30,6 +30,20 @@ void Nimate::prepare(
 }
 
 
+void Nimate::init()
+{
+  positions_temp.resize(positions->size());
+  colors_temp.resize(colors->size());
+  froms_temp.resize(positions->size());
+  tos_temp.resize(positions->size());
+
+  fr(i, (*positions)) {
+    positions_temp[i] = (*positions)[i];
+    colors_temp[i] = (*colors)[i];
+  }
+}
+
+
 void Nimate::schedule_position(
     const int id,
     const bx::Vec3& position,
@@ -53,16 +67,6 @@ void Nimate::run(const float t, const bool update_anyway)
     return;
   }
 
-  positions_temp.resize(positions->size());
-  colors_temp.resize(colors->size());
-  froms_temp.resize(positions->size());
-  tos_temp.resize(positions->size());
-
-  fr(i, positions_temp) {
-    positions_temp[i] = (*positions)[i];
-    colors_temp[i] = (*colors)[i];
-  }
-
   fr(i, next_positions) {
     if (!updated_positions[i] &&
         positions_from[i] >= 0.0f &&
@@ -78,13 +82,17 @@ void Nimate::run(const float t, const bool update_anyway)
   }
 
   fr(i, next_colors) {
-    // colors_temp[ids_colors[i]] = next_colors[i];
-    // froms_temp[i].y = colors_from[i];
-    // tos_temp[i].y = colors_to[i];
-  }
-
-  fr(i, (*colors)) {
-    colors_temp[i] = (*colors)[i];
+    if (!updated_colors[i] &&
+        colors_from[i] >= 0.0f &&
+        t >= colors_from[i] &&
+        (t <= colors_to[i] ||
+         colors_to[i] - colors_from[i] < 0.001f)) {
+      colors_temp[ids_colors[i]] = next_colors[i];
+      froms_temp[ids_colors[i]].y = colors_from[i];
+      tos_temp[ids_colors[i]].y = colors_to[i];
+      updated_colors[i] = true;
+      needs_update = true;
+    }
   }
 
   if (needs_update) {
@@ -112,9 +120,9 @@ void Nimate::run(const float t, const bool update_anyway)
         );
     bo->updateBuffer();
 
-        fr(i, positions_temp) {
-          (*positions)[i] = positions_temp[i];
-        }
+    fr(i, positions_temp) {
+      (*positions)[i] = positions_temp[i];
+    }
 
     fr(i, next_positions) {
       if (t > positions_to[i]) {
@@ -130,19 +138,6 @@ void Nimate::run(const float t, const bool update_anyway)
 }
 
 
-// void Nimate::abort(
-//     std::vector<std::vector<bx::Vec3>>& next_values,
-//     std::vector<float>& times
-//     )
-// {
-//   if (!next_values.empty()) {
-//     fr(i, times) {
-//       times[i] = 999999.0f;
-//     }
-//   }
-// }
-
-
 void Nimate::reset()
 {
   next_positions.clear();
@@ -153,4 +148,6 @@ void Nimate::reset()
   colors_to.clear();
   ids_positions.clear();
   ids_colors.clear();
+  updated_positions.clear();
+  updated_colors.clear();
 }

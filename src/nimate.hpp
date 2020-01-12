@@ -36,6 +36,7 @@ struct Nimate
       std::vector<bx::Vec3>* _positions,
       std::vector<bx::Vec3>* _colors
       );
+  void init();
 
   void schedule_position(
       const int id,
