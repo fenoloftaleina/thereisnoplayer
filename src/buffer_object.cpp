@@ -263,6 +263,16 @@ void BufferObject::writeModelVertices
     vertices[offset + i].normal_y = models.vertices[models.vertices_offsets[nth] + i].normal_y;
     vertices[offset + i].normal_z = models.vertices[models.vertices_offsets[nth] + i].normal_z;
 
+    vertices[offset + i].x2 = models.vertices[models.vertices_offsets[nth] + i].x;
+    vertices[offset + i].y2 = models.vertices[models.vertices_offsets[nth] + i].y;
+    vertices[offset + i].z2 = models.vertices[models.vertices_offsets[nth] + i].z;
+    vertices[offset + i].r2 = col.x;
+    vertices[offset + i].g2 = col.y;
+    vertices[offset + i].b2 = col.z;
+    vertices[offset + i].normal_x2 = models.vertices[models.vertices_offsets[nth] + i].normal_x;
+    vertices[offset + i].normal_y2 = models.vertices[models.vertices_offsets[nth] + i].normal_y;
+    vertices[offset + i].normal_z2 = models.vertices[models.vertices_offsets[nth] + i].normal_z;
+
     vertices[offset + i].pos_x1 = pos.x;
     vertices[offset + i].pos_y1 = pos.y;
     vertices[offset + i].pos_z1 = pos.z;
@@ -271,8 +281,11 @@ void BufferObject::writeModelVertices
     vertices[offset + i].pos_y2 = pos.y;
     vertices[offset + i].pos_z2 = pos.z;
 
-    vertices[offset + i].pos_from = 0;
-    vertices[offset + i].pos_to = 0;
+    vertices[offset + i].pos_from = 0.0f;
+    vertices[offset + i].pos_to = 0.0f;
+
+    vertices[offset + i].color_from = 0.0f;
+    vertices[offset + i].color_to = 0.0f;
   }
 
   // if (nth_model_vertices_count + offset > models_vertices_count) {
@@ -298,6 +311,16 @@ void BufferObject::writeModelVertices
     vertices[offset + i].normal_y = models.vertices[models.vertices_offsets[nth1] + i].normal_y;
     vertices[offset + i].normal_z = models.vertices[models.vertices_offsets[nth1] + i].normal_z;
 
+    vertices[offset + i].x2 = models.vertices[models.vertices_offsets[nth2] + i].x;
+    vertices[offset + i].y2 = models.vertices[models.vertices_offsets[nth2] + i].y;
+    vertices[offset + i].z2 = models.vertices[models.vertices_offsets[nth2] + i].z;
+    vertices[offset + i].r2 = col2.x;
+    vertices[offset + i].g2 = col2.y;
+    vertices[offset + i].b2 = col2.z;
+    vertices[offset + i].normal_x2 = models.vertices[models.vertices_offsets[nth2] + i].normal_x;
+    vertices[offset + i].normal_y2 = models.vertices[models.vertices_offsets[nth2] + i].normal_y;
+    vertices[offset + i].normal_z2 = models.vertices[models.vertices_offsets[nth2] + i].normal_z;
+
     vertices[offset + i].pos_x1 = pos1.x;
     vertices[offset + i].pos_y1 = pos1.y;
     vertices[offset + i].pos_z1 = pos1.z;
@@ -308,6 +331,9 @@ void BufferObject::writeModelVertices
 
     vertices[offset + i].pos_from = from.z;
     vertices[offset + i].pos_to = to.z;
+
+    vertices[offset + i].color_from = from.y;
+    vertices[offset + i].color_to = to.y;
   }
 
   // if (nth_model_vertices_count + offset > models_vertices_count) {

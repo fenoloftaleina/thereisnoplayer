@@ -178,6 +178,11 @@ void World::update(const float t, const float dt)
 {
   if (made_move) {
     positions_temp.resize(moving_spots.size());
+    colors_temp.resize(moving_colors.size());
+
+    fr(i, colors_temp) {
+      colors_temp[i] = bx::Vec3(0.5f, 0.7f, 0.9f);
+    }
 
     setPositionsFromSpots(positions_temp, maybe_door_spots);
 
@@ -185,6 +190,7 @@ void World::update(const float t, const float dt)
     if (travel) { animation_length = 0.0f; }
     fr(i, positions_temp) {
       moving_nimate.schedule_position(i, positions_temp[i], t, t + animation_length);
+      moving_nimate.schedule_color(i, colors_temp[i], t, t + 1000.0f);
     }
 
     acc_animation_length = t + animation_length;

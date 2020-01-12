@@ -59,6 +59,21 @@ void Nimate::schedule_position(
 }
 
 
+void Nimate::schedule_color(
+    const int id,
+    const bx::Vec3& color,
+    const float from,
+    const float to
+    )
+{
+  ids_positions.push_back(id);
+  next_colors.push_back(color);
+  colors_from.push_back(from);
+  colors_to.push_back(to);
+  updated_colors.push_back(false);
+}
+
+
 void Nimate::run(const float t, const bool update_anyway)
 {
   needs_update = false;
@@ -122,6 +137,10 @@ void Nimate::run(const float t, const bool update_anyway)
 
     fr(i, positions_temp) {
       (*positions)[i] = positions_temp[i];
+    }
+
+    fr(i, colors_temp) {
+      (*colors)[i] = colors_temp[i];
     }
 
     fr(i, next_positions) {

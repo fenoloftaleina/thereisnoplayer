@@ -44,6 +44,12 @@ struct Nimate
       const float from,
       const float to
       );
+  void schedule_color(
+      const int id,
+      const bx::Vec3& color,
+      const float from,
+      const float to
+      );
   void run(const float t, const bool update_anyway = false);
 
   void reset();

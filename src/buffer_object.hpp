@@ -46,19 +46,19 @@ struct AnimatedPosColorVertex {
   float normal_y;
   float normal_z;
 
+  float x2;
+  float y2;
+  float z2;
+  float r2;
+  float g2;
+  float b2;
+  float normal_x2;
+  float normal_y2;
+  float normal_z2;
+
   float pos_x1;
   float pos_y1;
   float pos_z1;
-
-  // float x2;
-  // float y2;
-  // float z2;
-  // float r2;
-  // float g2;
-  // float b2;
-  // float normal_x2;
-  // float normal_y2;
-  // float normal_z2;
 
   float pos_x2;
   float pos_y2;
@@ -78,8 +78,14 @@ struct AnimatedPosColorVertex {
       .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
       .add(bgfx::Attrib::Color0,   3, bgfx::AttribType::Float)
       .add(bgfx::Attrib::Normal,   3, bgfx::AttribType::Float)
+
+      .add(bgfx::Attrib::Tangent,   3, bgfx::AttribType::Float)
+      .add(bgfx::Attrib::Color1,    3, bgfx::AttribType::Float)
+      .add(bgfx::Attrib::Bitangent, 3, bgfx::AttribType::Float)
+
       .add(bgfx::Attrib::Color2,   3, bgfx::AttribType::Float)
       .add(bgfx::Attrib::Color3,   3, bgfx::AttribType::Float)
+
       .add(bgfx::Attrib::Indices,  3, bgfx::AttribType::Float)
       .add(bgfx::Attrib::Weight,   3, bgfx::AttribType::Float)
       .end();
