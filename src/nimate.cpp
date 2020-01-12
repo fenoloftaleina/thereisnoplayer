@@ -30,51 +30,18 @@ void Nimate::prepare(
 }
 
 
-void Nimate::schedule(
-    const std::vector<bx::Vec3>& positions_goal,
-    const std::vector<bx::Vec3>& colors_goal,
-    const std::vector<float>& new_positions_from,
-    const std::vector<float>& new_positions_to,
-    const std::vector<float>& new_colors_from,
-    const std::vector<float>& new_colors_to
+void Nimate::schedule_position(
+    const int id,
+    const bx::Vec3& position,
+    const float from,
+    const float to
     )
 {
-  positions_temp.resize(positions->size());
-  colors_temp.resize(colors->size());
-  froms_temp.resize(positions->size());
-  tos_temp.resize(positions->size());
-
-  positions_size = next_positions.size();
-  colors_size = next_colors.size();
-  new_positions_size = next_positions.size() + positions_goal.size();
-  new_colors_size = next_colors.size() + colors_goal.size();
-
-  next_positions.resize(new_positions_size);
-  next_colors.resize(new_colors_size);
-  positions_from.resize(new_positions_size);
-  positions_to.resize(new_positions_size);
-  colors_from.resize(new_colors_size);
-  colors_to.resize(new_colors_size);
-  ids_positions.resize(new_positions_size);
-  ids_colors.resize(new_colors_size);
-  updated_positions.resize(new_positions_size);
-  updated_colors.resize(new_colors_size);
-
-  fr(i, positions_goal) {
-    ids_positions[positions_size + i] = i;
-    ids_colors[colors_size + i] = i;
-
-    next_positions[positions_size + i] = positions_goal[i];
-    next_colors[colors_size + i] = colors_goal[i];
-
-    positions_from[positions_size + i] = new_positions_from[i];
-    positions_to[positions_size + i] = new_positions_to[i];
-    colors_from[positions_size + i] = new_colors_from[i];
-    colors_to[colors_size + i] = new_colors_to[i];
-
-    updated_positions[positions_size + i] = false;
-    updated_colors[colors_size + i] = false;
-  }
+  ids_positions.push_back(id);
+  next_positions.push_back(position);
+  positions_from.push_back(from);
+  positions_to.push_back(to);
+  updated_positions.push_back(false);
 }
 
 
@@ -85,6 +52,11 @@ void Nimate::run(const float t, const bool update_anyway)
   if (next_positions.empty() && next_colors.empty()) {
     return;
   }
+
+  positions_temp.resize(positions->size());
+  colors_temp.resize(colors->size());
+  froms_temp.resize(positions->size());
+  tos_temp.resize(positions->size());
 
   fr(i, positions_temp) {
     positions_temp[i] = (*positions)[i];
@@ -116,16 +88,16 @@ void Nimate::run(const float t, const bool update_anyway)
   }
 
   if (needs_update) {
-    printf("UPDATE!\n");
-
-    fr(i, positions_temp) {
-      printf("%f %f %f - %f %f %f\n", (*positions)[i].x, (*positions)[i].y, (*positions)[i].z, positions_temp[i].x, positions_temp[i].y, positions_temp[i].z);
-    }
-    printf("\n");
-    fr(i, froms_temp) {
-      printf("%f - %f (%f)\n", froms_temp[i].z, tos_temp[i].z, t);
-    }
-    printf("\n");
+    // printf("UPDATE!\n");
+    //
+    // fr(i, positions_temp) {
+    //   printf("%f %f %f - %f %f %f\n", (*positions)[i].x, (*positions)[i].y, (*positions)[i].z, positions_temp[i].x, positions_temp[i].y, positions_temp[i].z);
+    // }
+    // printf("\n");
+    // fr(i, froms_temp) {
+    //   printf("%f - %f (%f)\n", froms_temp[i].z, tos_temp[i].z, t);
+    // }
+    // printf("\n");
 
     world->writeAnimatedModelsVertices(
         *bo,

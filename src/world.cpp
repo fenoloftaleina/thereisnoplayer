@@ -29,10 +29,6 @@ void World::prepare()
 
   positions_temp.reserve(100);
   colors_temp.reserve(100);
-  positions_from_temp.reserve(100);
-  positions_to_temp.reserve(100);
-  colors_from_temp.reserve(100);
-  colors_to_temp.reserve(100);
 
   AnimatedPosColorVertex::init();
 
@@ -180,58 +176,27 @@ void World::update(const float t, const float dt)
 {
   if (made_move) {
     positions_temp.resize(moving_spots.size());
-    positions_from_temp.resize(moving_spots.size());
-    positions_to_temp.resize(moving_spots.size());
-    colors_from_temp.resize(moving_spots.size());
-    colors_to_temp.resize(moving_spots.size());
 
     setPositionsFromSpots(positions_temp, maybe_door_spots);
 
     animation_length = 200.0f;
     if (travel) { animation_length = 0.0f; }
-    fr(i, positions_from_temp) {
-      positions_from_temp[i] = t;
-      positions_to_temp[i] = t + animation_length;
-
-      colors_from_temp[i] = 0.0f;
-      colors_to_temp[i] = 0.0f;
+    fr(i, positions_temp) {
+      moving_nimate.schedule_position(i, positions_temp[i], t, t + animation_length);
     }
 
-    moving_nimate.schedule(
-        positions_temp,
-        moving_colors,
-        positions_from_temp,
-        positions_to_temp,
-        colors_from_temp,
-        colors_to_temp
-        );
+    acc_animation_length = t + animation_length;
 
     if (any_through_door) {
       setPositionsFromSpots(positions_temp, moving_spots);
 
       animation_length = 0.0f;
-      fr(i, positions_from_temp) {
+      fr(i, positions_temp) {
         if (through_door[i]) {
-          printf("%d went through door\n");
-          positions_from_temp[i] = positions_to_temp[i];
-          positions_to_temp[i] = positions_from_temp[i] + animation_length;
-        } else {
-          positions_from_temp[i] = -1;
-          positions_to_temp[i] = -1;
+          moving_nimate.schedule_position(i, positions_temp[i],
+              acc_animation_length, acc_animation_length + animation_length);
         }
-
-        colors_from_temp[i] = 0.0f;
-        colors_to_temp[i] = 0.0f;
       }
-
-      moving_nimate.schedule(
-          positions_temp,
-          moving_colors,
-          positions_from_temp,
-          positions_to_temp,
-          colors_from_temp,
-          colors_to_temp
-          );
     }
   }
 

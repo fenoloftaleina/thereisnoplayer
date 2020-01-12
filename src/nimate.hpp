@@ -37,13 +37,11 @@ struct Nimate
       std::vector<bx::Vec3>* _colors
       );
 
-  void schedule(
-      const std::vector<bx::Vec3>& positions_goal,
-      const std::vector<bx::Vec3>& colors_goal,
-      const std::vector<float>& new_positions_from,
-      const std::vector<float>& new_positions_to,
-      const std::vector<float>& new_colors_from,
-      const std::vector<float>& new_colors_to
+  void schedule_position(
+      const int id,
+      const bx::Vec3& position,
+      const float from,
+      const float to
       );
   void run(const float t, const bool update_anyway = false);
 

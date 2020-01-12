@@ -122,15 +122,12 @@ struct World
   bool travel;
   bool any_through_door;
   float animation_length;
+  float acc_animation_length;
   bool won;
   bool finished;
   std::vector<Spot> spots_temp;
   std::vector<bx::Vec3> positions_temp;
   std::vector<bx::Vec3> colors_temp;
-  std::vector<float> positions_from_temp;
-  std::vector<float> positions_to_temp;
-  std::vector<float> colors_from_temp;
-  std::vector<float> colors_to_temp;
 };
 
 #endif
