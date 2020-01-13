@@ -12,9 +12,9 @@ void World::prepare()
   editor_spot.reserve(1);
   editor_spot.resize(1);
   through_door.reserve(100);
-  maybe_door_spots.reserve(100);
 
   all_moving_spots.reserve(1000);
+  all_any_through_doors.reserve(1000);
 
   moving_positions.reserve(100);
   moving_colors.reserve(100);
@@ -78,7 +78,7 @@ void World::init()
   winning_doors_colors.resize(winning_doors_spots.size());
   editor_color.resize(1);
   through_door.resize(moving_spots.size());
-  maybe_door_spots.resize(moving_spots.size());
+  moving_cur_spots.resize(moving_spots.size());
 
   setPositionsFromSpots(moving_positions, moving_spots);
   setPositionsFromSpots(static_positions, static_spots);
@@ -200,7 +200,7 @@ void World::update(const float t, const float dt)
       models_temp[i] = (models_temp[i] + 1) % 2;
     }
 
-    setPositionsFromSpots(positions_temp, moving_spots);
+    setPositionsFromSpots(positions_temp, moving_cur_spots);
 
     animation_length = 200.0f;
     if (travel) { animation_length = 0.0f; }
@@ -213,7 +213,7 @@ void World::update(const float t, const float dt)
     acc_animation_length = t + animation_length;
 
     if (any_through_door) {
-      setPositionsFromSpots(positions_temp, maybe_door_spots);
+      setPositionsFromSpots(positions_temp, moving_spots);
 
       animation_length = 0.0f;
       fr(i, positions_temp) {
@@ -300,6 +300,7 @@ void World::maybe_make_move(const Spot& move)
   maybe_doors();
 
   all_moving_spots.push_back(moving_spots);
+  all_any_through_doors.push_back(any_through_door);
   moving_spots = moving_next_spots;
 }
 
@@ -308,11 +309,11 @@ void World::maybe_doors()
 {
   fr(i, moving_next_spots) {
     through_door[i] = false;
-    maybe_door_spots[i] = moving_next_spots[i];
+    moving_cur_spots[i] = moving_next_spots[i];
     fr(j, doors_spots) {
       if (same(moving_next_spots[i], doors_spots[j])) {
         towards = (((j + 1) % 2) * 2) - 1;
-        maybe_door_spots[i] = doors_spots[j + towards];
+        moving_next_spots[i] = doors_spots[j + towards];
         j += (j + 1) % 2;
         through_door[i] = true;
         any_through_door = true;
@@ -326,7 +327,12 @@ void World::execute_back()
 {
   made_move = true;
   moving_spots = all_moving_spots.back();
+  if (all_any_through_doors.back()) {
+    travel = true;
+  }
+  moving_cur_spots = moving_spots;
   all_moving_spots.pop_back();
+  all_any_through_doors.pop_back();
 }
 
 
@@ -336,7 +342,9 @@ void World::execute_reset()
   travel = true;
   moving_nimate.reset();
   moving_spots = all_moving_spots.front();
+  moving_cur_spots = moving_spots;
   all_moving_spots.clear();
+  all_any_through_doors.clear();
 }
 
 

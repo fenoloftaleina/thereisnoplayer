@@ -27,9 +27,9 @@ struct World
   std::vector<Spot> editor_spot;
 
   std::vector<bool> through_door;
-  std::vector<Spot> maybe_door_spots;
 
   std::vector<std::vector<Spot>> all_moving_spots;
+  std::vector<bool> all_any_through_doors;
 
   std::vector<bx::Vec3> moving_positions;
   std::vector<bx::Vec3> moving_colors;
