@@ -60,6 +60,19 @@ void Models::init()
   import("test-keyframe2.obj", 1);
   import("untitled.obj", 2);
   import("cube.obj", 3);
+
+  // import("cube.obj", 0);
+  //
+  // for (int i = 0; i < vertices_offsets[1]; ++i) {
+  //   printf("v %f %f %f\n", vertices[i].normal_x, vertices[i].normal_y, vertices[i].normal_z);
+  // }
+  // printf("\n");
+  // // for (int i = 0; i < indices_offsets[1]; ++i) {
+  // //   printf("i %d\n", indices[i]);
+  // // }
+  // // printf("\n");
+  //
+  // exit(0);
 }
 
 
