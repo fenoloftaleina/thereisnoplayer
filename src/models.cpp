@@ -59,6 +59,7 @@ void Models::init()
   import("test.obj", 0);
   import("test-keyframe2.obj", 1);
   import("untitled.obj", 2);
+  import("cube.obj", 3);
 }
 
 
@@ -66,11 +67,11 @@ void Models::import(const char* filename, const int nth)
 {
   sprintf(filename_str, "assets/%s", filename);
   const aiScene* scene = aiImportFile(filename_str,
-      aiProcess_Triangulate | aiProcess_FlipUVs
-    // aiProcess_CalcTangentSpace |
-    // aiProcess_Triangulate |
-    // // aiProcess_JoinIdenticalVertices
-    // aiProcess_SortByPType
+      // aiProcess_Triangulate | aiProcess_FlipUVs
+    aiProcess_CalcTangentSpace |
+    aiProcess_Triangulate |
+    aiProcess_JoinIdenticalVertices |
+    aiProcess_SortByPType
     );
 
   if (!scene) {

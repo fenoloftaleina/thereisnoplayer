@@ -96,7 +96,7 @@ void World::init()
 
   static_models_list.resize(static_positions.size());
   fr(i, static_positions) {
-    static_models_list[i] = 2;
+    static_models_list[i] = 3;
   }
 
 
