@@ -184,7 +184,7 @@ void World::update(const float t, const float dt)
       colors_temp[i] = bx::Vec3(0.5f, 0.7f, 0.9f);
     }
 
-    setPositionsFromSpots(positions_temp, maybe_door_spots);
+    setPositionsFromSpots(positions_temp, moving_spots);
 
     animation_length = 200.0f;
     if (travel) { animation_length = 0.0f; }
@@ -196,7 +196,7 @@ void World::update(const float t, const float dt)
     acc_animation_length = t + animation_length;
 
     if (any_through_door) {
-      setPositionsFromSpots(positions_temp, moving_spots);
+      setPositionsFromSpots(positions_temp, maybe_door_spots);
 
       animation_length = 0.0f;
       fr(i, positions_temp) {
@@ -295,7 +295,7 @@ void World::maybe_doors()
     fr(j, doors_spots) {
       if (same(moving_next_spots[i], doors_spots[j])) {
         towards = (((j + 1) % 2) * 2) - 1;
-        moving_next_spots[i] = doors_spots[j + towards];
+        maybe_door_spots[i] = doors_spots[j + towards];
         j += (j + 1) % 2;
         through_door[i] = true;
         any_through_door = true;
