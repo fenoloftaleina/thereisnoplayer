@@ -29,6 +29,7 @@ void World::prepare()
 
   positions_temp.reserve(100);
   colors_temp.reserve(100);
+  models_temp.reserve(100);
 
   AnimatedPosColorVertex::init();
 
@@ -50,8 +51,10 @@ void World::prepare()
   editor_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
 
   models.init();
+  static_models_list.resize(1000);
+  moving_models_list.resize(100);
 
-  moving_nimate.prepare(this, &moving_bo, &moving_positions, &moving_colors);
+  moving_nimate.prepare(this, &moving_bo, &moving_positions, &moving_colors, &moving_models_list);
 
   models_bo.initModels(100);
   models_bo.createBuffers();
@@ -91,22 +94,30 @@ void World::init()
   setColors(winning_doors_colors, winning_doors_color);
   setColors(editor_color, editor_thing_color);
 
-  moving_nimate.init();
-
 
   static_models_list.resize(static_positions.size());
   fr(i, static_positions) {
     static_models_list[i] = 3;
   }
+  moving_models_list.resize(moving_positions.size());
+  models_temp.resize(moving_models_list.size());
+  fr(i, moving_positions) {
+    moving_models_list[i] = 0;
+    models_temp[i] = moving_models_list[i];
+  }
 
 
-  writeModelsVertices(moving_bo, moving_positions, moving_colors, 0);
+  writeModelsVertices(moving_bo, moving_positions, moving_colors, moving_models_list);
   writeModelsVertices(static_bo, static_positions, static_colors, static_models_list);
   writeCubesVertices(doors_bo, doors_positions, doors_colors);
   writeCubesVertices(winning_doors_bo, winning_doors_positions, winning_doors_colors);
   writeCubesVertices(editor_bo, editor_position, editor_color);
 
   moving_next_spots = moving_spots;
+
+
+  moving_nimate.init();
+
 
 
   models_bo.writeModelVertices(
@@ -179,9 +190,14 @@ void World::update(const float t, const float dt)
   if (made_move) {
     positions_temp.resize(moving_spots.size());
     colors_temp.resize(moving_colors.size());
+    models_temp.resize(moving_models_list.size());
 
     fr(i, colors_temp) {
       colors_temp[i] = bx::Vec3(0.5f, 0.7f, 0.9f);
+    }
+
+    fr(i, models_temp) {
+      models_temp[i] = (models_temp[i] + 1) % 2;
     }
 
     setPositionsFromSpots(positions_temp, moving_spots);
@@ -190,7 +206,8 @@ void World::update(const float t, const float dt)
     if (travel) { animation_length = 0.0f; }
     fr(i, positions_temp) {
       moving_nimate.schedule_position(i, positions_temp[i], t, t + animation_length);
-      moving_nimate.schedule_color(i, colors_temp[i], t, t + 1000.0f);
+      // moving_nimate.schedule_color(i, colors_temp[i], t, t + 1000.0f);
+      moving_nimate.schedule_model(i, models_temp[i], t, t + animation_length * 2.0f);
     }
 
     acc_animation_length = t + animation_length;
@@ -421,8 +438,8 @@ void World::writeAnimatedModelsVertices
  const std::vector<bx::Vec3>& positions2,
  const std::vector<bx::Vec3>& colors1,
  const std::vector<bx::Vec3>& colors2,
- const int nth1,
- const int nth2,
+ const std::vector<int> nth1s,
+ const std::vector<int> nth2s,
  const std::vector<bx::Vec3>& froms,
  const std::vector<bx::Vec3>& tos
  )
@@ -438,8 +455,8 @@ void World::writeAnimatedModelsVertices
         colors1[i],
         colors2[i],
         models,
-        nth1,
-        nth2,
+        nth1s[i],
+        nth2s[i],
         froms[i],
         tos[i]
         );
@@ -447,10 +464,10 @@ void World::writeAnimatedModelsVertices
         acc_indices_offset,
         acc_vertices_offset,
         models,
-        nth1
+        nth1s[i]
         );
 
-    acc_vertices_offset += models.nth_model_vertices_count(nth1);
-    acc_indices_offset += models.nth_model_indices_count(nth2);
+    acc_vertices_offset += models.nth_model_vertices_count(nth1s[i]);
+    acc_indices_offset += models.nth_model_indices_count(nth2s[i]);
   }
 }

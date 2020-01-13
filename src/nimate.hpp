@@ -15,26 +15,33 @@ struct Nimate
   BufferObject* bo;
   std::vector<bx::Vec3>* positions;
   std::vector<bx::Vec3>* colors;
+  std::vector<int>* models;
 
   std::vector<bx::Vec3> next_positions;
   std::vector<bx::Vec3> next_colors;
+  std::vector<int> next_models;
 
   std::vector<float> positions_from;
   std::vector<float> positions_to;
   std::vector<float> colors_from;
   std::vector<float> colors_to;
+  std::vector<float> models_from;
+  std::vector<float> models_to;
 
   std::vector<int> ids_positions;
   std::vector<int> ids_colors;
+  std::vector<int> ids_models;
 
   std::vector<bool> updated_positions;
   std::vector<bool> updated_colors;
+  std::vector<bool> updated_models;
 
   void prepare(
       World* _world,
       BufferObject* _bo,
       std::vector<bx::Vec3>* _positions,
-      std::vector<bx::Vec3>* _colors
+      std::vector<bx::Vec3>* _colors,
+      std::vector<int>* _models
       );
   void init();
 
@@ -47,6 +54,12 @@ struct Nimate
   void schedule_color(
       const int id,
       const bx::Vec3& color,
+      const float from,
+      const float to
+      );
+  void schedule_model(
+      const int id,
+      const int nth_model,
       const float from,
       const float to
       );
@@ -65,6 +78,7 @@ struct Nimate
   bool bool_temp;
   std::vector<bx::Vec3> positions_temp;
   std::vector<bx::Vec3> colors_temp;
+  std::vector<int> models_temp;
   std::vector<bx::Vec3> froms_temp;
   std::vector<bx::Vec3> tos_temp;
 };

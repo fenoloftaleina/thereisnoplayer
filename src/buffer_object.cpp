@@ -286,6 +286,9 @@ void BufferObject::writeModelVertices
 
     vertices[offset + i].color_from = 0.0f;
     vertices[offset + i].color_to = 0.0f;
+
+    vertices[offset + i].model_from = 0.0f;
+    vertices[offset + i].model_to = 0.0f;
   }
 
   // if (nth_model_vertices_count + offset > models_vertices_count) {
@@ -334,6 +337,9 @@ void BufferObject::writeModelVertices
 
     vertices[offset + i].color_from = from.y;
     vertices[offset + i].color_to = to.y;
+
+    vertices[offset + i].model_from = from.x;
+    vertices[offset + i].model_to = to.x;
   }
 
   // if (nth_model_vertices_count + offset > models_vertices_count) {

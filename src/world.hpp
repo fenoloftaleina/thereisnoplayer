@@ -53,6 +53,7 @@ struct World
 
 
   std::vector<int> static_models_list;
+  std::vector<int> moving_models_list;
 
 
   Models models;
@@ -104,8 +105,8 @@ struct World
      const std::vector<bx::Vec3>& positions2,
      const std::vector<bx::Vec3>& colors1,
      const std::vector<bx::Vec3>& colors2,
-     const int nth1,
-     const int nth2,
+     const std::vector<int> nth1s,
+     const std::vector<int> nth2s,
      const std::vector<bx::Vec3>& froms,
      const std::vector<bx::Vec3>& tos
     );
@@ -128,6 +129,7 @@ struct World
   std::vector<Spot> spots_temp;
   std::vector<bx::Vec3> positions_temp;
   std::vector<bx::Vec3> colors_temp;
+  std::vector<int> models_temp;
 };
 
 #endif

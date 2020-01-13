@@ -64,10 +64,10 @@ struct AnimatedPosColorVertex {
   float pos_y2;
   float pos_z2;
 
-  float vertex_from;
+  float model_from;
   float color_from;
   float pos_from;
-  float vertex_to;
+  float model_to;
   float color_to;
   float pos_to;
 
