@@ -49,6 +49,10 @@ struct World
   BufferObject editor_bo;
 
 
+  BufferObject quads_bo;
+  int quads_count = 2;
+
+
   BufferObject models_bo;
 
 

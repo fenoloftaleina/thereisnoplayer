@@ -55,8 +55,7 @@ void BufferObject::writeCubesLinesIndices()
 
 void BufferObject::writeCubeVertices(int nth_cube, bx::Vec3 pos, bx::Vec3 col)
 {
-  bx::Vec3 end_pos, normal, a, b, c;
-  int offset = nth_cube * vertices_per_cube_count;
+  offset = nth_cube * vertices_per_cube_count;
 
   for (int i = 0; i < vertices_per_cube_count; ++i) {
     end_pos = bx::add(pos_vertices[i], pos);
@@ -358,4 +357,107 @@ void BufferObject::writeModelIndices
 
   // if (nth_model_indices_count + offset > models_indices_count) {
   models_indices_count = nth_model_indices_count + offset;
+}
+
+
+void BufferObject::initQuads(const int quads_count)
+{
+  vertices_count = quads_count * 4;
+  indices_count = quads_count * 6;
+
+  vertices = new AnimatedPosColorVertex[vertices_count];
+  indices = new uint16_t[indices_count];
+
+  writeQuadsIndices();
+}
+
+
+void BufferObject::writeQuadsIndices()
+{
+  for (int i = 0; i < indices_count / 6; ++i) {
+    // x4 y4 -- x2 y2
+    //   |        |
+    //   |        |
+    // x3 y3 -- x1 y1
+    //
+    indices[i * 6 + 0] = i * 4 + 1;
+    indices[i * 6 + 1] = i * 4 + 0;
+    indices[i * 6 + 2] = i * 4 + 3;
+    indices[i * 6 + 3] = i * 4 + 0;
+    indices[i * 6 + 4] = i * 4 + 2;
+    indices[i * 6 + 5] = i * 4 + 3;
+  }
+}
+
+
+void BufferObject::writeQuadsVertices
+(const int offset, const std::vector<bx::Vec3>& vs, const std::vector<bx::Vec3>cs)
+{
+  for (int i = 0; i < vs.size(); ++i) {
+    vertices[offset + i].x = vs[i].x;
+    vertices[offset + i].y = vs[i].y;
+    vertices[offset + i].z = vs[i].z;
+    vertices[offset + i].r = cs[i].x;
+    vertices[offset + i].g = cs[i].y;
+    vertices[offset + i].b = cs[i].z;
+  }
+
+  for(int i = 0; i < vs.size(); i += 4) {
+    a = bx::Vec3(
+        vertices[offset + i + 1].x,
+        vertices[offset + i + 1].y,
+        vertices[offset + i + 1].z
+        );
+    b = bx::Vec3(
+        vertices[offset + i + 0].x,
+        vertices[offset + i + 0].y,
+        vertices[offset + i + 0].z
+        );
+    c = bx::Vec3(
+        vertices[offset + i + 3].x,
+        vertices[offset + i + 3].y,
+        vertices[offset + i + 3].z
+        );
+
+    normal = bx::normalize(
+        bx::cross(
+          bx::sub(a, b),
+          bx::sub(a, c)
+          )
+        );
+
+    vertices[offset + i + 0].normal_x =
+      vertices[offset + i + 1].normal_x =
+      vertices[offset + i + 2].normal_x =
+      vertices[offset + i + 3].normal_x =
+      normal.x;
+
+    vertices[offset + i + 0].normal_y =
+      vertices[offset + i + 1].normal_y =
+      vertices[offset + i + 2].normal_y =
+      vertices[offset + i + 3].normal_y =
+      normal.y;
+
+    vertices[offset + i + 0].normal_z =
+      vertices[offset + i + 1].normal_z =
+      vertices[offset + i + 2].normal_z =
+      vertices[offset + i + 3].normal_z =
+      normal.z;
+
+
+    vertices[offset + i + 0].texcoord_x = 1.0f;
+    vertices[offset + i + 0].texcoord_y = 0.0f;
+    vertices[offset + i + 1].texcoord_x = 1.0f;
+    vertices[offset + i + 1].texcoord_y = 1.0f;
+    vertices[offset + i + 2].texcoord_x = 0.0f;
+    vertices[offset + i + 2].texcoord_y = 0.0f;
+    vertices[offset + i + 3].texcoord_x = 0.0f;
+    vertices[offset + i + 3].texcoord_y = 1.0f;
+  }
+}
+
+
+void BufferObject::drawQuads(uint16_t current_quads_count, uint64_t more_state)
+{
+  draw(current_quads_count * 4, current_quads_count * 6, more_state);
 }

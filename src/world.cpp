@@ -38,6 +38,7 @@ void World::prepare()
   doors_bo.initCubes(1000);
   winning_doors_bo.initCubes(1000);
   editor_bo.initCubes(1);
+  quads_bo.initQuads(1000);
 
   moving_bo.createBuffers();
   moving_bo.createShaders("bin/v_animated_simple.bin", "bin/f_simple.bin");
@@ -49,6 +50,8 @@ void World::prepare()
   winning_doors_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
   editor_bo.createBuffers();
   editor_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+  quads_bo.createBuffers();
+  quads_bo.createShaders("bin/v_texcoord.bin", "bin/f_grid.bin");
 
   models.init();
   static_models_list.resize(1000);
@@ -141,6 +144,27 @@ void World::init()
       models,
       0
       );
+
+
+  std::vector<bx::Vec3> quads_vs;
+  std::vector<bx::Vec3> quads_cs;
+  quads_count = 1;
+  quads_vs.resize(quads_count * 4);
+  quads_cs.resize(quads_count * 4);
+  // for (int i = 0; i < quads_count * 4; i += 4) {
+  int i = 0;
+  float s = 50.0f;
+    quads_vs[i + 0] = bx::Vec3( s, -1.0f, -s);
+    quads_vs[i + 1] = bx::Vec3( s, -1.0f,  s);
+    quads_vs[i + 2] = bx::Vec3(-s, -1.0f, -s);
+    quads_vs[i + 3] = bx::Vec3(-s, -1.0f,  s);
+
+    quads_cs[i + 0] = bx::Vec3(0.5f, 0.7f, 0.9f);
+    quads_cs[i + 1] = bx::Vec3(0.7f, 0.5f, 0.9f);
+    quads_cs[i + 2] = bx::Vec3(0.9f, 0.2f, 0.9f);
+    quads_cs[i + 3] = bx::Vec3(0.2f, 0.9f, 0.9f);
+  // }
+  quads_bo.writeQuadsVertices(0, quads_vs, quads_cs);
 }
 
 
@@ -151,9 +175,10 @@ void World::updateBuffers()
   doors_bo.updateBuffer();
   winning_doors_bo.updateBuffer();
 
+  quads_bo.updateBuffer();
+
   models_bo.updateBuffer();
 }
-
 
 void World::resolve
 (const Spot& move, const bool in_editor, const bool back, const bool reset)
@@ -235,6 +260,8 @@ void World::draw(const bool in_editor)
   static_bo.drawModels(0);
   doors_bo.drawCubes(doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
   winning_doors_bo.drawCubes(winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
+
+  quads_bo.drawQuads(quads_count);
 
   if (in_editor) {
     editor_bo.drawCubes(1);

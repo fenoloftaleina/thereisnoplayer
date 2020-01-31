@@ -71,6 +71,9 @@ struct AnimatedPosColorVertex {
   float color_to;
   float pos_to;
 
+  float texcoord_x;
+  float texcoord_y;
+
 
   static void init() {
     ms_layout
@@ -88,6 +91,9 @@ struct AnimatedPosColorVertex {
 
       .add(bgfx::Attrib::Indices,  3, bgfx::AttribType::Float)
       .add(bgfx::Attrib::Weight,   3, bgfx::AttribType::Float)
+
+      .add(bgfx::Attrib::TexCoord7,2, bgfx::AttribType::Float)
+
       .end();
   };
 
@@ -201,6 +207,7 @@ struct BufferObject {
   void initCubes(const int cubes_count);
   void initCubesLines(const int cubes_count);
   void initModels(const int models_count);
+  void initQuads(const int quads_count);
   void writeCubesIndices();
   void writeCubesLinesIndices();
   void writeCubeVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
@@ -211,6 +218,8 @@ struct BufferObject {
      const bx::Vec3 col1, const bx::Vec3 col2, const Models& models,
      const int nth1, const int nth2, const bx::Vec3 from, const bx::Vec3 to);
   void writeModelIndices(const int offset, const int vertices_num_offset, const Models& models, const int nth);
+  void writeQuadsVertices(const int offset, const std::vector<bx::Vec3>& vs, const std::vector<bx::Vec3>cs);
+  void writeQuadsIndices();
   void setFaceColor(const int nth_cube, const int nth_face, bx::Vec3 col);
   void createBuffers();
   void updateBuffer();
@@ -220,10 +229,14 @@ struct BufferObject {
   void drawCubesLines(uint16_t current_cubes_count);
   void drawModels(const int models_count, const Models& models, const int nth, uint64_t more_state);
   void drawModels(uint64_t more_state);
+  void drawQuads(uint16_t current_quads_count, uint64_t more_state = 0);
   void destroy();
 
   int models_vertices_count = 0;
   int models_indices_count = 0;
+
+  int offset;
+  bx::Vec3 end_pos, normal, a, b, c;
 };
 
 #include "models.hpp"
