@@ -182,7 +182,7 @@ int main (int argc, char* args[])
   bgfx::setViewRect(0, 0, 0, uint16_t(WIDTH), uint16_t(HEIGHT));
   bgfx::setViewClear(0,
                      BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH,
-                     0x555555FF, 1.0f, 0);
+                     0x888888FF, 1.0f, 0);
                      // 0x443355FF, 1.0f, 0);
 
   // bgfx::touch(0);
