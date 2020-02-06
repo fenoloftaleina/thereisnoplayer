@@ -51,7 +51,7 @@ void World::prepare()
   editor_bo.createBuffers();
   editor_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
   quads_bo.createBuffers();
-  quads_bo.createShaders("bin/v_texcoord.bin", "bin/f_grid.bin");
+  quads_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
 
   models.init();
   static_models_list.resize(1000);
@@ -148,22 +148,38 @@ void World::init()
 
   std::vector<bx::Vec3> quads_vs;
   std::vector<bx::Vec3> quads_cs;
-  quads_count = 1;
+  const int grid_size = 100;
+  const float tile_size = 2.0f;
+  const float line_weight = 0.05f;
+  quads_count = grid_size * 2;
   quads_vs.resize(quads_count * 4);
   quads_cs.resize(quads_count * 4);
-  // for (int i = 0; i < quads_count * 4; i += 4) {
-  int i = 0;
-  float s = 50.0f;
-    quads_vs[i + 0] = bx::Vec3( s, -1.0f, -s);
-    quads_vs[i + 1] = bx::Vec3( s, -1.0f,  s);
-    quads_vs[i + 2] = bx::Vec3(-s, -1.0f, -s);
-    quads_vs[i + 3] = bx::Vec3(-s, -1.0f,  s);
 
-    quads_cs[i + 0] = bx::Vec3(0.5f, 0.7f, 0.9f);
-    quads_cs[i + 1] = bx::Vec3(0.7f, 0.5f, 0.9f);
-    quads_cs[i + 2] = bx::Vec3(0.9f, 0.2f, 0.9f);
-    quads_cs[i + 3] = bx::Vec3(0.2f, 0.9f, 0.9f);
-  // }
+  const float sx1 = -50.0f;
+  const float sx2 =  50.0f;
+  const float sy1 = -50.0f;
+  const float sy2 =  50.0f;
+
+  for (int i = 0; i < grid_size; ++i) {
+    quads_vs[i * 4 + 0] = bx::Vec3(sx1 + i * tile_size + line_weight, -1.0f, sy1);
+    quads_vs[i * 4 + 1] = bx::Vec3(sx1 + i * tile_size + line_weight, -1.0f, sy2);
+    quads_vs[i * 4 + 2] = bx::Vec3(sx1 + i * tile_size - line_weight, -1.0f, sy1);
+    quads_vs[i * 4 + 3] = bx::Vec3(sx1 + i * tile_size - line_weight, -1.0f, sy2);
+  }
+
+  for (int i = 0; i < grid_size; ++i) {
+    quads_vs[(i + grid_size) * 4 + 0] = bx::Vec3(sx2, -1.0f, sy1 + i * tile_size - line_weight);
+    quads_vs[(i + grid_size) * 4 + 1] = bx::Vec3(sx2, -1.0f, sy1 + i * tile_size + line_weight);
+    quads_vs[(i + grid_size) * 4 + 2] = bx::Vec3(sx1, -1.0f, sy1 + i * tile_size - line_weight);
+    quads_vs[(i + grid_size) * 4 + 3] = bx::Vec3(sx1, -1.0f, sy1 + i * tile_size + line_weight);
+  }
+
+  for (int i = 0; i < 2 * grid_size * 4; i += 4) {
+    quads_cs[i + 0] = bx::Vec3(0.7f, 0.7f, 0.7f);
+    quads_cs[i + 1] = bx::Vec3(0.7f, 0.7f, 0.7f);
+    quads_cs[i + 2] = bx::Vec3(0.7f, 0.7f, 0.7f);
+    quads_cs[i + 3] = bx::Vec3(0.7f, 0.7f, 0.7f);
+  }
   quads_bo.writeQuadsVertices(0, quads_vs, quads_cs);
 }
 
