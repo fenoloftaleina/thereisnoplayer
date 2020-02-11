@@ -92,7 +92,7 @@ struct AnimatedPosColorVertex {
       .add(bgfx::Attrib::Indices,  3, bgfx::AttribType::Float)
       .add(bgfx::Attrib::Weight,   3, bgfx::AttribType::Float)
 
-      .add(bgfx::Attrib::TexCoord7,2, bgfx::AttribType::Float)
+      .add(bgfx::Attrib::TexCoord0,2, bgfx::AttribType::Float)
 
       .end();
   };
@@ -224,12 +224,12 @@ struct BufferObject {
   void createBuffers();
   void updateBuffer();
   void createShaders(const char* vertex_shader_path, const char* fragment_shader_path);
-  void draw(uint16_t current_vertices_count, uint16_t current_indices_count, uint64_t more_state);
-  void drawCubes(uint16_t current_cubes_count, uint64_t more_state = 0);
-  void drawCubesLines(uint16_t current_cubes_count);
-  void drawModels(const int models_count, const Models& models, const int nth, uint64_t more_state);
-  void drawModels(uint64_t more_state);
-  void drawQuads(uint16_t current_quads_count, uint64_t more_state = 0);
+  void draw(bgfx::ViewId view, uint16_t current_vertices_count, uint16_t current_indices_count, uint64_t more_state);
+  void drawCubes(bgfx::ViewId view, uint16_t current_cubes_count, uint64_t more_state = 0);
+  void drawCubesLines(bgfx::ViewId view, uint16_t current_cubes_count);
+  void drawModels(bgfx::ViewId view, const int models_count, const Models& models, const int nth, uint64_t more_state);
+  void drawModels(bgfx::ViewId view, uint64_t more_state);
+  void drawQuads(bgfx::ViewId view, uint16_t current_quads_count, uint64_t more_state = 0);
   void destroy();
 
   int models_vertices_count = 0;

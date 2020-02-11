@@ -170,7 +170,7 @@ void BufferObject::createShaders(const char* vertex_shader_path, const char* fra
   m_program = bgfx::createProgram(vsh, fsh, true);
 }
 
-void BufferObject::draw(uint16_t current_vertices_count, uint16_t current_indices_count, uint64_t more_state = 0)
+void BufferObject::draw(bgfx::ViewId view, uint16_t current_vertices_count, uint16_t current_indices_count, uint64_t more_state = 0)
 {
   bgfx::setState(0
       | BGFX_STATE_WRITE_R
@@ -197,17 +197,17 @@ void BufferObject::draw(uint16_t current_vertices_count, uint16_t current_indice
   bgfx::setVertexBuffer(0, m_vbh, 0, current_vertices_count);
   bgfx::setIndexBuffer(m_ibh, 0, current_indices_count);
 
-  bgfx::submit(0, m_program);
+  bgfx::submit(view, m_program);
 }
 
-void BufferObject::drawCubes(uint16_t current_cubes_count, uint64_t more_state)
+void BufferObject::drawCubes(bgfx::ViewId view, uint16_t current_cubes_count, uint64_t more_state)
 {
-  draw(current_cubes_count * vertices_per_cube_count, current_cubes_count * indices_per_cube_count, more_state);
+  draw(view, current_cubes_count * vertices_per_cube_count, current_cubes_count * indices_per_cube_count, more_state);
 }
 
-void BufferObject::drawCubesLines(uint16_t current_cubes_count)
+void BufferObject::drawCubesLines(bgfx::ViewId view, uint16_t current_cubes_count)
 {
-  draw(current_cubes_count * vertices_per_lines_cube_count, current_cubes_count * indices_per_lines_cube_count, BGFX_STATE_PT_LINES);
+  draw(view, current_cubes_count * vertices_per_lines_cube_count, current_cubes_count * indices_per_lines_cube_count, BGFX_STATE_PT_LINES);
 }
 
 void BufferObject::destroy()
@@ -230,9 +230,10 @@ void BufferObject::initModels(const int models_count)
 
 
 void BufferObject::drawModels
-(const int models_count, const Models& models, const int nth, uint64_t more_state = 0)
+(bgfx::ViewId view, const int models_count, const Models& models, const int nth, uint64_t more_state = 0)
 {
   draw(
+      view,
       models.nth_model_vertices_count(nth) * models_count,
       models.nth_model_indices_count(nth) * models_count,
       more_state
@@ -240,9 +241,9 @@ void BufferObject::drawModels
 }
 
 
-void BufferObject::drawModels(uint64_t more_state = 0)
+void BufferObject::drawModels(bgfx::ViewId view, uint64_t more_state = 0)
 {
-  draw(models_vertices_count, models_indices_count, more_state);
+  draw(view, models_vertices_count, models_indices_count, more_state);
 }
 
 
@@ -400,6 +401,10 @@ void BufferObject::writeQuadsVertices
     vertices[offset + i].r = cs[i].x;
     vertices[offset + i].g = cs[i].y;
     vertices[offset + i].b = cs[i].z;
+
+    vertices[offset + i].pos_x1 = 0.0f;
+    vertices[offset + i].pos_y1 = 0.0f;
+    vertices[offset + i].pos_z1 = 0.0f;
   }
 
   for(int i = 0; i < vs.size(); i += 4) {
@@ -446,18 +451,18 @@ void BufferObject::writeQuadsVertices
 
 
     vertices[offset + i + 0].texcoord_x = 1.0f;
-    vertices[offset + i + 0].texcoord_y = 0.0f;
+    vertices[offset + i + 0].texcoord_y = 1.0f;
     vertices[offset + i + 1].texcoord_x = 1.0f;
-    vertices[offset + i + 1].texcoord_y = 1.0f;
+    vertices[offset + i + 1].texcoord_y = 0.0f;
     vertices[offset + i + 2].texcoord_x = 0.0f;
-    vertices[offset + i + 2].texcoord_y = 0.0f;
+    vertices[offset + i + 2].texcoord_y = 1.0f;
     vertices[offset + i + 3].texcoord_x = 0.0f;
-    vertices[offset + i + 3].texcoord_y = 1.0f;
+    vertices[offset + i + 3].texcoord_y = 0.0f;
   }
 }
 
 
-void BufferObject::drawQuads(uint16_t current_quads_count, uint64_t more_state)
+void BufferObject::drawQuads(bgfx::ViewId view, uint16_t current_quads_count, uint64_t more_state)
 {
-  draw(current_quads_count * 4, current_quads_count * 6, more_state);
+  draw(view, current_quads_count * 4, current_quads_count * 6, more_state);
 }

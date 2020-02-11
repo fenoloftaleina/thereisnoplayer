@@ -12,9 +12,14 @@
 #include <string>
 #include <ctime>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#include <bimg/bimg.h>
+
 #include "common.hpp"
 #include "world.hpp"
 #include "editor.hpp"
+#include "buffer_object.hpp"
 
 SDL_Window* window = NULL;
 const int WIDTH = 1600;
@@ -179,17 +184,107 @@ int main (int argc, char* args[])
 
   bgfx::reset(WIDTH, HEIGHT, BGFX_RESET_VSYNC);
   bgfx::setDebug(BGFX_DEBUG_TEXT /*| BGFX_DEBUG_STATS*/);
-  bgfx::setViewRect(0, 0, 0, uint16_t(WIDTH), uint16_t(HEIGHT));
-  bgfx::setViewClear(0,
+
+
+  bgfx::TextureHandle readback =
+    bgfx::createTexture2D(1, 1, false, 1, bgfx::TextureFormat::BGRA8, BGFX_TEXTURE_READ_BACK);
+
+	bgfx::TextureHandle texture_handles[2];
+  uint32_t msaa = (BGFX_RESET_VSYNC&BGFX_RESET_MSAA_MASK)>>BGFX_RESET_MSAA_SHIFT;
+  texture_handles[0] = bgfx::createTexture2D(
+      uint16_t(WIDTH),
+      uint16_t(HEIGHT),
+      false,
+      1,
+      bgfx::TextureFormat::BGRA8,
+      (uint64_t(msaa + 1) << BGFX_TEXTURE_RT_MSAA_SHIFT) | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP
+      );
+  texture_handles[1] = bgfx::createTexture2D(
+      uint16_t(WIDTH),
+      uint16_t(HEIGHT),
+      false,
+      1,
+      bgfx::TextureFormat::BGRA8,
+      (uint64_t(msaa + 1) << BGFX_TEXTURE_RT_MSAA_SHIFT) | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_TEXTURE_BLIT_DST
+      );
+
+	bgfx::FrameBufferHandle framebuffer_handle;
+  // framebuffer_handle = bgfx::createFrameBuffer(BX_COUNTOF(texture_handles), texture_handles);
+  framebuffer_handle = bgfx::createFrameBuffer(1, texture_handles);
+
+  int width, height, nrChannels;
+  unsigned char* image;
+  stbi_set_flip_vertically_on_load(true);
+  image = stbi_load("assets/tex.png", &width, &height, &nrChannels, 0);
+  const bgfx::Memory *mem = bgfx::makeRef(image, 4194304);
+  bgfx::TextureHandle tex = bgfx::createTexture2D(
+      width,
+      height,
+      false,
+      1,
+      bgfx::TextureFormat::RGBA8,
+      0 | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP,
+      mem
+      );
+  // printf("AAAAAAAA: %d %d %d\n", 4194304, (float)4194304 / (width * height), width * height * sizeof(image[0]));
+
+	bgfx::UniformHandle sampler_handle;
+  sampler_handle = bgfx::createUniform("smplr",  bgfx::UniformType::Sampler);
+
+  bgfx::ViewId main_view = 0;
+  bgfx::ViewId deferred_view = 1;
+
+
+  world.view = deferred_view;
+
+  bgfx::setViewRect(main_view, 0, 0, uint16_t(WIDTH), uint16_t(HEIGHT));
+  bgfx::setViewClear(main_view,
+                     BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH,
+                     0x333333FF, 1.0f, 0);
+                     // 0x443355FF, 1.0f, 0);
+  bgfx::setViewFrameBuffer(main_view, BGFX_INVALID_HANDLE);
+
+  bgfx::setViewRect(deferred_view, 0, 0, uint16_t(WIDTH), uint16_t(HEIGHT));
+  bgfx::setViewClear(deferred_view,
                      BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH,
                      0x555555FF, 1.0f, 0);
                      // 0x443355FF, 1.0f, 0);
+  bgfx::setViewFrameBuffer(deferred_view, framebuffer_handle);
+  bgfx::touch(deferred_view);
+
+  BufferObject main_bo;
+  main_bo.initQuads(1);
+  main_bo.createBuffers();
+  main_bo.createShaders("bin/v_fullscreen_texture.bin", "bin/f_fullscreen_texture.bin");
+  std::vector<bx::Vec3> quad_vs;
+  std::vector<bx::Vec3> quad_cs;
+  quad_vs.resize(4);
+  quad_cs.resize(4);
+
+  quad_vs[0] = bx::Vec3( 0.5f, -0.5f,  0.0f);
+  quad_vs[1] = bx::Vec3( 0.5f,  0.5f,  0.0f);
+  quad_vs[2] = bx::Vec3(-0.5f, -0.5f,  0.0f);
+  quad_vs[3] = bx::Vec3(-0.5f,  0.5f,  0.0f);
+
+  quad_cs[0] = bx::Vec3(0.0f, 0.0f, 0.0f);
+  quad_cs[1] = bx::Vec3(0.0f, 0.0f, 0.0f);
+  quad_cs[2] = bx::Vec3(0.0f, 0.0f, 0.0f);
+  quad_cs[3] = bx::Vec3(0.0f, 0.0f, 0.0f);
+
+  main_bo.writeQuadsVertices(0, quad_vs, quad_cs);
+
+
 
   // bgfx::touch(0);
 
   float u_twh_val[4];
   u_twh_val[1] = w;
   u_twh_val[2] = h;
+
+  float view[16];
+  float proj[16];
+  float proj2[16];
+  const bgfx::Caps* caps = bgfx::getCaps();
 
   Spot move;
 
@@ -374,10 +469,7 @@ int main (int argc, char* args[])
     bx::Vec3 eye = {  0.0f, 25.0f, -10.0f };
 
     // Set view and projection matrix for view 0.
-    float view[16];
     bx::mtxLookAt(view, eye, at);
-
-    float proj[16];
 
     bx::mtxProj(proj,
         70.0f,
@@ -385,19 +477,27 @@ int main (int argc, char* args[])
         0.1f, 100.0f,
         bgfx::getCaps()->homogeneousDepth);
 
-    // float size = 30.0f;
-    // bx::mtxOrtho(proj, -size, size, -size, size, 0.0f, 100.0f, 0.0f, bgfx::getCaps()->homogeneousDepth);
-
-    bgfx::setViewTransform(0, view, proj);
+    bgfx::setViewTransform(deferred_view, view, proj);
 
     // float mtx[16];
     // bx::mtxSRT(mtx, 1, 1, 1, 0, 45, 0, 0.0f, 0.0f, 0);
     // bgfx::setTransform(mtx);
 
+
+    bx::mtxOrtho(proj2, -1.0f, 1.0f, -1.0f, 1.0f, -10.0f, 100.0f, 0.0f, caps->homogeneousDepth);
+
+    bgfx::setViewTransform(main_view, NULL, proj2);
+
     u_twh_val[0] = current_time;
     bgfx::setUniform(u_twh, &u_twh_val);
 
     world.draw(in_editor);
+
+    // bgfx::setTexture(0, sampler_handle, tex);
+
+    bgfx::setTexture(0, sampler_handle, texture_handles[0]);
+    main_bo.drawQuads(main_view, 1);
+
     bgfx::frame();
 
     last_time = current_time;

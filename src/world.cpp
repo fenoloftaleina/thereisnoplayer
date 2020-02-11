@@ -272,19 +272,19 @@ void World::update(const float t, const float dt)
 
 void World::draw(const bool in_editor)
 {
-  moving_bo.drawModels(moving_spots.size(), models, 0, BGFX_STATE_BLEND_ALPHA);
-  static_bo.drawModels(0);
-  doors_bo.drawCubes(doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
-  winning_doors_bo.drawCubes(winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
+  moving_bo.drawModels(view, moving_spots.size(), models, 0, BGFX_STATE_BLEND_ALPHA);
+  static_bo.drawModels(view, 0);
+  doors_bo.drawCubes(view, doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
+  winning_doors_bo.drawCubes(view, winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
 
-  quads_bo.drawQuads(quads_count);
+  quads_bo.drawQuads(view, quads_count);
 
   if (in_editor) {
-    editor_bo.drawCubes(1);
+    editor_bo.drawCubes(view, 1);
   }
 
 
-  // models_bo.drawModels(0);
+  // models_bo.drawModels(view, 0);
 }
 
 

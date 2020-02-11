@@ -18,6 +18,8 @@ struct Spot
 
 struct World
 {
+  bgfx::ViewId view;
+
   std::vector<Spot> moving_spots;
   std::vector<Spot> moving_next_spots;
   std::vector<Spot> moving_cur_spots;
