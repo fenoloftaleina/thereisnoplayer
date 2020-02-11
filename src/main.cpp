@@ -496,6 +496,15 @@ int main (int argc, char* args[])
     // bgfx::setTexture(0, sampler_handle, tex);
 
     bgfx::setTexture(0, sampler_handle, texture_handles[0]);
+
+    quad_vs[0] = bx::Vec3( 0.5f + 0.003 * dt, -0.5f,  0.0f);
+    quad_vs[1] = bx::Vec3( 0.5f + 0.005 * dt,  0.5f,  0.0f);
+    quad_vs[2] = bx::Vec3(-0.5f + 0.01 * dt, -0.5f,  0.0f);
+    quad_vs[3] = bx::Vec3(-0.5f + 0.008 * dt,  0.5f,  0.0f);
+
+    main_bo.writeQuadsVertices(0, quad_vs, quad_cs);
+    main_bo.updateBuffer();
+
     main_bo.drawQuads(main_view, 1);
 
     bgfx::frame();
