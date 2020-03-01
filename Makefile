@@ -7,7 +7,7 @@ SHADERS_PLATFORM = --platform osx -p metal
 TARGET = main
 
 SOURCES = $(wildcard src/*.cpp)
-SHADERS = $(wildcard src/shaders/f_*.sc) $(wildcard src/shaders/v_*.sc)
+SHADERS = $(wildcard src/shaders/f_*.c) $(wildcard src/shaders/v_*.c)
 
 all: $(TARGET) shaders
 
@@ -22,10 +22,10 @@ bin/%.o: src/%.cpp
 clean:
 	@rm -f $(TARGET) bin/*.o bin/*.d bin/*.bin
 
-shaders: $(SHADERS:src/shaders/%.sc=bin/%.bin)
+shaders: $(SHADERS:src/shaders/%.c=bin/%.bin)
 
-bin/f_%.bin: src/shaders/f_%.sc
+bin/f_%.bin: src/shaders/f_%.c
 	bgfx/.build/osx64_clang/bin/shadercDebug -f $< -o $@ -i bgfx/src $(SHADERS_PLATFORM) --type fragment
 
-bin/v_%.bin: src/shaders/v_%.sc
+bin/v_%.bin: src/shaders/v_%.c
 	bgfx/.build/osx64_clang/bin/shadercDebug -f $< -o $@ -i bgfx/src $(SHADERS_PLATFORM) --type vertex
