@@ -189,7 +189,7 @@ int main (int argc, char* args[])
   // }
   // return 0;
 
-  bgfx::reset(WIDTH, HEIGHT, BGFX_RESET_VSYNC);
+  bgfx::reset(WIDTH, HEIGHT, BGFX_RESET_VSYNC | BGFX_RESET_MSAA_X16);
   bgfx::setDebug(BGFX_DEBUG_TEXT /*| BGFX_DEBUG_STATS*/);
 
 
@@ -201,7 +201,7 @@ int main (int argc, char* args[])
   const uint64_t tsFlags = 0
     // | (uint64_t(msaa + 1) << BGFX_TEXTURE_RT_MSAA_SHIFT)
     // | BGFX_TEXTURE_MSAA_SAMPLE
-    | BGFX_TEXTURE_RT_MSAA_X2
+    | BGFX_TEXTURE_RT_MSAA_X16
     | BGFX_SAMPLER_MIN_POINT
     | BGFX_SAMPLER_MAG_POINT
     | BGFX_SAMPLER_MIP_POINT
