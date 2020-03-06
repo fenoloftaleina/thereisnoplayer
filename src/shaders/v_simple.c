@@ -10,5 +10,5 @@ void main()
 	gl_Position = mul(u_modelViewProj, vec4(a_position + pos, 1.0));
 	v_color0 = a_color0;
   v_normal0 = a_normal;
-	v_position0 = mul(u_model[0], vec4(a_position, 0.0)).xyz;
+	v_position0 = mul(u_model[0], vec4(a_position + pos, 0.0)).xyz;
 }
