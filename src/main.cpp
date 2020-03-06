@@ -182,13 +182,6 @@ int main (int argc, char* args[])
 
   bgfx::UniformHandle u_twh = bgfx::createUniform("twh", bgfx::UniformType::Vec4);
 
-  // for (int i = 0; i < 10; ++i) {
-    printf("Caps: %d!\n", bgfx::getCaps()->formats[BGFX_CAPS_FORMAT_TEXTURE_FRAMEBUFFER_MSAA]);
-    printf("Caps: %d!\n", bgfx::getCaps()->formats[BGFX_CAPS_FORMAT_TEXTURE_MSAA]);
-    printf("msaa? %d\n", BGFX_CAPS_FORMAT_TEXTURE_MSAA);
-  // }
-  // return 0;
-
   bgfx::reset(WIDTH, HEIGHT, BGFX_RESET_VSYNC | BGFX_RESET_MSAA_X16);
   bgfx::setDebug(BGFX_DEBUG_TEXT /*| BGFX_DEBUG_STATS*/);
 
@@ -196,11 +189,7 @@ int main (int argc, char* args[])
   bgfx::Attachment gbufferAt[3];
 	bgfx::TextureHandle m_gbufferTex[3];
 
-  uint32_t msaa = (BGFX_RESET_VSYNC&BGFX_RESET_MSAA_MASK)>>BGFX_RESET_MSAA_SHIFT;
-
   const uint64_t tsFlags = 0
-    // | (uint64_t(msaa + 1) << BGFX_TEXTURE_RT_MSAA_SHIFT)
-    // | BGFX_TEXTURE_MSAA_SAMPLE
     | BGFX_TEXTURE_RT_MSAA_X16
     | BGFX_SAMPLER_MIN_POINT
     | BGFX_SAMPLER_MAG_POINT
@@ -216,32 +205,17 @@ int main (int argc, char* args[])
   gbufferAt[1].init(m_gbufferTex[1]);
   gbufferAt[2].init(m_gbufferTex[2]);
 
-	bgfx::TextureHandle texture_handles[2];
+	bgfx::TextureHandle texture_handles[1];
   texture_handles[0] = bgfx::createTexture2D(
       uint16_t(WIDTH),
       uint16_t(HEIGHT),
       false,
       1,
       bgfx::TextureFormat::BGRA8,
-      // 0 | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP
       0 | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP | BGFX_TEXTURE_BLIT_DST
-      // (uint64_t(msaa + 1) << BGFX_TEXTURE_RT_MSAA_SHIFT) | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP | BGFX_TEXTURE_BLIT_DST
-      );
-  texture_handles[1] = bgfx::createTexture2D(
-      uint16_t(WIDTH),
-      uint16_t(HEIGHT),
-      false,
-      1,
-      bgfx::TextureFormat::BGRA8,
-      // 0 | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP
-      0 | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP | BGFX_TEXTURE_BLIT_DST
-      // (uint64_t(msaa + 1) << BGFX_TEXTURE_RT_MSAA_SHIFT) | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP | BGFX_TEXTURE_BLIT_DST
       );
 
 	bgfx::FrameBufferHandle framebuffer_handle;
-  // framebuffer_handle = bgfx::createFrameBuffer(BX_COUNTOF(texture_handles), texture_handles);
-  // framebuffer_handle = bgfx::createFrameBuffer(1, texture_handles);
-
   framebuffer_handle = bgfx::createFrameBuffer(BX_COUNTOF(gbufferAt), gbufferAt, true);
 
   int width, height, nrChannels;
@@ -258,7 +232,6 @@ int main (int argc, char* args[])
       0 | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP,
       mem
       );
-  // printf("AAAAAAAA: %d %d %d\n", 4194304, (float)4194304 / (width * height), width * height * sizeof(image[0]));
 
 	bgfx::UniformHandle sampler_handle;
   sampler_handle = bgfx::createUniform("smplr",  bgfx::UniformType::Sampler);
@@ -527,10 +500,10 @@ int main (int argc, char* args[])
 
     // bgfx::setTexture(0, sampler_handle, tex);
 
-    bgfx::blit(deferred_view, texture_handles[1], 0, 0, m_gbufferTex[0], 0, 0);
+    // bgfx::blit(deferred_view, texture_handles[0], 0, 0, m_gbufferTex[0], 0, 0);
 
-    // bgfx::setTexture(0, sampler_handle, m_gbufferTex[0]);
-    bgfx::setTexture(0, sampler_handle, texture_handles[1]);
+    bgfx::setTexture(0, sampler_handle, m_gbufferTex[0]);
+    // bgfx::setTexture(0, sampler_handle, texture_handles[0]);
     main_bo.drawQuads(main_view, 1);
 
     bgfx::frame();
