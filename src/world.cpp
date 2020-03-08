@@ -150,8 +150,8 @@ void World::init()
   std::vector<bx::Vec3> quads_cs;
   const int grid_size = 100;
   const float tile_size = 2.0f;
-  const float line_weight = 0.05f;
-  quads_count = grid_size * 2;
+  const float line_weight = 0.07f;
+  quads_count = grid_size * 2 + 1;
   quads_vs.resize(quads_count * 4);
   quads_cs.resize(quads_count * 4);
 
@@ -174,12 +174,25 @@ void World::init()
     quads_vs[(i + grid_size) * 4 + 3] = bx::Vec3(sx1, -1.0f, sy1 + i * tile_size + line_weight);
   }
 
+  const bx::Vec3 grid_color(0.65f, 0.65f, 0.65f);
   for (int i = 0; i < 2 * grid_size * 4; i += 4) {
-    quads_cs[i + 0] = bx::Vec3(0.7f, 0.7f, 0.7f);
-    quads_cs[i + 1] = bx::Vec3(0.7f, 0.7f, 0.7f);
-    quads_cs[i + 2] = bx::Vec3(0.7f, 0.7f, 0.7f);
-    quads_cs[i + 3] = bx::Vec3(0.7f, 0.7f, 0.7f);
+    quads_cs[i + 0] = grid_color;
+    quads_cs[i + 1] = grid_color;
+    quads_cs[i + 2] = grid_color;
+    quads_cs[i + 3] = grid_color;
   }
+
+  const float plane_size = 50.0f;
+  const bx::Vec3 plane_color(0.8f, 0.8f, 0.8f);
+  const float plane_y = -1.01;
+  quads_vs[grid_size * 2 + 0] = bx::Vec3(plane_size, plane_y, -plane_size);
+  quads_vs[grid_size * 2 + 1] = bx::Vec3(plane_size, plane_y, plane_size);
+  quads_vs[grid_size * 2 + 2] = bx::Vec3(-plane_size, plane_y, -plane_size);
+  quads_vs[grid_size * 2 + 3] = bx::Vec3(-plane_size, plane_y, plane_size);
+  quads_cs[grid_size * 2 + 0] = plane_color;
+  quads_cs[grid_size * 2 + 1] = plane_color;
+  quads_cs[grid_size * 2 + 2] = plane_color;
+  quads_cs[grid_size * 2 + 3] = plane_color;
   quads_bo.writeQuadsVertices(0, quads_vs, quads_cs);
 }
 
