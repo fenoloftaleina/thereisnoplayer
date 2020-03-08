@@ -31,7 +31,7 @@ void World::prepare()
   colors_temp.reserve(100);
   models_temp.reserve(100);
 
-  AnimatedPosColorVertex::init();
+  AnimatedPosColorTexVertex::init();
 
   moving_bo.initModels(100);
   static_bo.initModels(100);
@@ -43,7 +43,7 @@ void World::prepare()
   moving_bo.createBuffers();
   moving_bo.createShaders("bin/v_animated_simple.bin", "bin/f_simple.bin");
   static_bo.createBuffers();
-  static_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+  static_bo.createShaders("bin/v_animated_simple.bin", "bin/f_simple.bin");
   doors_bo.createBuffers();
   doors_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
   winning_doors_bo.createBuffers();

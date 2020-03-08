@@ -1,6 +1,6 @@
 #include "buffer_object.hpp"
 
-bgfx::VertexLayout AnimatedPosColorVertex::ms_layout;
+bgfx::VertexLayout AnimatedPosColorTexVertex::ms_layout;
 
 
 void BufferObject::initCubes(const int cubes_count)
@@ -8,7 +8,7 @@ void BufferObject::initCubes(const int cubes_count)
   vertices_count = cubes_count * vertices_per_cube_count;
   indices_count = cubes_count * indices_per_lines_cube_count;
 
-  vertices = new AnimatedPosColorVertex[vertices_count];
+  vertices = new AnimatedPosColorTexVertex[vertices_count];
   indices = new uint16_t[indices_count];
 
   writeCubesIndices();
@@ -20,7 +20,7 @@ void BufferObject::initCubesLines(const int cubes_count)
   vertices_count = cubes_count * vertices_per_lines_cube_count;
   indices_count = cubes_count * vertices_per_lines_cube_count;
 
-  vertices = new AnimatedPosColorVertex[vertices_count];
+  vertices = new AnimatedPosColorTexVertex[vertices_count];
   indices = new uint16_t[indices_count];
 
   writeCubesLinesIndices();
@@ -146,7 +146,7 @@ void BufferObject::createBuffers()
   m_vbh = bgfx::createDynamicVertexBuffer(
               // Static data can be passed with bgfx::makeRef
               bgfx::makeRef(vertices, vertices_count * sizeof(vertices[0])),
-              AnimatedPosColorVertex::ms_layout
+              AnimatedPosColorTexVertex::ms_layout
           );
 
   m_ibh = bgfx::createDynamicIndexBuffer(
@@ -224,7 +224,7 @@ void BufferObject::initModels(const int models_count)
   vertices_count = models_count * 10000;
   indices_count = models_count * 10000;
 
-  vertices = new AnimatedPosColorVertex[vertices_count];
+  vertices = new AnimatedPosColorTexVertex[vertices_count];
   indices = new uint16_t[indices_count];
 }
 
@@ -366,7 +366,7 @@ void BufferObject::initQuads(const int quads_count)
   vertices_count = quads_count * 4;
   indices_count = quads_count * 6;
 
-  vertices = new AnimatedPosColorVertex[vertices_count];
+  vertices = new AnimatedPosColorTexVertex[vertices_count];
   indices = new uint16_t[indices_count];
 
   writeQuadsIndices();
@@ -450,14 +450,14 @@ void BufferObject::writeQuadsVertices
       normal.z;
 
 
-    vertices[offset + i + 0].texcoord_x = 1.0f;
-    vertices[offset + i + 0].texcoord_y = 1.0f;
-    vertices[offset + i + 1].texcoord_x = 1.0f;
-    vertices[offset + i + 1].texcoord_y = 0.0f;
-    vertices[offset + i + 2].texcoord_x = 0.0f;
-    vertices[offset + i + 2].texcoord_y = 1.0f;
-    vertices[offset + i + 3].texcoord_x = 0.0f;
-    vertices[offset + i + 3].texcoord_y = 0.0f;
+    vertices[offset + i + 0].texcoord_x1 = 1.0f;
+    vertices[offset + i + 0].texcoord_y1 = 1.0f;
+    vertices[offset + i + 1].texcoord_x1 = 1.0f;
+    vertices[offset + i + 1].texcoord_y1 = 0.0f;
+    vertices[offset + i + 2].texcoord_x1 = 0.0f;
+    vertices[offset + i + 2].texcoord_y1 = 1.0f;
+    vertices[offset + i + 3].texcoord_x1 = 0.0f;
+    vertices[offset + i + 3].texcoord_y1 = 0.0f;
   }
 }
 

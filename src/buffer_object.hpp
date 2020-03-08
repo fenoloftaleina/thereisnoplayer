@@ -35,7 +35,7 @@ struct PosColorVertex {
   static bgfx::VertexLayout ms_layout;
 };
 
-struct AnimatedPosColorVertex {
+struct AnimatedPosColorTexVertex {
   float x;
   float y;
   float z;
@@ -71,8 +71,10 @@ struct AnimatedPosColorVertex {
   float color_to;
   float pos_to;
 
-  float texcoord_x;
-  float texcoord_y;
+  float texcoord_x1;
+  float texcoord_y1;
+  float texcoord_x2;
+  float texcoord_y2;
 
 
   static void init() {
@@ -93,6 +95,7 @@ struct AnimatedPosColorVertex {
       .add(bgfx::Attrib::Weight,   3, bgfx::AttribType::Float)
 
       .add(bgfx::Attrib::TexCoord0,2, bgfx::AttribType::Float)
+      .add(bgfx::Attrib::TexCoord1,2, bgfx::AttribType::Float)
 
       .end();
   };
@@ -197,7 +200,7 @@ struct BufferObject {
   int vertices_count;
   int indices_count;
 
-  AnimatedPosColorVertex* vertices;
+  AnimatedPosColorTexVertex* vertices;
   uint16_t* indices;
 
   bgfx::DynamicVertexBufferHandle m_vbh;

@@ -182,7 +182,10 @@ int main (int argc, char* args[])
 
   bgfx::UniformHandle u_twh = bgfx::createUniform("twh", bgfx::UniformType::Vec4);
 
-  bgfx::reset(WIDTH, HEIGHT, BGFX_RESET_VSYNC | BGFX_RESET_MSAA_X16);
+  bgfx::reset(WIDTH, HEIGHT, BGFX_RESET_VSYNC
+      | BGFX_RESET_MSAA_X16
+      | BGFX_RESET_SRGB_BACKBUFFER
+      );
   bgfx::setDebug(BGFX_DEBUG_TEXT /*| BGFX_DEBUG_STATS*/);
 
 
@@ -191,11 +194,15 @@ int main (int argc, char* args[])
 
   const uint64_t tsFlags = 0
     | BGFX_TEXTURE_RT_MSAA_X16
-    | BGFX_SAMPLER_MIN_POINT
-    | BGFX_SAMPLER_MAG_POINT
+    // | BGFX_SAMPLER_MIN_POINT
+    // | BGFX_SAMPLER_MAG_POINT
+    // | BGFX_SAMPLER_MIP_POINT
+    | BGFX_SAMPLER_MIN_ANISOTROPIC
+    | BGFX_SAMPLER_MAG_ANISOTROPIC
     | BGFX_SAMPLER_MIP_POINT
     | BGFX_SAMPLER_U_CLAMP
     | BGFX_SAMPLER_V_CLAMP
+    // | BGFX_TEXTURE_SRGB
     ;
 
   bgfx::TextureFormat::Enum tf = bgfx::TextureFormat::RGBA16;
@@ -233,13 +240,13 @@ int main (int argc, char* args[])
   unsigned char* image;
   stbi_set_flip_vertically_on_load(true);
   image = stbi_load("assets/tex.png", &width, &height, &nrChannels, 0);
-  const bgfx::Memory *mem = bgfx::makeRef(image, 4194304);
+  const bgfx::Memory *mem = bgfx::makeRef(image, width * height * 8);
   bgfx::TextureHandle tex = bgfx::createTexture2D(
       width,
       height,
       false,
       1,
-      bgfx::TextureFormat::RGBA8,
+      tf,
       0 | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP,
       mem
       );
@@ -490,6 +497,8 @@ int main (int argc, char* args[])
     }
 
     world.update(current_time, dt);
+
+    printf("curr %d\n", current_time);
 
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
     // const bx::Vec3 at = bx::neg(Common::spot_offset);
