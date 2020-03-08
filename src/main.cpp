@@ -282,11 +282,11 @@ int main (int argc, char* args[])
   BufferObject deferred_quad_bo1;
   deferred_quad_bo1.initQuads(1);
   deferred_quad_bo1.createBuffers();
-  deferred_quad_bo1.createShaders("bin/v_fullscreen_texture.bin", "bin/f_edge_detection.bin");
+  deferred_quad_bo1.createShaders("bin/post/v_simple.bin", "bin/post/f_simple.bin");
   BufferObject deferred_quad_bo2;
   deferred_quad_bo2.initQuads(1);
   deferred_quad_bo2.createBuffers();
-  deferred_quad_bo2.createShaders("bin/v_fullscreen_texture.bin", "bin/f_blur.bin");
+  deferred_quad_bo2.createShaders("bin/post/v_simple.bin", "bin/post/f_simple.bin");
   std::vector<bx::Vec3> quad_vs;
   std::vector<bx::Vec3> quad_cs;
   quad_vs.resize(4);
