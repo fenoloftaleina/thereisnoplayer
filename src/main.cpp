@@ -182,10 +182,7 @@ int main (int argc, char* args[])
 
   bgfx::UniformHandle u_twh = bgfx::createUniform("twh", bgfx::UniformType::Vec4);
 
-  bgfx::reset(WIDTH, HEIGHT, BGFX_RESET_VSYNC
-      | BGFX_RESET_MSAA_X16
-      | BGFX_RESET_SRGB_BACKBUFFER
-      );
+  bgfx::reset(WIDTH, HEIGHT, BGFX_RESET_VSYNC | BGFX_RESET_MSAA_X16 );
   bgfx::setDebug(BGFX_DEBUG_TEXT /*| BGFX_DEBUG_STATS*/);
 
 
@@ -194,18 +191,15 @@ int main (int argc, char* args[])
 
   const uint64_t tsFlags = 0
     | BGFX_TEXTURE_RT_MSAA_X16
-    // | BGFX_SAMPLER_MIN_POINT
-    // | BGFX_SAMPLER_MAG_POINT
-    // | BGFX_SAMPLER_MIP_POINT
-    | BGFX_SAMPLER_MIN_ANISOTROPIC
-    | BGFX_SAMPLER_MAG_ANISOTROPIC
+    | BGFX_SAMPLER_MIN_POINT
+    | BGFX_SAMPLER_MAG_POINT
     | BGFX_SAMPLER_MIP_POINT
     | BGFX_SAMPLER_U_CLAMP
     | BGFX_SAMPLER_V_CLAMP
     // | BGFX_TEXTURE_SRGB
     ;
 
-  bgfx::TextureFormat::Enum tf = bgfx::TextureFormat::RGBA16;
+  bgfx::TextureFormat::Enum tf = bgfx::TextureFormat::BGRA8;
 
   m_gbufferTex[0] = bgfx::createTexture2D(uint16_t(WIDTH), uint16_t(HEIGHT), false, 1, tf, tsFlags);
   m_gbufferTex[1] = bgfx::createTexture2D(uint16_t(WIDTH), uint16_t(HEIGHT), false, 1, tf, tsFlags);
@@ -236,20 +230,20 @@ int main (int argc, char* args[])
   framebuffer_handles[0] = bgfx::createFrameBuffer(BX_COUNTOF(gbufferAt), gbufferAt, true);
   framebuffer_handles[1] = bgfx::createFrameBuffer(1, texture_handles + 1, true);
 
-  int width, height, nrChannels;
-  unsigned char* image;
-  stbi_set_flip_vertically_on_load(true);
-  image = stbi_load("assets/tex.png", &width, &height, &nrChannels, 0);
-  const bgfx::Memory *mem = bgfx::makeRef(image, width * height * 8);
-  bgfx::TextureHandle tex = bgfx::createTexture2D(
-      width,
-      height,
-      false,
-      1,
-      tf,
-      0 | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP,
-      mem
-      );
+  // int width, height, nrChannels;
+  // unsigned char* image;
+  // stbi_set_flip_vertically_on_load(true);
+  // image = stbi_load("assets/tex.png", &width, &height, &nrChannels, 0);
+  // const bgfx::Memory *mem = bgfx::makeRef(image, width * height * 8);
+  // bgfx::TextureHandle tex = bgfx::createTexture2D(
+  //     width,
+  //     height,
+  //     false,
+  //     1,
+  //     tf,
+  //     0 | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP,
+  //     mem
+  //     );
 
 	bgfx::UniformHandle sampler_handle;
   sampler_handle = bgfx::createUniform("smplr",  bgfx::UniformType::Sampler);
