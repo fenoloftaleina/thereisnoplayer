@@ -256,7 +256,7 @@ void World::update(const float t, const float dt)
 
     setPositionsFromSpots(positions_temp, moving_cur_spots);
 
-    animation_length = 200.0f;
+    animation_length = 150.0f;
     if (travel) { animation_length = 0.0f; }
     fr(i, positions_temp) {
       moving_nimate.schedule_position(i, positions_temp[i], t, t + animation_length);

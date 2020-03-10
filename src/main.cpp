@@ -492,8 +492,6 @@ int main (int argc, char* args[])
 
     world.update(current_time, dt);
 
-    printf("curr %d\n", current_time);
-
     const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
     // const bx::Vec3 at = bx::neg(Common::spot_offset);
 
