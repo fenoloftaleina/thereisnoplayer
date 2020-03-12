@@ -26,6 +26,7 @@ struct World
   std::vector<Spot> static_spots;
   std::vector<Spot> doors_spots;
   std::vector<Spot> winning_doors_spots;
+  std::vector<Spot> floor_spots;
   std::vector<Spot> editor_spot;
 
   std::vector<bool> through_door;
@@ -41,6 +42,9 @@ struct World
   std::vector<bx::Vec3> doors_colors;
   std::vector<bx::Vec3> winning_doors_positions;
   std::vector<bx::Vec3> winning_doors_colors;
+  std::vector<bx::Vec3> floor_positions;
+  std::vector<bx::Vec3> floor_colors;
+  std::vector<int> floor_mapping_ids;
   std::vector<bx::Vec3> editor_position;
   std::vector<bx::Vec3> editor_color;
 
@@ -48,6 +52,7 @@ struct World
   BufferObject static_bo;
   BufferObject doors_bo;
   BufferObject winning_doors_bo;
+  BufferObject floor_bo;
   BufferObject editor_bo;
 
 
@@ -70,6 +75,7 @@ struct World
   bx::Vec3 moving_color = {0.85f, 0.2f, 0.32f};
   bx::Vec3 static_color = {0.0f, 99/255.0f, 115/255.0f};
   bx::Vec3 winning_doors_color = {0.5f, 0.5f, 0.5f};
+  bx::Vec3 floor_color = {0.0f, 0.0f, 0.0f};
   bx::Vec3 gate_colors[5] = {
     {0.5f, 0.2f, 0.4f},
     {0.6f, 0.8f, 0.4f},
@@ -116,6 +122,7 @@ struct World
      const std::vector<bx::Vec3>& froms,
      const std::vector<bx::Vec3>& tos
     );
+  void writeFloorVertices(BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors, const std::vector<int>& mapping_ids);
 
   template<class Archive>
   void serialize(Archive& archive)

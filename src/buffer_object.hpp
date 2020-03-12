@@ -8,6 +8,7 @@
 #include <bx/math.h>
 
 #include "common.hpp"
+#include "textures.hpp"
 
 
 struct Models;
@@ -207,6 +208,8 @@ struct BufferObject {
   bgfx::DynamicIndexBufferHandle m_ibh;
   bgfx::ProgramHandle m_program;
 
+  Textures textures;
+
   void initCubes(const int cubes_count);
   void initCubesLines(const int cubes_count);
   void initModels(const int models_count);
@@ -221,7 +224,7 @@ struct BufferObject {
      const bx::Vec3 col1, const bx::Vec3 col2, const Models& models,
      const int nth1, const int nth2, const bx::Vec3 from, const bx::Vec3 to);
   void writeModelIndices(const int offset, const int vertices_num_offset, const Models& models, const int nth);
-  void writeQuadsVertices(const int offset, const std::vector<bx::Vec3>& vs, const std::vector<bx::Vec3>cs);
+  void writeQuadsVertices(const int offset, const std::vector<bx::Vec3>& vs, const std::vector<bx::Vec3>cs, const std::vector<int>& mapping_ids);
   void writeQuadsIndices();
   void setFaceColor(const int nth_cube, const int nth_face, bx::Vec3 col);
   void createBuffers();
@@ -238,7 +241,7 @@ struct BufferObject {
   int models_vertices_count = 0;
   int models_indices_count = 0;
 
-  int offset;
+  int offset, mapping_id;
   bx::Vec3 end_pos, normal, a, b, c;
 };
 

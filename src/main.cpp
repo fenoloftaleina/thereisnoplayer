@@ -12,14 +12,11 @@
 #include <string>
 #include <ctime>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#include <bimg/bimg.h>
-
 #include "common.hpp"
 #include "world.hpp"
 #include "editor.hpp"
 #include "buffer_object.hpp"
+#include "textures.hpp"
 
 SDL_Window* window = NULL;
 const int WIDTH = 1600;
@@ -233,21 +230,6 @@ int main (int argc, char* args[])
   framebuffer_handles[0] = bgfx::createFrameBuffer(BX_COUNTOF(gbufferAt), gbufferAt, true);
   framebuffer_handles[1] = bgfx::createFrameBuffer(1, texture_handles + 1, true);
 
-  // int width, height, nrChannels;
-  // unsigned char* image;
-  // stbi_set_flip_vertically_on_load(true);
-  // image = stbi_load("assets/tex.png", &width, &height, &nrChannels, 0);
-  // const bgfx::Memory *mem = bgfx::makeRef(image, width * height * 8);
-  // bgfx::TextureHandle tex = bgfx::createTexture2D(
-  //     width,
-  //     height,
-  //     false,
-  //     1,
-  //     tf,
-  //     0 | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP,
-  //     mem
-  //     );
-
 	bgfx::UniformHandle sampler_handle;
   sampler_handle = bgfx::createUniform("smplr",  bgfx::UniformType::Sampler);
 
@@ -293,8 +275,10 @@ int main (int argc, char* args[])
   deferred_quad_bo2.createShaders("bin/post/v_simple.bin", "bin/post/f_simple.bin");
   std::vector<bx::Vec3> quad_vs;
   std::vector<bx::Vec3> quad_cs;
+  std::vector<int> quad_ms;
   quad_vs.resize(4);
   quad_cs.resize(4);
+  quad_ms.resize(1);
 
   quad_vs[0] = bx::Vec3( 1.0f, -1.0f,  0.0f);
   quad_vs[1] = bx::Vec3( 1.0f,  1.0f,  0.0f);
@@ -306,8 +290,10 @@ int main (int argc, char* args[])
   quad_cs[2] = bx::Vec3(0.0f, 0.0f, 0.0f);
   quad_cs[3] = bx::Vec3(0.0f, 0.0f, 0.0f);
 
-  deferred_quad_bo1.writeQuadsVertices(0, quad_vs, quad_cs);
-  deferred_quad_bo2.writeQuadsVertices(0, quad_vs, quad_cs);
+  quad_ms[0] = -2;
+
+  deferred_quad_bo1.writeQuadsVertices(0, quad_vs, quad_cs, quad_ms);
+  deferred_quad_bo2.writeQuadsVertices(0, quad_vs, quad_cs, quad_ms);
 
 
 
@@ -422,8 +408,21 @@ int main (int argc, char* args[])
             editor.add(world.doors_spots, world.editor_spot[0], world.doors_bo);
             break;
 
+          case SDLK_y:
+            // floor
+            if (!in_editor) break;
+            {
+              int i = editor.find(world.floor_spots, world.editor_spot[0]);
+              if (i == -1) {
+                editor.add(world.floor_spots, world.editor_spot[0], world.floor_bo, world.floor_mapping_ids, 0);
+              } else {
+                editor.next_mapping(i, world.floor_bo, world.floor_mapping_ids, world.floor_bo.textures.mappings.size());
+              }
+            }
+            break;
+
           case SDLK_n:
-            // remote/no
+            // remove/no
             if (!in_editor) break;
             editor.remove(world.editor_spot[0]);
             break;
@@ -528,8 +527,6 @@ int main (int argc, char* args[])
     bgfx::setUniform(u_twh, &u_twh_val);
 
     world.draw(in_editor);
-
-    // bgfx::setTexture(0, sampler_handle, tex);
 
     // bgfx::blit(deferred_view, texture_handles[0], 0, 0, m_gbufferTex[0], 0, 0);
 

@@ -24,6 +24,8 @@ void World::prepare()
   doors_colors.reserve(1000);
   winning_doors_positions.reserve(100);
   winning_doors_colors.reserve(100);
+  floor_positions.reserve(10000);
+  floor_colors.reserve(10000);
   editor_position.reserve(1);
   editor_color.reserve(1);
 
@@ -37,6 +39,7 @@ void World::prepare()
   static_bo.initModels(100);
   doors_bo.initCubes(1000);
   winning_doors_bo.initCubes(1000);
+  floor_bo.initQuads(10000);
   editor_bo.initCubes(1);
   quads_bo.initQuads(1000);
 
@@ -48,10 +51,19 @@ void World::prepare()
   doors_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
   winning_doors_bo.createBuffers();
   winning_doors_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
+  floor_bo.createBuffers();
+  floor_bo.createShaders("bin/v_tex.bin", "bin/f_tex.bin");
   editor_bo.createBuffers();
-  editor_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+  editor_bo.createShaders("bin/v_simple.bin", "bin/f_editor.bin");
   quads_bo.createBuffers();
-  quads_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+  quads_bo.createShaders("bin/v_tex.bin", "bin/f_tex.bin");
+
+  std::vector<std::string> texture_assets = {
+    "assets/t1.png",
+    "assets/t2.png"
+  };
+  floor_bo.textures.prepare(texture_assets);
+  quads_bo.textures.prepare(texture_assets);
 
   models.init();
   static_models_list.resize(1000);
@@ -74,11 +86,13 @@ void World::init()
   static_positions.resize(static_spots.size());
   doors_positions.resize(doors_spots.size());
   winning_doors_positions.resize(winning_doors_spots.size());
+  floor_positions.resize(floor_spots.size());
   editor_position.resize(1);
   moving_colors.resize(moving_spots.size());
   static_colors.resize(static_spots.size());
   doors_colors.resize(doors_spots.size());
   winning_doors_colors.resize(winning_doors_spots.size());
+  floor_colors.resize(floor_spots.size());
   editor_color.resize(1);
   through_door.resize(moving_spots.size());
   moving_cur_spots.resize(moving_spots.size());
@@ -87,6 +101,7 @@ void World::init()
   setPositionsFromSpots(static_positions, static_spots);
   setPositionsFromSpots(doors_positions, doors_spots);
   setPositionsFromSpots(winning_doors_positions, winning_doors_spots);
+  setPositionsFromSpots(floor_positions, floor_spots);
   setPositionsFromSpots(editor_position, editor_spot);
 
   setColors(moving_colors, moving_color);
@@ -95,6 +110,7 @@ void World::init()
     doors_colors[i] = gate_colors[(int)(i / 2)];
   }
   setColors(winning_doors_colors, winning_doors_color);
+  setColors(floor_colors, floor_color);
   setColors(editor_color, editor_thing_color);
 
 
@@ -114,6 +130,7 @@ void World::init()
   writeModelsVertices(static_bo, static_positions, static_colors, static_models_list);
   writeCubesVertices(doors_bo, doors_positions, doors_colors);
   writeCubesVertices(winning_doors_bo, winning_doors_positions, winning_doors_colors);
+  writeFloorVertices(floor_bo, floor_positions, floor_colors, floor_mapping_ids);
   writeCubesVertices(editor_bo, editor_position, editor_color);
 
   moving_next_spots = moving_spots;
@@ -148,12 +165,14 @@ void World::init()
 
   std::vector<bx::Vec3> quads_vs;
   std::vector<bx::Vec3> quads_cs;
-  const int grid_size = 100;
+  std::vector<int> quads_ms;
+  const int grid_size = 50;
   const float tile_size = 2.0f;
   const float line_weight = 0.07f;
   quads_count = grid_size * 2 + 1;
   quads_vs.resize(quads_count * 4);
   quads_cs.resize(quads_count * 4);
+  quads_ms.resize(quads_count);
 
   const float sx1 = -50.0f;
   const float sx2 =  50.0f;
@@ -175,25 +194,30 @@ void World::init()
   }
 
   const bx::Vec3 grid_color(0.65f, 0.65f, 0.65f);
-  for (int i = 0; i < 2 * grid_size * 4; i += 4) {
-    quads_cs[i + 0] = grid_color;
-    quads_cs[i + 1] = grid_color;
-    quads_cs[i + 2] = grid_color;
-    quads_cs[i + 3] = grid_color;
+  for (int i = 0; i < quads_count - 1; ++i) {
+    quads_cs[i * 4 + 0] = grid_color;
+    quads_cs[i * 4 + 1] = grid_color;
+    quads_cs[i * 4 + 2] = grid_color;
+    quads_cs[i * 4 + 3] = grid_color;
   }
 
-  const float plane_size = 50.0f;
-  const bx::Vec3 plane_color(0.8f, 0.8f, 0.8f);
+  for (int i = 0; i < quads_count - 1; ++i) {
+    quads_ms[i] = -1;
+  }
+
+  const float plane_size = 10.0f;
+  const bx::Vec3 plane_color(0.0f, 0.0f, 0.0f);
   const float plane_y = -1.01;
-  quads_vs[grid_size * 2 + 0] = bx::Vec3(plane_size, plane_y, -plane_size);
-  quads_vs[grid_size * 2 + 1] = bx::Vec3(plane_size, plane_y, plane_size);
-  quads_vs[grid_size * 2 + 2] = bx::Vec3(-plane_size, plane_y, -plane_size);
-  quads_vs[grid_size * 2 + 3] = bx::Vec3(-plane_size, plane_y, plane_size);
-  quads_cs[grid_size * 2 + 0] = plane_color;
-  quads_cs[grid_size * 2 + 1] = plane_color;
-  quads_cs[grid_size * 2 + 2] = plane_color;
-  quads_cs[grid_size * 2 + 3] = plane_color;
-  quads_bo.writeQuadsVertices(0, quads_vs, quads_cs);
+  quads_vs[(quads_count - 1) * 4 + 0] = bx::Vec3(plane_size, plane_y, -plane_size);
+  quads_vs[(quads_count - 1) * 4 + 1] = bx::Vec3(plane_size, plane_y, plane_size);
+  quads_vs[(quads_count - 1) * 4 + 2] = bx::Vec3(-plane_size, plane_y, -plane_size);
+  quads_vs[(quads_count - 1) * 4 + 3] = bx::Vec3(-plane_size, plane_y, plane_size);
+  quads_cs[(quads_count - 1) * 4 + 0] = plane_color;
+  quads_cs[(quads_count - 1) * 4 + 1] = plane_color;
+  quads_cs[(quads_count - 1) * 4 + 2] = plane_color;
+  quads_cs[(quads_count - 1) * 4 + 3] = plane_color;
+  quads_ms[quads_count - 1] = 0;
+  quads_bo.writeQuadsVertices(0, quads_vs, quads_cs, quads_ms);
 }
 
 
@@ -203,6 +227,7 @@ void World::updateBuffers()
   static_bo.updateBuffer();
   doors_bo.updateBuffer();
   winning_doors_bo.updateBuffer();
+  floor_bo.updateBuffer();
 
   quads_bo.updateBuffer();
 
@@ -289,11 +314,12 @@ void World::draw(const bool in_editor)
   static_bo.drawModels(view, 0);
   doors_bo.drawCubes(view, doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
   winning_doors_bo.drawCubes(view, winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
+  floor_bo.drawQuads(view, floor_spots.size());
 
   quads_bo.drawQuads(view, quads_count);
 
   if (in_editor) {
-    editor_bo.drawCubes(view, 1);
+    editor_bo.drawCubes(view, 1, BGFX_STATE_BLEND_ALPHA);
   }
 
 
@@ -534,4 +560,33 @@ void World::writeAnimatedModelsVertices
     acc_vertices_offset += models.nth_model_vertices_count(nth1s[i]);
     acc_indices_offset += models.nth_model_indices_count(nth2s[i]);
   }
+}
+
+
+void World::writeFloorVertices
+(BufferObject& bo,
+ const std::vector<bx::Vec3>& positions,
+ const std::vector<bx::Vec3>& colors,
+ const std::vector<int>& mapping_ids
+ )
+{
+  std::vector<bx::Vec3> floor_vs;
+  std::vector<bx::Vec3> floor_cs;
+  int tile_size = 1.0f;
+  floor_vs.resize(mapping_ids.size() * 4);
+  floor_cs.resize(mapping_ids.size() * 4);
+
+  for (int i = 0; i < mapping_ids.size(); ++i) {
+    printf("f pos: %f %f %f, ", positions[i].x, positions[i].y, positions[i].z);
+    floor_vs[i * 4 + 0] = bx::Vec3(positions[i].x + tile_size, -1.0f, positions[i].z - tile_size);
+    floor_vs[i * 4 + 1] = bx::Vec3(positions[i].x + tile_size, -1.0f, positions[i].z + tile_size);
+    floor_vs[i * 4 + 2] = bx::Vec3(positions[i].x - tile_size, -1.0f, positions[i].z - tile_size);
+    floor_vs[i * 4 + 3] = bx::Vec3(positions[i].x - tile_size, -1.0f, positions[i].z + tile_size);
+    floor_cs[i * 4 + 0] =
+      floor_cs[i * 4 + 1] =
+      floor_cs[i * 4 + 2] =
+      floor_cs[i * 4 + 3] = colors[i];
+  }
+
+  bo.writeQuadsVertices(0, floor_vs, floor_cs, mapping_ids);
 }

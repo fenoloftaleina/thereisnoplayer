@@ -196,6 +196,7 @@ void BufferObject::draw(bgfx::ViewId view, uint16_t current_vertices_count, uint
 
   bgfx::setVertexBuffer(0, m_vbh, 0, current_vertices_count);
   bgfx::setIndexBuffer(m_ibh, 0, current_indices_count);
+  textures.setTexture();
 
   bgfx::submit(view, m_program);
 }
@@ -392,7 +393,7 @@ void BufferObject::writeQuadsIndices()
 
 
 void BufferObject::writeQuadsVertices
-(const int offset, const std::vector<bx::Vec3>& vs, const std::vector<bx::Vec3>cs)
+(const int offset, const std::vector<bx::Vec3>& vs, const std::vector<bx::Vec3>cs, const std::vector<int>& mapping_ids)
 {
   for (int i = 0; i < vs.size(); ++i) {
     vertices[offset + i].x = vs[i].x;
@@ -448,16 +449,39 @@ void BufferObject::writeQuadsVertices
       vertices[offset + i + 2].normal_z =
       vertices[offset + i + 3].normal_z =
       normal.z;
+  // }
 
-
-    vertices[offset + i + 0].texcoord_x1 = 1.0f;
-    vertices[offset + i + 0].texcoord_y1 = 1.0f;
-    vertices[offset + i + 1].texcoord_x1 = 1.0f;
-    vertices[offset + i + 1].texcoord_y1 = 0.0f;
-    vertices[offset + i + 2].texcoord_x1 = 0.0f;
-    vertices[offset + i + 2].texcoord_y1 = 1.0f;
-    vertices[offset + i + 3].texcoord_x1 = 0.0f;
-    vertices[offset + i + 3].texcoord_y1 = 0.0f;
+  // for (int i = 0; i < mapping_ids.size(); ++i) {
+    mapping_id = mapping_ids[i / 4];
+    if (mapping_id == -1) {
+      vertices[offset + i + 0].texcoord_x1 = -1.0f;
+      vertices[offset + i + 0].texcoord_y1 = -1.0f;
+      vertices[offset + i + 1].texcoord_x1 = -1.0f;
+      vertices[offset + i + 1].texcoord_y1 = -1.0f;
+      vertices[offset + i + 2].texcoord_x1 = -1.0f;
+      vertices[offset + i + 2].texcoord_y1 = -1.0f;
+      vertices[offset + i + 3].texcoord_x1 = -1.0f;
+      vertices[offset + i + 3].texcoord_y1 = -1.0f;
+    } else if (mapping_id == -2) {
+      vertices[offset + i + 0].texcoord_x1 = 1.0f;
+      vertices[offset + i + 0].texcoord_y1 = 1.0f;
+      vertices[offset + i + 1].texcoord_x1 = 1.0f;
+      vertices[offset + i + 1].texcoord_y1 = 0.0f;
+      vertices[offset + i + 2].texcoord_x1 = 0.0f;
+      vertices[offset + i + 2].texcoord_y1 = 1.0f;
+      vertices[offset + i + 3].texcoord_x1 = 0.0f;
+      vertices[offset + i + 3].texcoord_y1 = 0.0f;
+    } else {
+      printf("AAAAAAAAAAAAAAA %d %f %f - %f %f %f \n", mapping_id, textures.mappings[mapping_id].x1, textures.mappings[mapping_id].x2, vertices[offset + i + 2].x, vertices[offset + i + 2].y, vertices[offset + i + 2].z);
+      vertices[offset + i + 0].texcoord_x1 = textures.mappings[mapping_id].x2;
+      vertices[offset + i + 0].texcoord_y1 = textures.mappings[mapping_id].y1;
+      vertices[offset + i + 1].texcoord_x1 = textures.mappings[mapping_id].x2;
+      vertices[offset + i + 1].texcoord_y1 = textures.mappings[mapping_id].y2;
+      vertices[offset + i + 2].texcoord_x1 = textures.mappings[mapping_id].x1;
+      vertices[offset + i + 2].texcoord_y1 = textures.mappings[mapping_id].y1;
+      vertices[offset + i + 3].texcoord_x1 = textures.mappings[mapping_id].x1;
+      vertices[offset + i + 3].texcoord_y1 = textures.mappings[mapping_id].y2;
+    }
   }
 }
 
