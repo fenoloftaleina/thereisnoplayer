@@ -246,6 +246,10 @@
             {
                 "value0": 3,
                 "value1": 3
+            },
+            {
+                "value0": 5,
+                "value1": 0
             }
         ],
         "value2": [
@@ -263,6 +267,20 @@
                 "value0": 8,
                 "value1": 5
             }
+        ],
+        "value4": [
+            {
+                "value0": 7,
+                "value1": -1
+            },
+            {
+                "value0": 6,
+                "value1": -1
+            }
+        ],
+        "value5": [
+            0,
+            1
         ]
     }
 }

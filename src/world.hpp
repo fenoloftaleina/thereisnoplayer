@@ -127,7 +127,7 @@ struct World
   template<class Archive>
   void serialize(Archive& archive)
   {
-    archive(moving_spots, static_spots, doors_spots, winning_doors_spots);
+    archive(moving_spots, static_spots, doors_spots, winning_doors_spots, floor_spots, floor_mapping_ids);
   }
 
   int towards;
