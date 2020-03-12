@@ -61,6 +61,30 @@ void Models::init()
   import("untitled.obj", 2);
   import("cube.obj", 3);
 
+  std::vector<bx::Vec3> vertices;
+  std::vector<bx::Vec3> normals;
+  std::vector<int> indices;
+
+  vertices.resize(4);
+  normals.resize(4);
+  indices.resize(6);
+
+  vertices[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
+  vertices[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
+  vertices[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  vertices[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
+
+  normals[0] = normals[1] = normals[2] = normals[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
+
+  indices[0] = 1;
+  indices[1] = 0;
+  indices[2] = 3;
+  indices[3] = 0;
+  indices[4] = 2;
+  indices[5] = 3;
+
+  set(vertices, normals, indices, 4);
+
   // import("cube.obj", 0);
   //
   // for (int i = 0; i < vertices_offsets[1]; ++i) {
@@ -101,6 +125,37 @@ void Models::import(const char* filename, const int nth)
   indices_offsets[nth + 1] = acc_next_indices_offset;
 
   aiReleaseImport(scene);
+}
+
+
+void Models::set
+(const std::vector<bx::Vec3>& model_vertices,
+ const std::vector<bx::Vec3>& model_normals,
+ const std::vector<int>& model_indices,
+ const int nth)
+{
+
+  int vertices_offset = vertices_offsets[nth];
+  int indices_offset = indices_offsets[nth];
+
+  for(int i = 0; i < model_vertices.size(); i++) {
+    vertices[vertices_offset + i].x = model_vertices[i].x;
+    vertices[vertices_offset + i].y = model_vertices[i].y;
+    vertices[vertices_offset + i].z = model_vertices[i].z;
+    vertices[vertices_offset + i].r = 0.5f;
+    vertices[vertices_offset + i].g = 0.3f;
+    vertices[vertices_offset + i].b = 0.9f;
+    vertices[vertices_offset + i].normal_x = model_normals[i].x;
+    vertices[vertices_offset + i].normal_y = model_normals[i].y;
+    vertices[vertices_offset + i].normal_z = model_normals[i].z;
+  }
+
+  for(int i = 0; i < model_indices.size(); i++) {
+    indices[indices_offset + i] = model_indices[i];
+  }
+
+  vertices_offsets[nth + 1] = vertices_offset + model_vertices.size();
+  indices_offsets[nth + 1] = indices_offset + model_indices.size();
 }
 
 

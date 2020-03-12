@@ -120,7 +120,7 @@ void World::init()
   moving_models_list.resize(moving_positions.size());
   models_temp.resize(moving_models_list.size());
   fr(i, moving_positions) {
-    moving_models_list[i] = 0;
+    moving_models_list[i] = 4;
     models_temp[i] = moving_models_list[i];
   }
 
@@ -218,7 +218,8 @@ void World::update(const float t, const float dt)
     }
 
     fr(i, models_temp) {
-      models_temp[i] = (models_temp[i] + 1) % 2;
+      // models_temp[i] = (models_temp[i] + 1) % 2;
+      models_temp[i] = 4;
     }
 
     setPositionsFromSpots(positions_temp, moving_cur_spots);
