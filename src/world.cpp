@@ -63,7 +63,6 @@ void World::prepare()
     "assets/t2.png"
   };
   floor_bo.textures.prepare(texture_assets);
-  quads_bo.textures.prepare(texture_assets);
 
   models.init();
   static_models_list.resize(1000);
@@ -161,63 +160,6 @@ void World::init()
       models,
       0
       );
-
-
-  std::vector<bx::Vec3> quads_vs;
-  std::vector<bx::Vec3> quads_cs;
-  std::vector<int> quads_ms;
-  const int grid_size = 50;
-  const float tile_size = 2.0f;
-  const float line_weight = 0.07f;
-  quads_count = grid_size * 2 + 1;
-  quads_vs.resize(quads_count * 4);
-  quads_cs.resize(quads_count * 4);
-  quads_ms.resize(quads_count);
-
-  const float sx1 = -50.0f;
-  const float sx2 =  50.0f;
-  const float sy1 = -50.0f;
-  const float sy2 =  50.0f;
-
-  for (int i = 0; i < grid_size; ++i) {
-    quads_vs[i * 4 + 0] = bx::Vec3(sx1 + i * tile_size + line_weight, -1.0f, sy1);
-    quads_vs[i * 4 + 1] = bx::Vec3(sx1 + i * tile_size + line_weight, -1.0f, sy2);
-    quads_vs[i * 4 + 2] = bx::Vec3(sx1 + i * tile_size - line_weight, -1.0f, sy1);
-    quads_vs[i * 4 + 3] = bx::Vec3(sx1 + i * tile_size - line_weight, -1.0f, sy2);
-  }
-
-  for (int i = 0; i < grid_size; ++i) {
-    quads_vs[(i + grid_size) * 4 + 0] = bx::Vec3(sx2, -1.0f, sy1 + i * tile_size - line_weight);
-    quads_vs[(i + grid_size) * 4 + 1] = bx::Vec3(sx2, -1.0f, sy1 + i * tile_size + line_weight);
-    quads_vs[(i + grid_size) * 4 + 2] = bx::Vec3(sx1, -1.0f, sy1 + i * tile_size - line_weight);
-    quads_vs[(i + grid_size) * 4 + 3] = bx::Vec3(sx1, -1.0f, sy1 + i * tile_size + line_weight);
-  }
-
-  const bx::Vec3 grid_color(0.65f, 0.65f, 0.65f);
-  for (int i = 0; i < quads_count - 1; ++i) {
-    quads_cs[i * 4 + 0] = grid_color;
-    quads_cs[i * 4 + 1] = grid_color;
-    quads_cs[i * 4 + 2] = grid_color;
-    quads_cs[i * 4 + 3] = grid_color;
-  }
-
-  for (int i = 0; i < quads_count - 1; ++i) {
-    quads_ms[i] = -1;
-  }
-
-  const float plane_size = 10.0f;
-  const bx::Vec3 plane_color(0.0f, 0.0f, 0.0f);
-  const float plane_y = -1.01;
-  quads_vs[(quads_count - 1) * 4 + 0] = bx::Vec3(plane_size, plane_y, -plane_size);
-  quads_vs[(quads_count - 1) * 4 + 1] = bx::Vec3(plane_size, plane_y, plane_size);
-  quads_vs[(quads_count - 1) * 4 + 2] = bx::Vec3(-plane_size, plane_y, -plane_size);
-  quads_vs[(quads_count - 1) * 4 + 3] = bx::Vec3(-plane_size, plane_y, plane_size);
-  quads_cs[(quads_count - 1) * 4 + 0] = plane_color;
-  quads_cs[(quads_count - 1) * 4 + 1] = plane_color;
-  quads_cs[(quads_count - 1) * 4 + 2] = plane_color;
-  quads_cs[(quads_count - 1) * 4 + 3] = plane_color;
-  quads_ms[quads_count - 1] = 0;
-  quads_bo.writeQuadsVertices(0, quads_vs, quads_cs, quads_ms);
 }
 
 
