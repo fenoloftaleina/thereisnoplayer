@@ -65,7 +65,7 @@ void World::prepare()
   floor_bo.textures.prepare(texture_assets);
 
   models.init();
-  static_models_list.resize(1000);
+  static_models_list.reserve(1000);
   moving_models_list.resize(100);
 
   moving_nimate.prepare(this, &moving_bo, &moving_positions, &moving_colors, &moving_models_list);
@@ -113,10 +113,6 @@ void World::init()
   setColors(editor_color, editor_thing_color);
 
 
-  static_models_list.resize(static_positions.size());
-  fr(i, static_positions) {
-    static_models_list[i] = 3;
-  }
   moving_models_list.resize(moving_positions.size());
   models_temp.resize(moving_models_list.size());
   fr(i, moving_positions) {

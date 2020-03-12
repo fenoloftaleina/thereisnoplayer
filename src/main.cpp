@@ -393,7 +393,14 @@ int main (int argc, char* args[])
           case SDLK_i:
             // static
             if (!in_editor) break;
-            editor.add(world.static_spots, world.editor_spot[0], world.static_bo);
+            {
+              int i = editor.find(world. static_spots, world.editor_spot[0]);
+              if (i == -1) {
+                editor.add(world.static_spots, world.editor_spot[0], world.static_bo, world.static_models_list, 3);
+              } else {
+                editor.next_mapping(i, world.static_bo, world.static_models_list, 5);
+              }
+            }
             break;
 
           case SDLK_o:
