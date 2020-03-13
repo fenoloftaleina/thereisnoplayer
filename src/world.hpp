@@ -64,8 +64,6 @@ struct World
   std::vector<int> moving_models_list;
 
 
-  Models models;
-
   Nimate moving_nimate;
 
 

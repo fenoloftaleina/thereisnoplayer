@@ -3,7 +3,6 @@
 #pragma once
 
 #include "common.hpp"
-#include "textures.hpp"
 #include <bx/math.h>
 #include <stdio.h>
 #include <vector>
@@ -90,8 +89,6 @@ struct Models
 
   uint16_t vertices_offsets[100];
   uint16_t indices_offsets[100];
-
-  Textures* textures;
 
   void init();
   void import(const char* filename, const int nth);

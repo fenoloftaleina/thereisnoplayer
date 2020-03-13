@@ -66,10 +66,56 @@ void World::prepare()
   moving_bo.textures.prepare(texture_assets);
 
 
-  // TODO:
-  // models...
-  models.textures = &(moving_bo.textures);
-  models.init();
+
+  static_bo.models.init();
+  static_bo.models.import("test.obj", 0);
+  static_bo.models.import("test-keyframe2.obj", 1);
+  static_bo.models.import("untitled.obj", 2);
+  static_bo.models.import("cube.obj", 3);
+
+
+  std::vector<bx::Vec3> vertices;
+  std::vector<bx::Vec3> normals;
+  std::vector<bx::Vec3> uvs;
+  std::vector<int> indices;
+
+  vertices.resize(4);
+  normals.resize(4);
+  uvs.resize(4);
+  indices.resize(6);
+
+  vertices[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
+  vertices[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
+  vertices[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  vertices[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
+
+  normals[0] = normals[1] = normals[2] = normals[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
+
+  // uvs[0] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  // uvs[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
+  // uvs[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  // uvs[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
+
+  uvs[0] = bx::Vec3(moving_bo.textures.mappings[0].x2, moving_bo.textures.mappings[0].y1, 0.0f);
+  uvs[1] = bx::Vec3(moving_bo.textures.mappings[0].x2, moving_bo.textures.mappings[0].y2, 0.0f);
+  uvs[2] = bx::Vec3(moving_bo.textures.mappings[0].x1, moving_bo.textures.mappings[0].y1, 0.0f);
+  uvs[3] = bx::Vec3(moving_bo.textures.mappings[0].x1, moving_bo.textures.mappings[0].y2, 0.0f);
+
+  // uvs[0] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  // uvs[1] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  // uvs[2] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  // uvs[3] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+
+  indices[0] = 1;
+  indices[1] = 0;
+  indices[2] = 3;
+  indices[3] = 0;
+  indices[4] = 2;
+  indices[5] = 3;
+
+  moving_bo.models.init();
+  moving_bo.models.set(vertices, normals, uvs, indices, 0);
+
   static_models_list.reserve(1000);
   moving_models_list.resize(100);
 
@@ -117,7 +163,7 @@ void World::init()
   moving_models_list.resize(moving_positions.size());
   models_temp.resize(moving_models_list.size());
   fr(i, moving_positions) {
-    moving_models_list[i] = 4;
+    moving_models_list[i] = 0;
     models_temp[i] = moving_models_list[i];
   }
 
@@ -190,7 +236,7 @@ void World::update(const float t, const float dt)
 
     fr(i, models_temp) {
       // models_temp[i] = (models_temp[i] + 1) % 2;
-      models_temp[i] = 4;
+      models_temp[i] = 0;
     }
 
     setPositionsFromSpots(positions_temp, moving_cur_spots);
@@ -224,7 +270,7 @@ void World::update(const float t, const float dt)
 
 void World::draw(const bool in_editor)
 {
-  moving_bo.drawModels(view, moving_spots.size(), models, 0, BGFX_STATE_BLEND_ALPHA);
+  moving_bo.drawModels(view, moving_spots.size(), 0, BGFX_STATE_BLEND_ALPHA);
   static_bo.drawModels(view, 0);
   doors_bo.drawCubes(view, doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
   winning_doors_bo.drawCubes(view, winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
@@ -382,21 +428,19 @@ void World::writeCubesVertices
 void World::writeModelsVertices
 (BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors, const int nth_model)
 {
-  int nth_model_vertices_count = models.nth_model_vertices_count(nth_model);
-  int nth_model_indices_count = models.nth_model_indices_count(nth_model);
+  int nth_model_vertices_count = bo.models.nth_model_vertices_count(nth_model);
+  int nth_model_indices_count = bo.models.nth_model_indices_count(nth_model);
 
   for (int i = 0; i < positions.size(); ++i) {
     bo.writeModelVertices(
         nth_model_vertices_count * i,
         positions[i],
         colors[i],
-        models,
         nth_model
         );
     bo.writeModelIndices(
         nth_model_indices_count * i,
         nth_model_vertices_count * i,
-        models,
         nth_model
         );
   }
@@ -414,18 +458,16 @@ void World::writeModelsVertices
         acc_vertices_offset,
         positions[i],
         colors[i],
-        models,
         models_list[i]
         );
     bo.writeModelIndices(
         acc_indices_offset,
         acc_vertices_offset,
-        models,
         models_list[i]
         );
 
-    acc_vertices_offset += models.nth_model_vertices_count(models_list[i]);
-    acc_indices_offset += models.nth_model_indices_count(models_list[i]);
+    acc_vertices_offset += bo.models.nth_model_vertices_count(models_list[i]);
+    acc_indices_offset += bo.models.nth_model_indices_count(models_list[i]);
   }
 }
 
@@ -452,7 +494,6 @@ void World::writeAnimatedModelsVertices
         positions2[i],
         colors1[i],
         colors2[i],
-        models,
         nth1s[i],
         nth2s[i],
         froms[i],
@@ -461,12 +502,11 @@ void World::writeAnimatedModelsVertices
     bo.writeModelIndices(
         acc_indices_offset,
         acc_vertices_offset,
-        models,
         nth1s[i]
         );
 
-    acc_vertices_offset += models.nth_model_vertices_count(nth1s[i]);
-    acc_indices_offset += models.nth_model_indices_count(nth2s[i]);
+    acc_vertices_offset += bo.models.nth_model_vertices_count(nth1s[i]);
+    acc_indices_offset += bo.models.nth_model_indices_count(nth2s[i]);
   }
 }
 

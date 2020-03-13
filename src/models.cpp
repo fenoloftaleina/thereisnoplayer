@@ -56,58 +56,6 @@ void Models::init()
   vertices_offsets[0] = 0;
   indices_offsets[0] = 0;
 
-
-  // TODO:
-  // Move import-ing and set-ing these below to buffer objects that now each
-  // have their own models.
-
-
-  import("test.obj", 0);
-  import("test-keyframe2.obj", 1);
-  import("untitled.obj", 2);
-  import("cube.obj", 3);
-
-  std::vector<bx::Vec3> vertices;
-  std::vector<bx::Vec3> normals;
-  std::vector<bx::Vec3> uvs;
-  std::vector<int> indices;
-
-  vertices.resize(4);
-  normals.resize(4);
-  uvs.resize(4);
-  indices.resize(6);
-
-  vertices[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
-  vertices[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
-  vertices[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  vertices[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
-
-  normals[0] = normals[1] = normals[2] = normals[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
-
-  // uvs[0] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  // uvs[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
-  // uvs[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  // uvs[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
-
-  uvs[0] = bx::Vec3(textures->mappings[0].x2, textures->mappings[0].y1, 0.0f);
-  uvs[1] = bx::Vec3(textures->mappings[0].x2, textures->mappings[0].y2, 0.0f);
-  uvs[2] = bx::Vec3(textures->mappings[0].x1, textures->mappings[0].y1, 0.0f);
-  uvs[3] = bx::Vec3(textures->mappings[0].x1, textures->mappings[0].y2, 0.0f);
-
-  // uvs[0] = bx::Vec3(-1.0f, -1.0f, 0.0f);
-  // uvs[1] = bx::Vec3(-1.0f, -1.0f, 0.0f);
-  // uvs[2] = bx::Vec3(-1.0f, -1.0f, 0.0f);
-  // uvs[3] = bx::Vec3(-1.0f, -1.0f, 0.0f);
-
-  indices[0] = 1;
-  indices[1] = 0;
-  indices[2] = 3;
-  indices[3] = 0;
-  indices[4] = 2;
-  indices[5] = 3;
-
-  set(vertices, normals, uvs, indices, 4);
-
   // import("cube.obj", 0);
   //
   // for (int i = 0; i < vertices_offsets[1]; ++i) {

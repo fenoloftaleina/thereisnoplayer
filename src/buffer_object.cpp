@@ -231,7 +231,7 @@ void BufferObject::initModels(const int models_count)
 
 
 void BufferObject::drawModels
-(bgfx::ViewId view, const int models_count, const Models& models, const int nth, uint64_t more_state = 0)
+(bgfx::ViewId view, const int models_count, const int nth, uint64_t more_state = 0)
 {
   draw(
       view,
@@ -249,7 +249,7 @@ void BufferObject::drawModels(bgfx::ViewId view, uint64_t more_state = 0)
 
 
 void BufferObject::writeModelVertices
-(const int offset, bx::Vec3 pos, bx::Vec3 col, const Models& models, const int nth)
+(const int offset, bx::Vec3 pos, bx::Vec3 col, const int nth)
 {
   int nth_model_vertices_count = models.nth_model_vertices_count(nth);
 
@@ -305,7 +305,7 @@ void BufferObject::writeModelVertices
 
 void BufferObject::writeModelVertices
 (const int offset, const bx::Vec3 pos1, const bx::Vec3 pos2,
- const bx::Vec3 col1, const bx::Vec3 col2, const Models& models,
+ const bx::Vec3 col1, const bx::Vec3 col2,
  const int nth1, const int nth2, const bx::Vec3 from, const bx::Vec3 to)
 {
   int nth_model_vertices_count = models.nth_model_vertices_count(nth1);
@@ -361,7 +361,7 @@ void BufferObject::writeModelVertices
 
 
 void BufferObject::writeModelIndices
-(const int offset, const int vertices_num_offset, const Models& models, const int nth)
+(const int offset, const int vertices_num_offset, const int nth)
 {
   int nth_model_indices_count = models.nth_model_indices_count(nth);
 

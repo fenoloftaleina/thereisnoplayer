@@ -117,8 +117,7 @@ struct BufferObject {
   bgfx::ProgramHandle m_program;
 
   Textures textures;
-  // TODO
-  // Models models;
+  Models models;
 
   void prepare(const std::vector<std::string>& texture_assets);
   void initCubes(const int cubes_count);
@@ -129,12 +128,12 @@ struct BufferObject {
   void writeCubesLinesIndices();
   void writeCubeVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
   void writeCubeLinesVertices(const int nth_cube, bx::Vec3 pos, bx::Vec3 col);
-  void writeModelVertices(const int offset, bx::Vec3 pos, bx::Vec3 col, const Models& models, const int nth);
+  void writeModelVertices(const int offset, bx::Vec3 pos, bx::Vec3 col, const int nth);
   void writeModelVertices
     (const int offset, const bx::Vec3 pos1, const bx::Vec3 pos2,
-     const bx::Vec3 col1, const bx::Vec3 col2, const Models& models,
+     const bx::Vec3 col1, const bx::Vec3 col2,
      const int nth1, const int nth2, const bx::Vec3 from, const bx::Vec3 to);
-  void writeModelIndices(const int offset, const int vertices_num_offset, const Models& models, const int nth);
+  void writeModelIndices(const int offset, const int vertices_num_offset, const int nth);
   void writeQuadsVertices(const int offset, const std::vector<bx::Vec3>& vs, const std::vector<bx::Vec3>cs, const std::vector<int>& mapping_ids);
   void writeQuadsIndices();
   void setFaceColor(const int nth_cube, const int nth_face, bx::Vec3 col);
@@ -144,7 +143,7 @@ struct BufferObject {
   void draw(bgfx::ViewId view, uint16_t current_vertices_count, uint16_t current_indices_count, uint64_t more_state);
   void drawCubes(bgfx::ViewId view, uint16_t current_cubes_count, uint64_t more_state = 0);
   void drawCubesLines(bgfx::ViewId view, uint16_t current_cubes_count);
-  void drawModels(bgfx::ViewId view, const int models_count, const Models& models, const int nth, uint64_t more_state);
+  void drawModels(bgfx::ViewId view, const int models_count, const int nth, uint64_t more_state);
   void drawModels(bgfx::ViewId view, uint64_t more_state);
   void drawQuads(bgfx::ViewId view, uint16_t current_quads_count, uint64_t more_state = 0);
   void destroy();
