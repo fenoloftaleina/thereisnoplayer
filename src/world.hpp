@@ -72,7 +72,7 @@ struct World
   Nimate moving_nimate;
 
 
-  bx::Vec3 moving_color = {0.85f, 0.2f, 0.32f};
+  bx::Vec3 moving_color = {0.0f, 0.0f, 0.0f};
   bx::Vec3 static_color = {0.0f, 99/255.0f, 115/255.0f};
   bx::Vec3 winning_doors_color = {0.5f, 0.5f, 0.5f};
   bx::Vec3 floor_color = {0.0f, 0.0f, 0.0f};

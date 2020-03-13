@@ -44,7 +44,7 @@ void World::prepare()
   quads_bo.initQuads(1000);
 
   moving_bo.createBuffers();
-  moving_bo.createShaders("bin/v_animated_simple.bin", "bin/f_simple.bin");
+  moving_bo.createShaders("bin/v_animated_tex.bin", "bin/f_animated_tex.bin");
   static_bo.createBuffers();
   static_bo.createShaders("bin/v_animated_simple.bin", "bin/f_simple.bin");
   doors_bo.createBuffers();

@@ -290,6 +290,12 @@ void BufferObject::writeModelVertices
 
     vertices[offset + i].model_from = 0.0f;
     vertices[offset + i].model_to = 0.0f;
+
+    vertices[offset + i].texcoord_x1 = models.vertices[models.vertices_offsets[nth] + i].texcoord_x1;
+    vertices[offset + i].texcoord_y1 = models.vertices[models.vertices_offsets[nth] + i].texcoord_y1;
+
+    vertices[offset + i].texcoord_x2 = models.vertices[models.vertices_offsets[nth] + i].texcoord_x1;
+    vertices[offset + i].texcoord_y2 = models.vertices[models.vertices_offsets[nth] + i].texcoord_y1;
   }
 
   // if (nth_model_vertices_count + offset > models_vertices_count) {
@@ -341,6 +347,12 @@ void BufferObject::writeModelVertices
 
     vertices[offset + i].model_from = from.x;
     vertices[offset + i].model_to = to.x;
+
+    vertices[offset + i].texcoord_x1 = models.vertices[models.vertices_offsets[nth1] + i].texcoord_x1;
+    vertices[offset + i].texcoord_y1 = models.vertices[models.vertices_offsets[nth1] + i].texcoord_y1;
+
+    vertices[offset + i].texcoord_x2 = models.vertices[models.vertices_offsets[nth2] + i].texcoord_x1;
+    vertices[offset + i].texcoord_y2 = models.vertices[models.vertices_offsets[nth2] + i].texcoord_y1;
   }
 
   // if (nth_model_vertices_count + offset > models_vertices_count) {

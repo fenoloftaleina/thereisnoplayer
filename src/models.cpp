@@ -51,7 +51,7 @@ int Models::processNode(aiNode* node, const aiScene* scene, int& vertices_offset
 
 void Models::init()
 {
-  vertices = new PosColorVertex[vertices_count];
+  vertices = new AnimatedPosColorTexVertex[vertices_count];
   indices = new uint16_t[indices_count];
   vertices_offsets[0] = 0;
   indices_offsets[0] = 0;
@@ -63,10 +63,12 @@ void Models::init()
 
   std::vector<bx::Vec3> vertices;
   std::vector<bx::Vec3> normals;
+  std::vector<bx::Vec3> uvs;
   std::vector<int> indices;
 
   vertices.resize(4);
   normals.resize(4);
+  uvs.resize(4);
   indices.resize(6);
 
   vertices[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
@@ -76,6 +78,29 @@ void Models::init()
 
   normals[0] = normals[1] = normals[2] = normals[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
 
+  Textures textures;
+  std::vector<std::string> texture_assets = {
+    "assets/t1.png",
+    "assets/t2.png"
+  };
+  textures.prepare(texture_assets);
+  textures.setTexture();
+
+  // uvs[0] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  // uvs[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
+  // uvs[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  // uvs[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
+
+  uvs[0] = bx::Vec3(textures.mappings[0].x2, textures.mappings[0].y1, 0.0f);
+  uvs[1] = bx::Vec3(textures.mappings[0].x2, textures.mappings[0].y2, 0.0f);
+  uvs[2] = bx::Vec3(textures.mappings[0].x1, textures.mappings[0].y1, 0.0f);
+  uvs[3] = bx::Vec3(textures.mappings[0].x1, textures.mappings[0].y2, 0.0f);
+
+  // uvs[0] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  // uvs[1] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  // uvs[2] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  // uvs[3] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+
   indices[0] = 1;
   indices[1] = 0;
   indices[2] = 3;
@@ -83,7 +108,7 @@ void Models::init()
   indices[4] = 2;
   indices[5] = 3;
 
-  set(vertices, normals, indices, 4);
+  set(vertices, normals, uvs, indices, 4);
 
   // import("cube.obj", 0);
   //
@@ -131,10 +156,10 @@ void Models::import(const char* filename, const int nth)
 void Models::set
 (const std::vector<bx::Vec3>& model_vertices,
  const std::vector<bx::Vec3>& model_normals,
+ const std::vector<bx::Vec3>& model_uvs,
  const std::vector<int>& model_indices,
  const int nth)
 {
-
   int vertices_offset = vertices_offsets[nth];
   int indices_offset = indices_offsets[nth];
 
@@ -148,6 +173,8 @@ void Models::set
     vertices[vertices_offset + i].normal_x = model_normals[i].x;
     vertices[vertices_offset + i].normal_y = model_normals[i].y;
     vertices[vertices_offset + i].normal_z = model_normals[i].z;
+    vertices[vertices_offset + i].texcoord_x1 = model_uvs[i].x;
+    vertices[vertices_offset + i].texcoord_y1 = model_uvs[i].y;
   }
 
   for(int i = 0; i < model_indices.size(); i++) {

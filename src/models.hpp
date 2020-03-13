@@ -11,13 +11,13 @@
 #include <assimp/postprocess.h>
 
 struct BufferObject;
-struct PosColorVertex;
+struct AnimatedPosColorTexVertex;
 
 struct Models
 {
   const int vertices_count = 10000;
   const int indices_count = 10000;
-  PosColorVertex* vertices;
+  AnimatedPosColorTexVertex* vertices;
   uint16_t* indices;
 
   uint16_t vertices_offsets[100];
@@ -25,7 +25,7 @@ struct Models
 
   void init();
   void import(const char* filename, const int nth);
-  void set(const std::vector<bx::Vec3>& model_vertices, const std::vector<bx::Vec3>& model_normals, const std::vector<int>& model_indices, const int nth);
+  void set(const std::vector<bx::Vec3>& model_vertices, const std::vector<bx::Vec3>& model_normals, const std::vector<bx::Vec3>& model_uvs, const std::vector<int>& model_indices, const int nth);
   void put(const int nth, BufferObject& bo);
 
   int nth_model_vertices_count(int nth) const;
