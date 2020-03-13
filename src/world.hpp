@@ -60,9 +60,6 @@ struct World
   int quads_count = 2;
 
 
-  BufferObject models_bo;
-
-
   std::vector<int> static_models_list;
   std::vector<int> moving_models_list;
 

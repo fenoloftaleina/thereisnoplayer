@@ -56,6 +56,12 @@ void Models::init()
   vertices_offsets[0] = 0;
   indices_offsets[0] = 0;
 
+
+  // TODO:
+  // Move import-ing and set-ing these below to buffer objects that now each
+  // have their own models.
+
+
   import("test.obj", 0);
   import("test-keyframe2.obj", 1);
   import("untitled.obj", 2);
@@ -78,23 +84,15 @@ void Models::init()
 
   normals[0] = normals[1] = normals[2] = normals[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
 
-  Textures textures;
-  std::vector<std::string> texture_assets = {
-    "assets/t1.png",
-    "assets/t2.png"
-  };
-  textures.prepare(texture_assets);
-  textures.setTexture();
-
   // uvs[0] = bx::Vec3(-1.0f, -1.0f, -1.0f);
   // uvs[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
   // uvs[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
   // uvs[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
 
-  uvs[0] = bx::Vec3(textures.mappings[0].x2, textures.mappings[0].y1, 0.0f);
-  uvs[1] = bx::Vec3(textures.mappings[0].x2, textures.mappings[0].y2, 0.0f);
-  uvs[2] = bx::Vec3(textures.mappings[0].x1, textures.mappings[0].y1, 0.0f);
-  uvs[3] = bx::Vec3(textures.mappings[0].x1, textures.mappings[0].y2, 0.0f);
+  uvs[0] = bx::Vec3(textures->mappings[0].x2, textures->mappings[0].y1, 0.0f);
+  uvs[1] = bx::Vec3(textures->mappings[0].x2, textures->mappings[0].y2, 0.0f);
+  uvs[2] = bx::Vec3(textures->mappings[0].x1, textures->mappings[0].y1, 0.0f);
+  uvs[3] = bx::Vec3(textures->mappings[0].x1, textures->mappings[0].y2, 0.0f);
 
   // uvs[0] = bx::Vec3(-1.0f, -1.0f, 0.0f);
   // uvs[1] = bx::Vec3(-1.0f, -1.0f, 0.0f);

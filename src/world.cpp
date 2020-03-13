@@ -63,16 +63,17 @@ void World::prepare()
     "assets/t2.png"
   };
   floor_bo.textures.prepare(texture_assets);
+  moving_bo.textures.prepare(texture_assets);
 
+
+  // TODO:
+  // models...
+  models.textures = &(moving_bo.textures);
   models.init();
   static_models_list.reserve(1000);
   moving_models_list.resize(100);
 
   moving_nimate.prepare(this, &moving_bo, &moving_positions, &moving_colors, &moving_models_list);
-
-  models_bo.initModels(100);
-  models_bo.createBuffers();
-  models_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
 }
 
 
@@ -132,30 +133,6 @@ void World::init()
 
 
   moving_nimate.init();
-
-
-
-  models_bo.writeModelVertices(
-      0,
-      bx::Vec3(-2.0f, 3.0f, 0.0f),
-      bx::Vec3(0.5f, 0.3f, 0.9f),
-      models,
-      0
-      );
-  models_bo.writeModelIndices(0, 0, models, 0);
-  models_bo.writeModelVertices(
-      models.nth_model_vertices_count(0),
-      bx::Vec3(2.0f, 0.0f, 0.0f),
-      bx::Vec3(0.1f, 0.3f, 0.9f),
-      models,
-      0
-      );
-  models_bo.writeModelIndices(
-      models.nth_model_indices_count(0),
-      models.nth_model_vertices_count(0),
-      models,
-      0
-      );
 }
 
 
@@ -168,8 +145,6 @@ void World::updateBuffers()
   floor_bo.updateBuffer();
 
   quads_bo.updateBuffer();
-
-  models_bo.updateBuffer();
 }
 
 void World::resolve
@@ -260,9 +235,6 @@ void World::draw(const bool in_editor)
   if (in_editor) {
     editor_bo.drawCubes(view, 1, BGFX_STATE_BLEND_ALPHA);
   }
-
-
-  // models_bo.drawModels(view, 0);
 }
 
 
@@ -273,9 +245,6 @@ void World::destroy()
   doors_bo.destroy();
   winning_doors_bo.destroy();
   editor_bo.destroy();
-
-
-  models_bo.destroy();
 }
 
 
