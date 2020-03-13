@@ -230,18 +230,6 @@ void BufferObject::initModels(const int models_count)
 }
 
 
-void BufferObject::drawModels
-(bgfx::ViewId view, const int models_count, const int nth, uint64_t more_state = 0)
-{
-  draw(
-      view,
-      models.nth_model_vertices_count(nth) * models_count,
-      models.nth_model_indices_count(nth) * models_count,
-      more_state
-      );
-}
-
-
 void BufferObject::drawModels(bgfx::ViewId view, uint64_t more_state = 0)
 {
   draw(view, models_vertices_count, models_indices_count, more_state);

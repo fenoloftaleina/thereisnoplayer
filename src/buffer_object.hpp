@@ -143,7 +143,6 @@ struct BufferObject {
   void draw(bgfx::ViewId view, uint16_t current_vertices_count, uint16_t current_indices_count, uint64_t more_state);
   void drawCubes(bgfx::ViewId view, uint16_t current_cubes_count, uint64_t more_state = 0);
   void drawCubesLines(bgfx::ViewId view, uint16_t current_cubes_count);
-  void drawModels(bgfx::ViewId view, const int models_count, const int nth, uint64_t more_state);
   void drawModels(bgfx::ViewId view, uint64_t more_state);
   void drawQuads(bgfx::ViewId view, uint16_t current_quads_count, uint64_t more_state = 0);
   void destroy();

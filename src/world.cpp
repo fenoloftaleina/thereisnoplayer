@@ -270,7 +270,7 @@ void World::update(const float t, const float dt)
 
 void World::draw(const bool in_editor)
 {
-  moving_bo.drawModels(view, moving_spots.size(), 0, BGFX_STATE_BLEND_ALPHA);
+  moving_bo.drawModels(view, BGFX_STATE_BLEND_ALPHA);
   static_bo.drawModels(view, 0);
   doors_bo.drawCubes(view, doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
   winning_doors_bo.drawCubes(view, winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
