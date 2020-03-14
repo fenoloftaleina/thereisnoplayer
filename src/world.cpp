@@ -83,47 +83,64 @@ void World::prepare()
   static_bo.models.import("test-keyframe2.obj", 1);
   static_bo.models.import("untitled.obj", 2);
 
+  float y = -1.0f;
+  float h = 2.0f;
   float lw = 0.05f;
   float lw2 = lw * 0.5f;
 
-  int planes = 3;
+  int planes = 5;
   vertices.resize(planes * 4);
   colors.resize(planes * 4);
   normals.resize(planes * 4);
   uvs.resize(planes * 4);
   indices.resize(planes * 6);
 
-  vertices[ 0] = bx::Vec3( 1.0f - lw2, -1.0f, -1.0f + lw2);
-  vertices[ 1] = bx::Vec3( 1.0f - lw2, -1.0f,  1.0f - lw2);
-  vertices[ 2] = bx::Vec3(-1.0f + lw2, -1.0f, -1.0f + lw2);
-  vertices[ 3] = bx::Vec3(-1.0f + lw2, -1.0f,  1.0f - lw2);
-
-  vertices[ 4] = bx::Vec3(-1.0f + lw2, -1.0f, -1.0f - lw2);
-  vertices[ 5] = bx::Vec3(-1.0f + lw2, -1.0f,  1.0f + lw2);
-  vertices[ 6] = bx::Vec3(-1.0f - lw2, -1.0f, -1.0f - lw2);
-  vertices[ 7] = bx::Vec3(-1.0f - lw2, -1.0f,  1.0f + lw2);
-
-  vertices[ 8] = bx::Vec3( 1.0f - lw2, -1.0f, -1.0f - lw2);
-  vertices[ 9] = bx::Vec3( 1.0f - lw2, -1.0f, -1.0f + lw2);
-  vertices[10] = bx::Vec3(-1.0f + lw2, -1.0f, -1.0f - lw2);
-  vertices[11] = bx::Vec3(-1.0f + lw2, -1.0f, -1.0f + lw2);
-
-  // vertices[12] = bx::Vec3( 1.0f, -1.0f, -1.0f + lw);
-  // vertices[13] = bx::Vec3( 1.0f, -1.0f,  1.0f - lw);
-  // vertices[14] = bx::Vec3( 1.0f - lw, -1.0f, -1.0f + lw);
-  // vertices[15] = bx::Vec3( 1.0f - lw, -1.0f,  1.0f - lw);
-
-  // vertices[16] = bx::Vec3(-1.0f, -1.0f, -1.0f + lw);
-  // vertices[17] = bx::Vec3(-1.0f, -1.0f,  1.0f - lw);
-  // vertices[18] = bx::Vec3(-1.0f + lw, -1.0f, -1.0f + lw);
-  // vertices[19] = bx::Vec3(-1.0f + lw, -1.0f,  1.0f - lw);
+  bx::Vec3 inside_color(0.8f, 0.8f, 0.8f);
+  bx::Vec3 bg_color(0.33f, 0.33f, 0.33f);
+  bx::Vec3 border_color_main(0.4f, 0.4f, 0.4f);
+  // bx::Vec3 border_color_secondary(0.6f, 0.6f, 0.6f);
+  bx::Vec3 gradient_color(0.5f, 0.5f, 0.5f);
 
   fr(i, normals) {
-    colors[i] = bx::Vec3(0.4f, 0.4f, 0.4f);
+    colors[i] = border_color_main;
     normals[i] = bx::Vec3(0.0f, 1.0f, 0.0f);
     uvs[i] = bx::Vec3(-1.0f, -1.0f, 0.0f);
   }
-  colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(0.9f, 0.9f, 0.9f);
+
+  // inside
+  vertices[ 0] = bx::Vec3( 1.0f - lw2, y, -1.0f + lw2);
+  vertices[ 1] = bx::Vec3( 1.0f - lw2, y,  1.0f - lw2);
+  vertices[ 2] = bx::Vec3(-1.0f + lw2, y, -1.0f + lw2);
+  vertices[ 3] = bx::Vec3(-1.0f + lw2, y,  1.0f - lw2);
+  colors[0] = colors[1] = colors[2] = colors[3] = inside_color;
+
+  // left
+  vertices[ 4] = bx::Vec3(-1.0f + lw2, y, -1.0f - lw2);
+  vertices[ 5] = bx::Vec3(-1.0f + lw2, y,  1.0f - lw2);
+  vertices[ 6] = bx::Vec3(-1.0f - lw2, y, -1.0f - lw2);
+  vertices[ 7] = bx::Vec3(-1.0f - lw2, y,  1.0f - lw2);
+  // colors[4] = colors[5] = colors[6] = colors[7] = border_color_main;
+
+  // bottom
+  vertices[ 8] = bx::Vec3( 1.0f - lw2, y, -1.0f - lw2);
+  vertices[ 9] = bx::Vec3( 1.0f - lw2, y, -1.0f + lw2);
+  vertices[10] = bx::Vec3(-1.0f + lw2, y, -1.0f - lw2);
+  vertices[11] = bx::Vec3(-1.0f + lw2, y, -1.0f + lw2);
+  // colors[8] = colors[9] = colors[10] = colors[11] = border_color_main;
+
+  // front
+  vertices[12] = bx::Vec3( 1.0f - lw2, y - lw2, -1.0f - lw2);
+  vertices[13] = bx::Vec3( 1.0f - lw2, y, -1.0f - lw2);
+  vertices[14] = bx::Vec3(-1.0f + lw2, y - lw2, -1.0f - lw2);
+  vertices[15] = bx::Vec3(-1.0f + lw2, y, -1.0f - lw2);
+
+  // front gradient
+  vertices[16] = bx::Vec3( 1.0f - lw2, y - h, -1.0f - lw2);
+  vertices[17] = bx::Vec3( 1.0f - lw2, y - lw2, -1.0f - lw2);
+  vertices[18] = bx::Vec3(-1.0f + lw2, y - h, -1.0f - lw2);
+  vertices[19] = bx::Vec3(-1.0f + lw2, y - lw2, -1.0f - lw2);
+  colors[17] = colors[19] = gradient_color;
+  colors[16] = colors[18] = bg_color;
 
   for (int i = 0; i < planes; ++i) {
     indices[6 * i + 0] = 4 * i + 1;
