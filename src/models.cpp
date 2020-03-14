@@ -103,6 +103,7 @@ void Models::import(const char* filename, const int nth)
 
 void Models::set
 (const std::vector<bx::Vec3>& model_vertices,
+ const std::vector<bx::Vec3>& model_colors,
  const std::vector<bx::Vec3>& model_normals,
  const std::vector<bx::Vec3>& model_uvs,
  const std::vector<int>& model_indices,
@@ -115,9 +116,9 @@ void Models::set
     vertices[vertices_offset + i].x = model_vertices[i].x;
     vertices[vertices_offset + i].y = model_vertices[i].y;
     vertices[vertices_offset + i].z = model_vertices[i].z;
-    vertices[vertices_offset + i].r = 0.5f;
-    vertices[vertices_offset + i].g = 0.3f;
-    vertices[vertices_offset + i].b = 0.9f;
+    vertices[vertices_offset + i].r = model_colors[i].x;
+    vertices[vertices_offset + i].g = model_colors[i].y;
+    vertices[vertices_offset + i].b = model_colors[i].z;
     vertices[vertices_offset + i].normal_x = model_normals[i].x;
     vertices[vertices_offset + i].normal_y = model_normals[i].y;
     vertices[vertices_offset + i].normal_z = model_normals[i].z;

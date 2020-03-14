@@ -92,7 +92,7 @@ struct Models
 
   void init();
   void import(const char* filename, const int nth);
-  void set(const std::vector<bx::Vec3>& model_vertices, const std::vector<bx::Vec3>& model_normals, const std::vector<bx::Vec3>& model_uvs, const std::vector<int>& model_indices, const int nth);
+  void set(const std::vector<bx::Vec3>& model_vertices, const std::vector<bx::Vec3>& model_colors, const std::vector<bx::Vec3>& model_normals, const std::vector<bx::Vec3>& model_uvs, const std::vector<int>& model_indices, const int nth);
 
   int nth_model_vertices_count(int nth) const;
   int nth_model_indices_count(int nth) const;

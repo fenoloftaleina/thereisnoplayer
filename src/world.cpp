@@ -70,6 +70,7 @@ void World::prepare()
 
 
   std::vector<bx::Vec3> vertices;
+  std::vector<bx::Vec3> colors;
   std::vector<bx::Vec3> normals;
   std::vector<bx::Vec3> uvs;
   std::vector<int> indices;
@@ -78,37 +79,69 @@ void World::prepare()
 
   static_bo.models.init();
 
-  // float lw = 0.1f;
-  //
-  // vertices.resize(20);
-  // normals.resize(20);
-  // uvs.resize(4);
-  // indices.resize(30);
-  //
-  // vertices[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
-  // vertices[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
-  // vertices[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  // vertices[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
-  //
-  // fr(i, normals) {
-  //   normals[i] = bx::Vec3(0.0f, 1.0f, 0.0f);
-  //   uvs[i] = bx::Vec3(-1.0f, -1.0f, 0.0f);
-  // }
-  //
-  // for (int i = 0; i < 5; ++i) {
-  //   indices[6 * i + 0] = 4 * i + 1;
-  //   indices[6 * i + 1] = 4 * i + 0;
-  //   indices[6 * i + 2] = 4 * i + 3;
-  //   indices[6 * i + 3] = 4 * i + 0;
-  //   indices[6 * i + 4] = 4 * i + 2;
-  //   indices[6 * i + 5] = 4 * i + 3;
-  // }
-  //
-  // static_bo.models.set(vertices, normals, uvs, indices, 4);
+  static_bo.models.import("test.obj", 0);
+  static_bo.models.import("test-keyframe2.obj", 1);
+  static_bo.models.import("untitled.obj", 2);
+
+  float lw = 0.05f;
+  float lw2 = lw * 0.5f;
+
+  int planes = 3;
+  vertices.resize(planes * 4);
+  colors.resize(planes * 4);
+  normals.resize(planes * 4);
+  uvs.resize(planes * 4);
+  indices.resize(planes * 6);
+
+  vertices[ 0] = bx::Vec3( 1.0f - lw2, -1.0f, -1.0f + lw2);
+  vertices[ 1] = bx::Vec3( 1.0f - lw2, -1.0f,  1.0f - lw2);
+  vertices[ 2] = bx::Vec3(-1.0f + lw2, -1.0f, -1.0f + lw2);
+  vertices[ 3] = bx::Vec3(-1.0f + lw2, -1.0f,  1.0f - lw2);
+
+  vertices[ 4] = bx::Vec3(-1.0f + lw2, -1.0f, -1.0f - lw2);
+  vertices[ 5] = bx::Vec3(-1.0f + lw2, -1.0f,  1.0f + lw2);
+  vertices[ 6] = bx::Vec3(-1.0f - lw2, -1.0f, -1.0f - lw2);
+  vertices[ 7] = bx::Vec3(-1.0f - lw2, -1.0f,  1.0f + lw2);
+
+  vertices[ 8] = bx::Vec3( 1.0f - lw2, -1.0f, -1.0f - lw2);
+  vertices[ 9] = bx::Vec3( 1.0f - lw2, -1.0f, -1.0f + lw2);
+  vertices[10] = bx::Vec3(-1.0f + lw2, -1.0f, -1.0f - lw2);
+  vertices[11] = bx::Vec3(-1.0f + lw2, -1.0f, -1.0f + lw2);
+
+  // vertices[12] = bx::Vec3( 1.0f, -1.0f, -1.0f + lw);
+  // vertices[13] = bx::Vec3( 1.0f, -1.0f,  1.0f - lw);
+  // vertices[14] = bx::Vec3( 1.0f - lw, -1.0f, -1.0f + lw);
+  // vertices[15] = bx::Vec3( 1.0f - lw, -1.0f,  1.0f - lw);
+
+  // vertices[16] = bx::Vec3(-1.0f, -1.0f, -1.0f + lw);
+  // vertices[17] = bx::Vec3(-1.0f, -1.0f,  1.0f - lw);
+  // vertices[18] = bx::Vec3(-1.0f + lw, -1.0f, -1.0f + lw);
+  // vertices[19] = bx::Vec3(-1.0f + lw, -1.0f,  1.0f - lw);
+
+  fr(i, normals) {
+    colors[i] = bx::Vec3(0.4f, 0.4f, 0.4f);
+    normals[i] = bx::Vec3(0.0f, 1.0f, 0.0f);
+    uvs[i] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  }
+  colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(0.9f, 0.9f, 0.9f);
+
+  for (int i = 0; i < planes; ++i) {
+    indices[6 * i + 0] = 4 * i + 1;
+    indices[6 * i + 1] = 4 * i + 0;
+    indices[6 * i + 2] = 4 * i + 3;
+    indices[6 * i + 3] = 4 * i + 0;
+    indices[6 * i + 4] = 4 * i + 2;
+    indices[6 * i + 5] = 4 * i + 3;
+  }
+
+  static_bo.models.set(vertices, colors, normals, uvs, indices, 3);
+
+  static_bo.models.import("cube.obj", 4);
 
 
 
   vertices.resize(4);
+  colors.resize(4);
   normals.resize(4);
   uvs.resize(4);
   indices.resize(6);
@@ -118,6 +151,7 @@ void World::prepare()
   vertices[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
   vertices[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
 
+  colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(0.0f, 0.0f, 0.0f);
   normals[0] = normals[1] = normals[2] = normals[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
 
   // uvs[0] = bx::Vec3(-1.0f, -1.0f, -1.0f);
@@ -143,13 +177,7 @@ void World::prepare()
   indices[5] = 3;
 
   moving_bo.models.init();
-  moving_bo.models.set(vertices, normals, uvs, indices, 0);
-
-  static_bo.models.import("test.obj", 0);
-  static_bo.models.import("test-keyframe2.obj", 1);
-  static_bo.models.import("untitled.obj", 2);
-  static_bo.models.set(vertices, normals, uvs, indices, 3);
-  static_bo.models.import("cube.obj", 4);
+  moving_bo.models.set(vertices, colors, normals, uvs, indices, 0);
 
   static_models_list.reserve(1000);
   moving_models_list.resize(100);
