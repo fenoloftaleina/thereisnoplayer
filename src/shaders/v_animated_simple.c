@@ -20,11 +20,8 @@ void main()
   vec4 col = mix(a_color0, a_color1, smoothstep(from_vcp.y, to_vcp.y, twh.x));
   vec3 pos = mix(pos1, pos2, smoothstep(from_vcp.z, to_vcp.z, twh.x));
 
-  vec3 end_pos = position + pos;
-  end_pos.y = end_pos.y - (end_pos.x * end_pos.x * 0.01 + end_pos.z * end_pos.z * 0.01);
-
-	gl_Position = mul(u_modelViewProj, vec4(end_pos, 1.0));
+	gl_Position = mul(u_modelViewProj, vec4(position + pos, 1.0));
 	v_color0 = col;
   v_normal0 = a_normal;
-	v_position0 = mul(u_model[0], vec4(end_pos, 0.0)).xyz;
+	v_position0 = mul(u_model[0], vec4(position + pos, 0.0)).xyz;
 }
