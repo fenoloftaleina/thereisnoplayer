@@ -387,7 +387,7 @@ bool World::maybe_won()
     }
   }
 
-  won = winning_count == winning_doors_spots.size();
+  won = winning_doors_spots.size() > 0 && winning_count == winning_doors_spots.size();
 
   return won;
 }
