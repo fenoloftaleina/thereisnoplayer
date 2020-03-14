@@ -46,7 +46,8 @@ void World::prepare()
   moving_bo.createBuffers();
   moving_bo.createShaders("bin/v_animated_tex.bin", "bin/f_animated_tex.bin");
   static_bo.createBuffers();
-  static_bo.createShaders("bin/v_animated_simple.bin", "bin/f_simple.bin");
+  static_bo.m_program = moving_bo.m_program;
+  // static_bo.createShaders("bin/v_animated_tex.bin", "bin/f_animated_tex.bin");
   doors_bo.createBuffers();
   doors_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
   winning_doors_bo.createBuffers();
@@ -64,20 +65,48 @@ void World::prepare()
   };
   floor_bo.textures.prepare(texture_assets);
   moving_bo.textures.prepare(texture_assets);
+  static_bo.textures.prepare(texture_assets);
 
-
-
-  static_bo.models.init();
-  static_bo.models.import("test.obj", 0);
-  static_bo.models.import("test-keyframe2.obj", 1);
-  static_bo.models.import("untitled.obj", 2);
-  static_bo.models.import("cube.obj", 3);
 
 
   std::vector<bx::Vec3> vertices;
   std::vector<bx::Vec3> normals;
   std::vector<bx::Vec3> uvs;
   std::vector<int> indices;
+
+
+
+  static_bo.models.init();
+
+  // float lw = 0.1f;
+  //
+  // vertices.resize(20);
+  // normals.resize(20);
+  // uvs.resize(4);
+  // indices.resize(30);
+  //
+  // vertices[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
+  // vertices[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
+  // vertices[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  // vertices[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
+  //
+  // fr(i, normals) {
+  //   normals[i] = bx::Vec3(0.0f, 1.0f, 0.0f);
+  //   uvs[i] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  // }
+  //
+  // for (int i = 0; i < 5; ++i) {
+  //   indices[6 * i + 0] = 4 * i + 1;
+  //   indices[6 * i + 1] = 4 * i + 0;
+  //   indices[6 * i + 2] = 4 * i + 3;
+  //   indices[6 * i + 3] = 4 * i + 0;
+  //   indices[6 * i + 4] = 4 * i + 2;
+  //   indices[6 * i + 5] = 4 * i + 3;
+  // }
+  //
+  // static_bo.models.set(vertices, normals, uvs, indices, 4);
+
+
 
   vertices.resize(4);
   normals.resize(4);
@@ -115,6 +144,12 @@ void World::prepare()
 
   moving_bo.models.init();
   moving_bo.models.set(vertices, normals, uvs, indices, 0);
+
+  static_bo.models.import("test.obj", 0);
+  static_bo.models.import("test-keyframe2.obj", 1);
+  static_bo.models.import("untitled.obj", 2);
+  static_bo.models.set(vertices, normals, uvs, indices, 3);
+  static_bo.models.import("cube.obj", 4);
 
   static_models_list.reserve(1000);
   moving_models_list.resize(100);

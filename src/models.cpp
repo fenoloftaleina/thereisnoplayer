@@ -13,6 +13,8 @@ void Models::processMesh(aiMesh *mesh, const aiScene *scene, int& vertices_offse
     vertices[vertices_offset + i].normal_x = mesh->mNormals[i].x;
     vertices[vertices_offset + i].normal_y = mesh->mNormals[i].y;
     vertices[vertices_offset + i].normal_z = mesh->mNormals[i].z;
+    vertices[vertices_offset + i].texcoord_x1 = -1.0f;
+    vertices[vertices_offset + i].texcoord_y1 = -1.0f;
   }
 
   int n = 0;
