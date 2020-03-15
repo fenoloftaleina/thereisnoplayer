@@ -12,6 +12,7 @@ void World::prepare()
   editor_spot.reserve(1);
   editor_spot.resize(1);
   through_door.reserve(100);
+  floor_spots.reserve(1000);
 
   all_moving_spots.reserve(1000);
   all_any_through_doors.reserve(1000);
@@ -24,10 +25,11 @@ void World::prepare()
   doors_colors.reserve(1000);
   winning_doors_positions.reserve(100);
   winning_doors_colors.reserve(100);
-  floor_positions.reserve(10000);
-  floor_colors.reserve(10000);
+  tiles_positions.reserve(10000);
+  tiles_colors.reserve(10000);
   editor_position.reserve(1);
   editor_color.reserve(1);
+  floor_positions.reserve(1000);
 
   positions_temp.reserve(100);
   colors_temp.reserve(100);
@@ -39,31 +41,55 @@ void World::prepare()
   static_bo.initModels(100);
   doors_bo.initCubes(1000);
   winning_doors_bo.initCubes(1000);
-  floor_bo.initQuads(10000);
+  tiles_bo.initQuads(10000);
   editor_bo.initCubes(1);
   quads_bo.initQuads(1000);
+  floor_bo.initModels(1000);
+  bg_bo.initModels(1);
+
+
+  bgfx::ShaderHandle v_animated_tex = Common::loadShader("bin/v_animated_tex.bin");
+  bgfx::ShaderHandle f_animated_tex = Common::loadShader("bin/f_animated_tex.bin");
+  bgfx::ShaderHandle v_simple = Common::loadShader("bin/v_simple.bin");
+  bgfx::ShaderHandle f_simple = Common::loadShader("bin/f_simple.bin");
+  bgfx::ShaderHandle f_noise_simple = Common::loadShader("bin/f_noise_simple.bin");
+  bgfx::ShaderHandle v_tex = Common::loadShader("bin/v_tex.bin");
+  bgfx::ShaderHandle f_tex = Common::loadShader("bin/f_tex.bin");
+  bgfx::ShaderHandle f_editor = Common::loadShader("bin/f_editor.bin");
+  bgfx::ShaderHandle f_bg = Common::loadShader("bin/f_bg.bin");
+
+  bgfx::ProgramHandle p_animated_tex = bgfx::createProgram(v_animated_tex, f_animated_tex, false);
+  bgfx::ProgramHandle p_simple = bgfx::createProgram(v_simple, f_simple, false);
+  bgfx::ProgramHandle p_tex = bgfx::createProgram(v_tex, f_tex, false);
+  bgfx::ProgramHandle p_noise_simple = bgfx::createProgram(v_simple, f_noise_simple, false);
+  bgfx::ProgramHandle p_editor = bgfx::createProgram(v_simple, f_editor, false);
+  bgfx::ProgramHandle p_bg = bgfx::createProgram(v_animated_tex, f_bg, false);
 
   moving_bo.createBuffers();
-  moving_bo.createShaders("bin/v_animated_tex.bin", "bin/f_animated_tex.bin");
+  moving_bo.m_program = p_animated_tex;
   static_bo.createBuffers();
-  static_bo.m_program = moving_bo.m_program;
-  // static_bo.createShaders("bin/v_animated_tex.bin", "bin/f_animated_tex.bin");
+  static_bo.m_program = p_animated_tex;
   doors_bo.createBuffers();
-  doors_bo.createShaders("bin/v_simple.bin", "bin/f_simple.bin");
+  doors_bo.m_program = p_simple;
   winning_doors_bo.createBuffers();
-  winning_doors_bo.createShaders("bin/v_simple.bin", "bin/f_noise_simple.bin");
-  floor_bo.createBuffers();
-  floor_bo.createShaders("bin/v_tex.bin", "bin/f_tex.bin");
+  winning_doors_bo.m_program = p_noise_simple;
+  tiles_bo.createBuffers();
+  tiles_bo.m_program = p_tex;
   editor_bo.createBuffers();
-  editor_bo.createShaders("bin/v_simple.bin", "bin/f_editor.bin");
+  editor_bo.m_program = p_editor;
   quads_bo.createBuffers();
-  quads_bo.createShaders("bin/v_tex.bin", "bin/f_tex.bin");
+  quads_bo.m_program = p_tex;
+  floor_bo.createBuffers();
+  floor_bo.m_program = p_animated_tex;
+  bg_bo.createBuffers();
+  bg_bo.m_program = p_bg;
+
 
   std::vector<std::string> texture_assets = {
     "assets/t1.png",
     "assets/t2.png"
   };
-  floor_bo.textures.prepare(texture_assets);
+  tiles_bo.textures.prepare(texture_assets);
   moving_bo.textures.prepare(texture_assets);
   static_bo.textures.prepare(texture_assets);
 
@@ -156,6 +182,10 @@ void World::prepare()
   static_bo.models.import("cube.obj", 4);
 
 
+  floor_bo.models.init();
+  floor_bo.models.set(vertices, colors, normals, uvs, indices, 0);
+
+
 
   vertices.resize(4);
   colors.resize(4);
@@ -171,20 +201,15 @@ void World::prepare()
   colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(0.0f, 0.0f, 0.0f);
   normals[0] = normals[1] = normals[2] = normals[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
 
-  // uvs[0] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  // uvs[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
-  // uvs[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  // uvs[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
-
   uvs[0] = bx::Vec3(moving_bo.textures.mappings[0].x2, moving_bo.textures.mappings[0].y1, 0.0f);
   uvs[1] = bx::Vec3(moving_bo.textures.mappings[0].x2, moving_bo.textures.mappings[0].y2, 0.0f);
   uvs[2] = bx::Vec3(moving_bo.textures.mappings[0].x1, moving_bo.textures.mappings[0].y1, 0.0f);
   uvs[3] = bx::Vec3(moving_bo.textures.mappings[0].x1, moving_bo.textures.mappings[0].y2, 0.0f);
 
-  // uvs[0] = bx::Vec3(-1.0f, -1.0f, 0.0f);
-  // uvs[1] = bx::Vec3(-1.0f, -1.0f, 0.0f);
-  // uvs[2] = bx::Vec3(-1.0f, -1.0f, 0.0f);
-  // uvs[3] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  // uvs[0] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  // uvs[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
+  // uvs[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  // uvs[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
 
   indices[0] = 1;
   indices[1] = 0;
@@ -196,8 +221,28 @@ void World::prepare()
   moving_bo.models.init();
   moving_bo.models.set(vertices, colors, normals, uvs, indices, 0);
 
+
+  float screen_size = 100.0f;
+  float bg_y = -3.0f;
+  vertices[0] = bx::Vec3( screen_size, bg_y, -screen_size);
+  vertices[1] = bx::Vec3( screen_size, bg_y,  screen_size);
+  vertices[2] = bx::Vec3(-screen_size, bg_y, -screen_size);
+  vertices[3] = bx::Vec3(-screen_size, bg_y,  screen_size);
+
+  colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
+
+  uvs[0] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  uvs[1] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  uvs[2] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  uvs[3] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+
+  bg_bo.models.init();
+  bg_bo.models.set(vertices, colors, normals, uvs, indices, 0);
+
   static_models_list.reserve(1000);
   moving_models_list.resize(100);
+  floor_models_list.reserve(100);
+  bg_models_list.reserve(1);
 
   moving_nimate.prepare(this, &moving_bo, &moving_positions, &moving_colors, &moving_models_list);
 }
@@ -212,23 +257,31 @@ void World::init()
   static_positions.resize(static_spots.size());
   doors_positions.resize(doors_spots.size());
   winning_doors_positions.resize(winning_doors_spots.size());
-  floor_positions.resize(floor_spots.size());
+  tiles_positions.resize(tiles_spots.size());
   editor_position.resize(1);
   moving_colors.resize(moving_spots.size());
   static_colors.resize(static_spots.size());
   doors_colors.resize(doors_spots.size());
   winning_doors_colors.resize(winning_doors_spots.size());
-  floor_colors.resize(floor_spots.size());
+  tiles_colors.resize(tiles_spots.size());
   editor_color.resize(1);
   through_door.resize(moving_spots.size());
   moving_cur_spots.resize(moving_spots.size());
+  floor_positions.resize(floor_spots.size());
+  floor_colors.resize(floor_spots.size());
 
   setPositionsFromSpots(moving_positions, moving_spots);
   setPositionsFromSpots(static_positions, static_spots);
   setPositionsFromSpots(doors_positions, doors_spots);
   setPositionsFromSpots(winning_doors_positions, winning_doors_spots);
-  setPositionsFromSpots(floor_positions, floor_spots);
+  setPositionsFromSpots(tiles_positions, tiles_spots);
   setPositionsFromSpots(editor_position, editor_spot);
+  setPositionsFromSpots(floor_positions, floor_spots);
+
+  bg_positions.resize(1);
+  bg_colors.resize(1);
+  bg_positions[0] = bx::Vec3(0.0f, 0.0f, 0.0f);
+  bg_colors[0] = bg_color;
 
   setColors(moving_colors, moving_color);
   setColors(static_colors, static_color);
@@ -236,8 +289,9 @@ void World::init()
     doors_colors[i] = gate_colors[(int)(i / 2)];
   }
   setColors(winning_doors_colors, winning_doors_color);
-  setColors(floor_colors, floor_color);
+  setColors(tiles_colors, tiles_color);
   setColors(editor_color, editor_thing_color);
+  setColors(floor_colors, floor_color);
 
 
   moving_models_list.resize(moving_positions.size());
@@ -247,13 +301,18 @@ void World::init()
     models_temp[i] = moving_models_list[i];
   }
 
+  bg_models_list.resize(1);
+  bg_models_list[0] = 0;
+
 
   writeModelsVertices(moving_bo, moving_positions, moving_colors, moving_models_list);
   writeModelsVertices(static_bo, static_positions, static_colors, static_models_list);
   writeCubesVertices(doors_bo, doors_positions, doors_colors);
   writeCubesVertices(winning_doors_bo, winning_doors_positions, winning_doors_colors);
-  writeFloorVertices(floor_bo, floor_positions, floor_colors, floor_mapping_ids);
+  writeFloorVertices(tiles_bo, tiles_positions, tiles_colors, tiles_mapping_ids);
   writeCubesVertices(editor_bo, editor_position, editor_color);
+  writeModelsVertices(floor_bo, floor_positions, floor_colors, floor_models_list);
+  writeModelsVertices(bg_bo, moving_positions, moving_colors, bg_models_list);
 
   moving_next_spots = moving_spots;
 
@@ -268,7 +327,9 @@ void World::updateBuffers()
   static_bo.updateBuffer();
   doors_bo.updateBuffer();
   winning_doors_bo.updateBuffer();
+  tiles_bo.updateBuffer();
   floor_bo.updateBuffer();
+  bg_bo.updateBuffer();
 
   quads_bo.updateBuffer();
 }
@@ -354,7 +415,9 @@ void World::draw(const bool in_editor)
   static_bo.drawModels(view, 0);
   doors_bo.drawCubes(view, doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
   winning_doors_bo.drawCubes(view, winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
-  floor_bo.drawQuads(view, floor_spots.size());
+  tiles_bo.drawQuads(view, tiles_spots.size());
+  floor_bo.drawModels(view, 0);
+  bg_bo.drawModels(view, 0);
 
   quads_bo.drawQuads(view, quads_count);
 
@@ -371,6 +434,8 @@ void World::destroy()
   doors_bo.destroy();
   winning_doors_bo.destroy();
   editor_bo.destroy();
+  floor_bo.destroy();
+  bg_bo.destroy();
 }
 
 
@@ -598,23 +663,23 @@ void World::writeFloorVertices
  const std::vector<int>& mapping_ids
  )
 {
-  std::vector<bx::Vec3> floor_vs;
-  std::vector<bx::Vec3> floor_cs;
+  std::vector<bx::Vec3> tiles_vs;
+  std::vector<bx::Vec3> tiles_cs;
   int tile_size = 1.0f;
-  floor_vs.resize(mapping_ids.size() * 4);
-  floor_cs.resize(mapping_ids.size() * 4);
+  tiles_vs.resize(mapping_ids.size() * 4);
+  tiles_cs.resize(mapping_ids.size() * 4);
 
   for (int i = 0; i < mapping_ids.size(); ++i) {
     printf("f pos: %f %f %f, ", positions[i].x, positions[i].y, positions[i].z);
-    floor_vs[i * 4 + 0] = bx::Vec3(positions[i].x + tile_size, -1.0f, positions[i].z - tile_size);
-    floor_vs[i * 4 + 1] = bx::Vec3(positions[i].x + tile_size, -1.0f, positions[i].z + tile_size);
-    floor_vs[i * 4 + 2] = bx::Vec3(positions[i].x - tile_size, -1.0f, positions[i].z - tile_size);
-    floor_vs[i * 4 + 3] = bx::Vec3(positions[i].x - tile_size, -1.0f, positions[i].z + tile_size);
-    floor_cs[i * 4 + 0] =
-      floor_cs[i * 4 + 1] =
-      floor_cs[i * 4 + 2] =
-      floor_cs[i * 4 + 3] = colors[i];
+    tiles_vs[i * 4 + 0] = bx::Vec3(positions[i].x + tile_size, -1.0f, positions[i].z - tile_size);
+    tiles_vs[i * 4 + 1] = bx::Vec3(positions[i].x + tile_size, -1.0f, positions[i].z + tile_size);
+    tiles_vs[i * 4 + 2] = bx::Vec3(positions[i].x - tile_size, -1.0f, positions[i].z - tile_size);
+    tiles_vs[i * 4 + 3] = bx::Vec3(positions[i].x - tile_size, -1.0f, positions[i].z + tile_size);
+    tiles_cs[i * 4 + 0] =
+      tiles_cs[i * 4 + 1] =
+      tiles_cs[i * 4 + 2] =
+      tiles_cs[i * 4 + 3] = colors[i];
   }
 
-  bo.writeQuadsVertices(0, floor_vs, floor_cs, mapping_ids);
+  bo.writeQuadsVertices(0, tiles_vs, tiles_cs, mapping_ids);
 }

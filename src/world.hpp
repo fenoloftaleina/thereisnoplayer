@@ -26,8 +26,9 @@ struct World
   std::vector<Spot> static_spots;
   std::vector<Spot> doors_spots;
   std::vector<Spot> winning_doors_spots;
-  std::vector<Spot> floor_spots;
+  std::vector<Spot> tiles_spots;
   std::vector<Spot> editor_spot;
+  std::vector<Spot> floor_spots;
 
   std::vector<bool> through_door;
 
@@ -42,18 +43,24 @@ struct World
   std::vector<bx::Vec3> doors_colors;
   std::vector<bx::Vec3> winning_doors_positions;
   std::vector<bx::Vec3> winning_doors_colors;
-  std::vector<bx::Vec3> floor_positions;
-  std::vector<bx::Vec3> floor_colors;
-  std::vector<int> floor_mapping_ids;
+  std::vector<bx::Vec3> tiles_positions;
+  std::vector<bx::Vec3> tiles_colors;
+  std::vector<int> tiles_mapping_ids;
   std::vector<bx::Vec3> editor_position;
   std::vector<bx::Vec3> editor_color;
+  std::vector<bx::Vec3> floor_positions;
+  std::vector<bx::Vec3> floor_colors;
+  std::vector<bx::Vec3> bg_positions;
+  std::vector<bx::Vec3> bg_colors;
 
   BufferObject moving_bo;
   BufferObject static_bo;
   BufferObject doors_bo;
   BufferObject winning_doors_bo;
-  BufferObject floor_bo;
+  BufferObject tiles_bo;
   BufferObject editor_bo;
+  BufferObject bg_bo;
+  BufferObject floor_bo;
 
 
   BufferObject quads_bo;
@@ -62,6 +69,8 @@ struct World
 
   std::vector<int> static_models_list;
   std::vector<int> moving_models_list;
+  std::vector<int> floor_models_list;
+  std::vector<int> bg_models_list;
 
 
   Nimate moving_nimate;
@@ -71,7 +80,7 @@ struct World
   // bx::Vec3 static_color = {0.0f, 99/255.0f, 115/255.0f};
   bx::Vec3 static_color = {0.0f, 0.0f, 0.0f};
   bx::Vec3 winning_doors_color = {0.5f, 0.5f, 0.5f};
-  bx::Vec3 floor_color = {0.0f, 0.0f, 0.0f};
+  bx::Vec3 tiles_color = {0.0f, 0.0f, 0.0f};
   bx::Vec3 gate_colors[5] = {
     {0.5f, 0.2f, 0.4f},
     {0.6f, 0.8f, 0.4f},
@@ -80,6 +89,8 @@ struct World
     {0.1f, 0.6f, 1.0f},
   };
   bx::Vec3 editor_thing_color = {0.3f, 0.3f, 0.3f};
+  bx::Vec3 floor_color = {0.0f, 0.0f, 0.0f};
+  bx::Vec3 bg_color = {0.5f, 0.5f, 0.5f};
 
   void prepare();
   void init();
@@ -123,7 +134,7 @@ struct World
   template<class Archive>
   void serialize(Archive& archive)
   {
-    archive(moving_spots, static_spots, doors_spots, winning_doors_spots, floor_spots, floor_mapping_ids, static_models_list);
+    archive(moving_spots, static_spots, doors_spots, winning_doors_spots, tiles_spots, tiles_mapping_ids, static_models_list, floor_spots, floor_models_list);
   }
 
   int towards;

@@ -167,7 +167,7 @@ void BufferObject::createShaders(const char* vertex_shader_path, const char* fra
   bgfx::ShaderHandle vsh = Common::loadShader(vertex_shader_path);
   bgfx::ShaderHandle fsh = Common::loadShader(fragment_shader_path);
 
-  m_program = bgfx::createProgram(vsh, fsh, true);
+  m_program = bgfx::createProgram(vsh, fsh, false);
 }
 
 void BufferObject::draw(bgfx::ViewId view, uint16_t current_vertices_count, uint16_t current_indices_count, uint64_t more_state = 0)
