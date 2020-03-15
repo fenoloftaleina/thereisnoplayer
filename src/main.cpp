@@ -265,14 +265,21 @@ int main (int argc, char* args[])
   bgfx::touch(deferred_view2);
   bgfx::touch(main_view);
 
+
+  bgfx::ShaderHandle v_post_simple = Common::loadShader("bin/post/v_simple.bin");
+  bgfx::ShaderHandle f_post_simple = Common::loadShader("bin/post/f_simple.bin");
+
+  bgfx::ProgramHandle p_post1 = bgfx::createProgram(v_post_simple, f_post_simple, false);
+  bgfx::ProgramHandle p_post2 = bgfx::createProgram(v_post_simple, f_post_simple, false);
+
   BufferObject deferred_quad_bo1;
   deferred_quad_bo1.initQuads(1);
   deferred_quad_bo1.createBuffers();
-  deferred_quad_bo1.createShaders("bin/post/v_simple.bin", "bin/post/f_simple.bin");
+  deferred_quad_bo1.m_program = p_post1;
   BufferObject deferred_quad_bo2;
   deferred_quad_bo2.initQuads(1);
   deferred_quad_bo2.createBuffers();
-  deferred_quad_bo2.createShaders("bin/post/v_simple.bin", "bin/post/f_simple.bin");
+  deferred_quad_bo2.m_program = p_post2;
   std::vector<bx::Vec3> quad_vs;
   std::vector<bx::Vec3> quad_cs;
   std::vector<int> quad_ms;
@@ -416,14 +423,27 @@ int main (int argc, char* args[])
             break;
 
           case SDLK_y:
+            // tiles
+            if (!in_editor) break;
+            {
+              int i = editor.find(world.tiles_spots, world.editor_spot[0]);
+              if (i == -1) {
+                editor.add(world.tiles_spots, world.editor_spot[0], world.tiles_bo, world.tiles_mapping_ids, 0);
+              } else {
+                editor.next_mapping(i, world.tiles_bo, world.tiles_mapping_ids, world.tiles_bo.textures.mappings.size());
+              }
+            }
+            break;
+
+          case SDLK_g:
             // floor
             if (!in_editor) break;
             {
               int i = editor.find(world.floor_spots, world.editor_spot[0]);
               if (i == -1) {
-                editor.add(world.floor_spots, world.editor_spot[0], world.floor_bo, world.floor_mapping_ids, 0);
+                editor.add(world.floor_spots, world.editor_spot[0], world.floor_bo, world.floor_models_list, 0);
               } else {
-                editor.next_mapping(i, world.floor_bo, world.floor_mapping_ids, world.floor_bo.textures.mappings.size());
+                editor.next_mapping(i, world.floor_bo, world.floor_models_list, 1);
               }
             }
             break;

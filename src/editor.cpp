@@ -24,6 +24,7 @@ void Editor::remove(const Spot& spot)
       remove_for(world->static_spots, spot) ||
       remove_for(world->doors_spots, spot) ||
       remove_for(world->winning_doors_spots, spot) ||
+      remove_for(world->tiles_spots, spot) ||
       remove_for(world->floor_spots, spot)
       ) {
     world->init();
