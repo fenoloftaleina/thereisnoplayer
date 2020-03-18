@@ -1,6 +1,133 @@
 #include "world.hpp"
 #include <cmath>
 
+
+void gen_quads_with_edges(
+    const std::vector<bx::Vec3>& points,
+    std::vector<bx::Vec3>& vertices,
+    std::vector<bx::Vec3>& colors,
+    std::vector<bx::Vec3>& normals,
+    std::vector<bx::Vec3>& uvs,
+    std::vector<int>& indices
+    )
+{
+  float lw = 0.01f;
+  bx::Vec3 l;
+  bx::Vec3 a, b, c, normal;
+  int planes = 5 * points.size() / 4;
+  printf("PLANES %d!\n\n", planes);
+
+  vertices.resize(planes * 4);
+  colors.resize(planes * 4);
+  normals.resize(planes * 4);
+  uvs.resize(planes * 4);
+  indices.resize(planes * 6);
+
+  bx::Vec3 inside_color(0.8f, 0.8f, 0.8f);
+  bx::Vec3 border_color(0.2f, 0.2f, 0.2f);
+
+  fr(i, colors) {
+    colors[i] = border_color;
+    uvs[i] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+  }
+  colors[0] = colors[1] = colors[2] = colors[3] = inside_color;
+
+  for (int i = 0; i < points.size(); i += 4) {
+    a = bx::Vec3(
+        points[i + 1].x,
+        points[i + 1].y,
+        points[i + 1].z
+        );
+    b = bx::Vec3(
+        points[i + 0].x,
+        points[i + 0].y,
+        points[i + 0].z
+        );
+    c = bx::Vec3(
+        points[i + 3].x,
+        points[i + 3].y,
+        points[i + 3].z
+        );
+
+    normal = bx::normalize(
+        bx::cross(
+          bx::sub(a, b),
+          bx::sub(a, c)
+          )
+        );
+
+    for(int j = 0; j < 4; ++j) {
+      normals[i * planes + j] = normal;
+    }
+
+    l = bx::mul(bx::sub(bx::Vec3(1.0f, 1.0f, 1.0f), normals[i]), lw);
+    // l = bx::mul(normals[i], lw);
+
+    printf("l: \n");
+    Common::pv3(l);
+
+    // inside
+    vertices[i * planes + 0] = bx::Vec3(
+        points[i + 0].x - l.x, points[i + 0].y + l.y, points[i + 0].z + l.z);
+    vertices[i * planes + 1] = bx::Vec3(
+        points[i + 1].x - l.x, points[i + 1].y - l.y, points[i + 1].z - l.z);
+    vertices[i * planes + 2] = bx::Vec3(
+        points[i + 2].x + l.x, points[i + 2].y + l.y, points[i + 2].z + l.z);
+    vertices[i * planes + 3] = bx::Vec3(
+        points[i + 3].x + l.x, points[i + 3].y - l.y, points[i + 3].z - l.z);
+
+    // left
+    vertices[i * planes + 4] = bx::Vec3(
+        points[i + 2].x + l.x, points[i + 2].y + l.y, points[i + 2].z + l.z);
+    vertices[i * planes + 5] = bx::Vec3(
+        points[i + 2].x + l.x, points[i + 3].y - l.y, points[i + 3].z - l.z);
+    vertices[i * planes + 6] = bx::Vec3(
+        points[i + 3].x, points[i + 2].y, points[i + 2].z);
+    vertices[i * planes + 7] = bx::Vec3(
+        points[i + 3].x, points[i + 3].y, points[i + 3].z);
+
+    // right
+    vertices[i * planes + 8] = bx::Vec3(
+        points[i + 0].x, points[i + 0].y, points[i + 0].z);
+    vertices[i * planes + 9] = bx::Vec3(
+        points[i + 0].x, points[i + 1].y, points[i + 1].z);
+    vertices[i * planes + 10] = bx::Vec3(
+        points[i + 0].x - l.x, points[i + 0].y + l.y, points[i + 0].z + l.z);
+    vertices[i * planes + 11] = bx::Vec3(
+        points[i + 0].x - l.x, points[i + 1].y - l.y, points[i + 1].z - l.z);
+
+    // bottom
+    vertices[i * planes + 12] = bx::Vec3(
+        points[i + 0].x, points[i + 0].y, points[i + 0].z);
+    vertices[i * planes + 13] = bx::Vec3(
+        points[i + 0].x - l.x, points[i + 0].y + l.y, points[i + 0].z + l.z);
+    vertices[i * planes + 14] = bx::Vec3(
+        points[i + 2].x, points[i + 2].y, points[i + 2].z);
+    vertices[i * planes + 15] = bx::Vec3(
+        points[i + 2].x + l.x, points[i + 2].y + l.y, points[i + 2].z + l.z);
+
+    // top
+    vertices[i * planes + 16] = bx::Vec3(
+        points[i + 1].x - l.x, points[i + 1].y - l.y, points[i + 1].z - l.z);
+    vertices[i * planes + 17] = bx::Vec3(
+        points[i + 1].x, points[i + 1].y, points[i + 1].z);
+    vertices[i * planes + 18] = bx::Vec3(
+        points[i + 3].x + l.x, points[i + 3].y - l.y, points[i + 3].z - l.z);
+    vertices[i * planes + 19] = bx::Vec3(
+        points[i + 3].x, points[i + 3].y, points[i + 3].z);
+  }
+
+  for (int i = 0; i < planes; ++i) {
+    indices[6 * i + 0] = 4 * i + 1;
+    indices[6 * i + 1] = 4 * i + 0;
+    indices[6 * i + 2] = 4 * i + 3;
+    indices[6 * i + 3] = 4 * i + 0;
+    indices[6 * i + 4] = 4 * i + 2;
+    indices[6 * i + 5] = 4 * i + 3;
+  }
+}
+
+
 void World::prepare()
 {
   moving_spots.reserve(100);
@@ -103,6 +230,8 @@ void World::prepare()
 
 
 
+
+
   static_bo.models.init();
 
   static_bo.models.import("test.obj", 0);
@@ -127,7 +256,7 @@ void World::prepare()
   // bx::Vec3 border_color_secondary(0.6f, 0.6f, 0.6f);
   bx::Vec3 gradient_color(0.5f, 0.5f, 0.5f);
 
-  fr(i, normals) {
+  fr(i, colors) {
     colors[i] = border_color_main;
     normals[i] = bx::Vec3(0.0f, 1.0f, 0.0f);
     uvs[i] = bx::Vec3(-1.0f, -1.0f, 0.0f);
@@ -177,13 +306,50 @@ void World::prepare()
     indices[6 * i + 5] = 4 * i + 3;
   }
 
-  static_bo.models.set(vertices, colors, normals, uvs, indices, 3);
-
-  static_bo.models.import("cube.obj", 4);
+  // static_bo.models.set(vertices, colors, normals, uvs, indices, 3);
 
 
   floor_bo.models.init();
   floor_bo.models.set(vertices, colors, normals, uvs, indices, 0);
+
+
+  ////////////////
+
+  // static_bo.models.set(vertices, colors, normals, uvs, indices, 3);
+
+  std::vector<bx::Vec3> points;
+  points.resize(4);
+
+  points[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
+  points[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
+  points[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  points[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
+  // gen_quads_with_edges(
+  //     points,
+  //     vertices,
+  //     colors,
+  //     normals,
+  //     uvs,
+  //     indices
+  //     );
+  // static_bo.models.set(vertices, colors, normals, uvs, indices, 3);
+
+  // points[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
+  // points[1] = bx::Vec3( 1.0f,  0.5f,  2.5f);
+  // points[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  // points[3] = bx::Vec3(-1.0f,  0.5f,  2.5f);
+  gen_quads_with_edges(
+      points,
+      vertices,
+      colors,
+      normals,
+      uvs,
+      indices
+      );
+  static_bo.models.set(vertices, colors, normals, uvs, indices, 3);
+  // static_bo.models.set(vertices, colors, normals, uvs, indices, 4);
+
+  static_bo.models.import("cube.obj", 4);
 
 
 
@@ -269,6 +435,7 @@ void World::init()
   moving_cur_spots.resize(moving_spots.size());
   floor_positions.resize(floor_spots.size());
   floor_colors.resize(floor_spots.size());
+
 
   setPositionsFromSpots(moving_positions, moving_spots);
   setPositionsFromSpots(static_positions, static_spots);
