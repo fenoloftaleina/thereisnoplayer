@@ -327,27 +327,28 @@ void World::prepare()
   //     );
   // static_bo.models.set(vertices, colors, normals, uvs, indices, 3);
 
+  lw = 0.02f;
   points.resize(16);
   // top
-  points[0] = bx::Vec3( 1.0f,  1.0f, -1.0f);
-  points[1] = bx::Vec3( 1.0f,  1.0f,  1.0f);
-  points[2] = bx::Vec3(-1.0f,  1.0f, -1.0f);
-  points[3] = bx::Vec3(-1.0f,  1.0f,  1.0f);
+  points[0] = bx::Vec3( 1.0f + lw,  1.0f + lw, -1.0f);
+  points[1] = bx::Vec3( 1.0f + lw,  1.0f + lw,  1.0f + lw);
+  points[2] = bx::Vec3(-1.0f,  1.0f + lw, -1.0f);
+  points[3] = bx::Vec3(-1.0f,  1.0f + lw,  1.0f + lw);
   // right
-  points[4] = bx::Vec3( 1.0f, -1.0f,  1.0f);
-  points[5] = bx::Vec3( 1.0f,  1.0f,  1.0f);
-  points[6] = bx::Vec3( 1.0f, -1.0f, -1.0f);
-  points[7] = bx::Vec3( 1.0f,  1.0f, -1.0f);
+  points[4] = bx::Vec3( 1.0f + lw, -1.0f,  1.0f + lw);
+  points[5] = bx::Vec3( 1.0f + lw,  1.0f + lw,  1.0f + lw);
+  points[6] = bx::Vec3( 1.0f + lw, -1.0f, -1.0f);
+  points[7] = bx::Vec3( 1.0f + lw,  1.0f + lw, -1.0f);
   // left
   points[8] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  points[9] = bx::Vec3(-1.0f,  1.0f, -1.0f);
-  points[10] = bx::Vec3(-1.0f, -1.0f,  1.0f);
-  points[11] = bx::Vec3(-1.0f,  1.0f,  1.0f);
+  points[9] = bx::Vec3(-1.0f,  1.0f + lw, -1.0f);
+  points[10] = bx::Vec3(-1.0f, -1.0f,  1.0f + lw);
+  points[11] = bx::Vec3(-1.0f,  1.0f + lw,  1.0f + lw);
   // front
-  points[12] = bx::Vec3( 1.0f, -1.0f, -1.0f);
-  points[13] = bx::Vec3( 1.0f,  1.0f, -1.0f);
+  points[12] = bx::Vec3( 1.0f + lw, -1.0f, -1.0f);
+  points[13] = bx::Vec3( 1.0f + lw,  1.0f + lw, -1.0f);
   points[14] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  points[15] = bx::Vec3(-1.0f,  1.0f, -1.0f);
+  points[15] = bx::Vec3(-1.0f,  1.0f + lw, -1.0f);
 
   // // top
   // points[0] = bx::Vec3( 1.0f,  1.0f, -1.0f);

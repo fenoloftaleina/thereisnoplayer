@@ -29,5 +29,10 @@ void main()
   vec3 diffuse = diff * light_color;
 
 	/* gl_FragColor = vec4(color.xyz * (ambient + diffuse), 1.0); */
+
+
+  /* vec3 n = abs(v_normal0); */
+  /* color = vec3(n.x * 0.8 + n.y * 0.9 + n.z * 0.7); */
+
 	gl_FragColor = vec4(color.xyz, 1.0);
 }
