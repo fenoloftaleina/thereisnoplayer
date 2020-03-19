@@ -472,7 +472,6 @@ void BufferObject::writeQuadsVertices
       vertices[offset + i + 3].texcoord_x1 = 0.0f;
       vertices[offset + i + 3].texcoord_y1 = 0.0f;
     } else {
-      printf("AAAAAAAAAAAAAAA %d %f %f - %f %f %f \n", mapping_id, textures.mappings[mapping_id].x1, textures.mappings[mapping_id].x2, vertices[offset + i + 2].x, vertices[offset + i + 2].y, vertices[offset + i + 2].z);
       vertices[offset + i + 0].texcoord_x1 = textures.mappings[mapping_id].x2;
       vertices[offset + i + 0].texcoord_y1 = textures.mappings[mapping_id].y1;
       vertices[offset + i + 1].texcoord_x1 = textures.mappings[mapping_id].x2;
