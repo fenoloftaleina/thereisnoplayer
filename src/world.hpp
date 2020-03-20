@@ -71,6 +71,7 @@ struct World
   std::vector<int> moving_models_list;
   std::vector<int> floor_models_list;
   std::vector<int> bg_models_list;
+  std::vector<int> doors_models_list;
 
 
   Nimate moving_nimate;
@@ -82,7 +83,7 @@ struct World
   bx::Vec3 winning_doors_color = {0.5f, 0.5f, 0.5f};
   bx::Vec3 tiles_color = {0.0f, 0.0f, 0.0f};
   bx::Vec3 gate_colors[5] = {
-    {0.5f, 0.2f, 0.4f},
+    {0.5f, 0.3f, 0.9f},
     {0.6f, 0.8f, 0.4f},
     {0.3f, 0.9f, 0.8f},
     {0.2f, 0.3f, 0.8f},

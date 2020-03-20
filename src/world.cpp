@@ -159,7 +159,7 @@ void World::prepare()
 
   moving_bo.initModels(100);
   static_bo.initModels(100);
-  doors_bo.initCubes(1000);
+  doors_bo.initModels(100);
   winning_doors_bo.initCubes(1000);
   tiles_bo.initQuads(1000);
   editor_bo.initCubes(1);
@@ -190,7 +190,7 @@ void World::prepare()
   static_bo.createBuffers();
   static_bo.m_program = p_animated_tex;
   doors_bo.createBuffers();
-  doors_bo.m_program = p_simple;
+  doors_bo.m_program = p_animated_tex;
   winning_doors_bo.createBuffers();
   winning_doors_bo.m_program = p_noise_simple;
   tiles_bo.createBuffers();
@@ -348,17 +348,11 @@ void World::prepare()
       );
 
   static_bo.models.init();
-  // static_bo.models.import("test.obj", 0);
-  // static_bo.models.import("test-keyframe2.obj", 1);
-  // static_bo.models.import("untitled.obj", 2);
-  // static_bo.models.import("cube.obj", 4);
   static_bo.models.set(vertices, colors, normals, uvs, indices, 0);
+  static_bo.models.import("test.obj", 1);
+  static_bo.models.import("test-keyframe2.obj", 2);
+  static_bo.models.import("cube.obj", 3);
 
-  // vertices.resize(4);
-  // colors.resize(4);
-  // normals.resize(4);
-  // uvs.resize(4);
-  // indices.resize(6);
   //
   // vertices[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
   // vertices[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
@@ -394,6 +388,11 @@ void World::prepare()
 
 
 
+  vertices.resize(4);
+  colors.resize(4);
+  normals.resize(4);
+  uvs.resize(4);
+  indices.resize(6);
 
   float screen_size = 100.0f;
   float bg_y = -5.0f;
@@ -419,10 +418,19 @@ void World::prepare()
   bg_bo.models.init();
   bg_bo.models.set(vertices, colors, normals, uvs, indices, 0);
 
+  vertices[0] = bx::Vec3(1.0f, -0.999f, -1.0f + lw);
+  vertices[1] = bx::Vec3(1.0f, -0.999f, 1.0f);
+  vertices[2] = bx::Vec3(-1.0f + lw, -0.999f, -1.0f + lw);
+  vertices[3] = bx::Vec3(-1.0f + lw, -0.999f, 1.0f);
+
+  doors_bo.models.init();
+  doors_bo.models.set(vertices, colors, normals, uvs, indices, 0);
+
   static_models_list.reserve(1000);
   moving_models_list.resize(100);
   floor_models_list.reserve(100);
   bg_models_list.reserve(1);
+  doors_models_list.reserve(100);
 
   moving_nimate.prepare(this, &moving_bo, &moving_positions, &moving_colors, &moving_models_list);
 }
@@ -485,10 +493,15 @@ void World::init()
   bg_models_list.resize(1);
   bg_models_list[0] = 0;
 
+  doors_models_list.resize(doors_positions.size());
+  fr(i, doors_positions) {
+    doors_models_list[i] = 0;
+  }
+
 
   writeModelsVertices(moving_bo, moving_positions, moving_colors, moving_models_list);
   writeModelsVertices(static_bo, static_positions, static_colors, static_models_list);
-  writeCubesVertices(doors_bo, doors_positions, doors_colors);
+  writeModelsVertices(doors_bo, doors_positions, doors_colors, doors_models_list);
   writeCubesVertices(winning_doors_bo, winning_doors_positions, winning_doors_colors);
   writeFloorVertices(tiles_bo, tiles_positions, tiles_colors, tiles_mapping_ids);
   writeCubesVertices(editor_bo, editor_position, editor_color);
@@ -595,7 +608,7 @@ void World::draw(const bool in_editor)
 {
   moving_bo.drawModels(view, BGFX_STATE_BLEND_ALPHA);
   static_bo.drawModels(view, 0);
-  doors_bo.drawCubes(view, doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
+  doors_bo.drawModels(view, BGFX_STATE_BLEND_ALPHA);
   winning_doors_bo.drawCubes(view, winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
   tiles_bo.drawQuads(view, tiles_spots.size());
   floor_bo.drawModels(view, 0);
