@@ -773,21 +773,25 @@ void World::writeCubesVertices
 void World::writeModelsVertices
 (BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors, const int nth_model)
 {
-  int nth_model_vertices_count = bo.models.nth_model_vertices_count(nth_model);
-  int nth_model_indices_count = bo.models.nth_model_indices_count(nth_model);
+  if (positions.empty()) {
+    bo.models_vertices_count = 0;
+  } else {
+    int nth_model_vertices_count = bo.models.nth_model_vertices_count(nth_model);
+    int nth_model_indices_count = bo.models.nth_model_indices_count(nth_model);
 
-  for (int i = 0; i < positions.size(); ++i) {
-    bo.writeModelVertices(
-        nth_model_vertices_count * i,
-        positions[i],
-        colors[i],
-        nth_model
-        );
-    bo.writeModelIndices(
-        nth_model_indices_count * i,
-        nth_model_vertices_count * i,
-        nth_model
-        );
+    for (int i = 0; i < positions.size(); ++i) {
+      bo.writeModelVertices(
+          nth_model_vertices_count * i,
+          positions[i],
+          colors[i],
+          nth_model
+          );
+      bo.writeModelIndices(
+          nth_model_indices_count * i,
+          nth_model_vertices_count * i,
+          nth_model
+          );
+    }
   }
 }
 
@@ -795,24 +799,28 @@ void World::writeModelsVertices
 void World::writeModelsVertices
 (BufferObject& bo, const std::vector<bx::Vec3>& positions, const std::vector<bx::Vec3>& colors, const std::vector<int>& models_list)
 {
-  int acc_vertices_offset = 0;
-  int acc_indices_offset = 0;
+  if (positions.empty()) {
+    bo.models_vertices_count = 0;
+  } else {
+    int acc_vertices_offset = 0;
+    int acc_indices_offset = 0;
 
-  for (int i = 0; i < positions.size(); ++i) {
-    bo.writeModelVertices(
-        acc_vertices_offset,
-        positions[i],
-        colors[i],
-        models_list[i]
-        );
-    bo.writeModelIndices(
-        acc_indices_offset,
-        acc_vertices_offset,
-        models_list[i]
-        );
+    for (int i = 0; i < positions.size(); ++i) {
+      bo.writeModelVertices(
+          acc_vertices_offset,
+          positions[i],
+          colors[i],
+          models_list[i]
+          );
+      bo.writeModelIndices(
+          acc_indices_offset,
+          acc_vertices_offset,
+          models_list[i]
+          );
 
-    acc_vertices_offset += bo.models.nth_model_vertices_count(models_list[i]);
-    acc_indices_offset += bo.models.nth_model_indices_count(models_list[i]);
+      acc_vertices_offset += bo.models.nth_model_vertices_count(models_list[i]);
+      acc_indices_offset += bo.models.nth_model_indices_count(models_list[i]);
+    }
   }
 }
 
@@ -829,29 +837,33 @@ void World::writeAnimatedModelsVertices
  const std::vector<bx::Vec3>& tos
  )
 {
-  int acc_vertices_offset = 0;
-  int acc_indices_offset = 0;
+  if (positions1.empty()) {
+    bo.models_vertices_count = 0;
+  } else {
+    int acc_vertices_offset = 0;
+    int acc_indices_offset = 0;
 
-  for (int i = 0; i < positions1.size(); ++i) {
-    bo.writeModelVertices(
-        acc_vertices_offset,
-        positions1[i],
-        positions2[i],
-        colors1[i],
-        colors2[i],
-        nth1s[i],
-        nth2s[i],
-        froms[i],
-        tos[i]
-        );
-    bo.writeModelIndices(
-        acc_indices_offset,
-        acc_vertices_offset,
-        nth1s[i]
-        );
+    for (int i = 0; i < positions1.size(); ++i) {
+      bo.writeModelVertices(
+          acc_vertices_offset,
+          positions1[i],
+          positions2[i],
+          colors1[i],
+          colors2[i],
+          nth1s[i],
+          nth2s[i],
+          froms[i],
+          tos[i]
+          );
+      bo.writeModelIndices(
+          acc_indices_offset,
+          acc_vertices_offset,
+          nth1s[i]
+          );
 
-    acc_vertices_offset += bo.models.nth_model_vertices_count(nth1s[i]);
-    acc_indices_offset += bo.models.nth_model_indices_count(nth2s[i]);
+      acc_vertices_offset += bo.models.nth_model_vertices_count(nth1s[i]);
+      acc_indices_offset += bo.models.nth_model_indices_count(nth2s[i]);
+    }
   }
 }
 
