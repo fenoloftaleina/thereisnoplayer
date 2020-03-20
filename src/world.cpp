@@ -11,7 +11,7 @@ void gen_quads_with_edges(
     std::vector<int>& indices
     )
 {
-  float lw = 0.02f, lw2 = lw / 2.0f;
+  float lw = 0.02f;
   bx::Vec3 a, b, c, normal;
   int planes = 5;
   int quads = planes * points.size() / 4;
@@ -222,21 +222,11 @@ void World::prepare()
   std::vector<int> indices;
 
 
-
-
-
-  static_bo.models.init();
-
-  static_bo.models.import("test.obj", 0);
-  static_bo.models.import("test-keyframe2.obj", 1);
-  static_bo.models.import("untitled.obj", 2);
-
   float y = -1.0f;
-  float h = 2.0f;
+  float h = 1.5f;
   float lw = 0.05f;
-  float lw2 = lw * 0.5f;
 
-  int planes = 5;
+  int planes = 8;
   vertices.resize(planes * 4);
   colors.resize(planes * 4);
   normals.resize(planes * 4);
@@ -244,10 +234,8 @@ void World::prepare()
   indices.resize(planes * 6);
 
   bx::Vec3 inside_color(0.8f, 0.84f, 0.85f);
-  // bx::Vec3 bg_color(0.33f, 0.33f, 0.33f);
   bx::Vec3 border_color_main(0.4f, 0.4f, 0.4f);
-  // bx::Vec3 border_color_secondary(0.6f, 0.6f, 0.6f);
-  bx::Vec3 gradient_color(0.5f, 0.5f, 0.5f);
+  bx::Vec3 gradient_color = bx::sub(bg_color, 0.2);
 
   fr(i, colors) {
     colors[i] = border_color_main;
@@ -256,39 +244,62 @@ void World::prepare()
   }
 
   // inside
-  vertices[ 0] = bx::Vec3( 1.0f - lw2, y, -1.0f + lw2);
-  vertices[ 1] = bx::Vec3( 1.0f - lw2, y,  1.0f - lw2);
-  vertices[ 2] = bx::Vec3(-1.0f + lw2, y, -1.0f + lw2);
-  vertices[ 3] = bx::Vec3(-1.0f + lw2, y,  1.0f - lw2);
+  vertices[ 0] = bx::Vec3( 1.0f, y, -1.0f + lw);
+  vertices[ 1] = bx::Vec3( 1.0f, y,  1.0f);
+  vertices[ 2] = bx::Vec3(-1.0f + lw, y, -1.0f + lw);
+  vertices[ 3] = bx::Vec3(-1.0f + lw, y,  1.0f);
   colors[0] = colors[1] = colors[2] = colors[3] = inside_color;
 
   // left
-  vertices[ 4] = bx::Vec3(-1.0f + lw2, y, -1.0f - lw2);
-  vertices[ 5] = bx::Vec3(-1.0f + lw2, y,  1.0f - lw2);
-  vertices[ 6] = bx::Vec3(-1.0f - lw2, y, -1.0f - lw2);
-  vertices[ 7] = bx::Vec3(-1.0f - lw2, y,  1.0f - lw2);
-  // colors[4] = colors[5] = colors[6] = colors[7] = border_color_main;
+  vertices[ 4] = bx::Vec3(-1.0f + lw, y, -1.0f + lw);
+  vertices[ 5] = bx::Vec3(-1.0f + lw, y,  1.0f);
+  vertices[ 6] = bx::Vec3(-1.0f, y, -1.0f);
+  vertices[ 7] = bx::Vec3(-1.0f, y,  1.0f + lw);
+
+  // right
+  vertices[ 8] = bx::Vec3(1.0f + lw, y, -1.0f);
+  vertices[ 9] = bx::Vec3(1.0f + lw, y,  1.0f + lw);
+  vertices[10] = bx::Vec3(1.0f, y, -1.0f + lw);
+  vertices[11] = bx::Vec3(1.0f, y,  1.0f);
 
   // bottom
-  vertices[ 8] = bx::Vec3( 1.0f - lw2, y, -1.0f - lw2);
-  vertices[ 9] = bx::Vec3( 1.0f - lw2, y, -1.0f + lw2);
-  vertices[10] = bx::Vec3(-1.0f + lw2, y, -1.0f - lw2);
-  vertices[11] = bx::Vec3(-1.0f + lw2, y, -1.0f + lw2);
-  // colors[8] = colors[9] = colors[10] = colors[11] = border_color_main;
+  vertices[12] = bx::Vec3( 1.0f + lw, y, -1.0f);
+  vertices[13] = bx::Vec3( 1.0f, y, -1.0f + lw);
+  vertices[14] = bx::Vec3(-1.0f, y, -1.0f);
+  vertices[15] = bx::Vec3(-1.0f + lw, y, -1.0f + lw);
 
-  // front
-  vertices[12] = bx::Vec3( 1.0f - lw2, y - lw2, -1.0f - lw2);
-  vertices[13] = bx::Vec3( 1.0f - lw2, y, -1.0f - lw2);
-  vertices[14] = bx::Vec3(-1.0f + lw2, y - lw2, -1.0f - lw2);
-  vertices[15] = bx::Vec3(-1.0f + lw2, y, -1.0f - lw2);
+  // top
+  vertices[16] = bx::Vec3( 1.0f, y, 1.0f);
+  vertices[17] = bx::Vec3( 1.0f + lw, y, 1.0f + lw);
+  vertices[18] = bx::Vec3(-1.0f + lw, y, 1.0f);
+  vertices[19] = bx::Vec3(-1.0f, y, 1.0f + lw);
+
+  // left gradient
+  vertices[20] = bx::Vec3(-1.0f, y - h, -1.0f);
+  vertices[21] = bx::Vec3(-1.0f, y, -1.0f);
+  vertices[22] = bx::Vec3(-1.0f, y - h, 1.0f + lw);
+  vertices[23] = bx::Vec3(-1.0f, y, 1.0f + lw);
+  colors[21] = colors[23] = gradient_color;
+  colors[20] = colors[22] = bg_color;
+  normals[20] = normals[21] = normals[22] = normals[23] = bx::Vec3(-1.0f, 0.0f, 0.0f);
 
   // front gradient
-  vertices[16] = bx::Vec3( 1.0f - lw2, y - h, -1.0f - lw2);
-  vertices[17] = bx::Vec3( 1.0f - lw2, y - lw2, -1.0f - lw2);
-  vertices[18] = bx::Vec3(-1.0f + lw2, y - h, -1.0f - lw2);
-  vertices[19] = bx::Vec3(-1.0f + lw2, y - lw2, -1.0f - lw2);
-  colors[17] = colors[19] = gradient_color;
-  colors[16] = colors[18] = bg_color;
+  vertices[24] = bx::Vec3( 1.0f + lw, y - h, -1.0f);
+  vertices[25] = bx::Vec3( 1.0f + lw, y, -1.0f);
+  vertices[26] = bx::Vec3(-1.0f, y - h, -1.0f);
+  vertices[27] = bx::Vec3(-1.0f, y, -1.0f);
+  colors[25] = colors[27] = gradient_color;
+  colors[24] = colors[26] = bg_color;
+  normals[24] = normals[25] = normals[26] = normals[27] = bx::Vec3(0.0f, 0.0f, -1.0f);
+
+  // right gradient
+  vertices[28] = bx::Vec3(1.0f + lw, y - h, 1.0f + lw);
+  vertices[29] = bx::Vec3(1.0f + lw, y, 1.0f + lw);
+  vertices[30] = bx::Vec3(1.0f + lw, y - h, -1.0f);
+  vertices[31] = bx::Vec3(1.0f + lw, y, -1.0f);
+  colors[29] = colors[31] = gradient_color;
+  colors[28] = colors[30] = bg_color;
+  normals[28] = normals[29] = normals[30] = normals[31] = bx::Vec3(1.0f, 0.0f, 0.0f);
 
   for (int i = 0; i < planes; ++i) {
     indices[6 * i + 0] = 4 * i + 1;
@@ -299,36 +310,13 @@ void World::prepare()
     indices[6 * i + 5] = 4 * i + 3;
   }
 
-  // static_bo.models.set(vertices, colors, normals, uvs, indices, 3);
-
-
   floor_bo.models.init();
   floor_bo.models.set(vertices, colors, normals, uvs, indices, 0);
 
 
-  ////////////////
-
-  // static_bo.models.set(vertices, colors, normals, uvs, indices, 3);
-
   std::vector<bx::Vec3> points;
-  points.resize(4);
-
-  points[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
-  points[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
-  points[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  points[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
-  // gen_quads_with_edges(
-  //     points,
-  //     vertices,
-  //     colors,
-  //     normals,
-  //     uvs,
-  //     indices
-  //     );
-  // static_bo.models.set(vertices, colors, normals, uvs, indices, 3);
-
-  lw = 0.02f;
   points.resize(16);
+  lw = 0.0f;
   // top
   points[0] = bx::Vec3( 1.0f + lw,  1.0f + lw, -1.0f);
   points[1] = bx::Vec3( 1.0f + lw,  1.0f + lw,  1.0f + lw);
@@ -350,28 +338,6 @@ void World::prepare()
   points[14] = bx::Vec3(-1.0f, -1.0f, -1.0f);
   points[15] = bx::Vec3(-1.0f,  1.0f + lw, -1.0f);
 
-  // // top
-  // points[0] = bx::Vec3( 1.0f,  1.0f, -1.0f);
-  // points[1] = bx::Vec3( 1.0f,  1.0f,  1.0f);
-  // points[2] = bx::Vec3(-1.0f,  1.0f, -1.0f);
-  // points[3] = bx::Vec3(-1.0f,  1.0f,  1.0f);
-
-  // // right
-  // points[0] = bx::Vec3( 1.0f, -1.0f,  1.0f);
-  // points[1] = bx::Vec3( 1.0f,  1.0f,  1.0f);
-  // points[2] = bx::Vec3( 1.0f, -1.0f, -1.0f);
-  // points[3] = bx::Vec3( 1.0f,  1.0f, -1.0f);
-  // // left
-  // points[0] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  // points[1] = bx::Vec3(-1.0f,  1.0f, -1.0f);
-  // points[2] = bx::Vec3(-1.0f, -1.0f,  1.0f);
-  // points[3] = bx::Vec3(-1.0f,  1.0f,  1.0f);
-  // // front
-  // points[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
-  // points[1] = bx::Vec3( 1.0f,  1.0f, -1.0f);
-  // points[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  // points[3] = bx::Vec3(-1.0f,  1.0f, -1.0f);
-
   gen_quads_with_edges(
       points,
       vertices,
@@ -380,11 +346,13 @@ void World::prepare()
       uvs,
       indices
       );
-  static_bo.models.set(vertices, colors, normals, uvs, indices, 3);
 
+  static_bo.models.init();
+  // static_bo.models.import("test.obj", 0);
+  // static_bo.models.import("test-keyframe2.obj", 1);
+  // static_bo.models.import("untitled.obj", 2);
   // static_bo.models.import("cube.obj", 4);
-
-
+  static_bo.models.set(vertices, colors, normals, uvs, indices, 0);
 
   // vertices.resize(4);
   // colors.resize(4);
@@ -421,13 +389,6 @@ void World::prepare()
   // moving_bo.models.set(vertices, colors, normals, uvs, indices, 0);
 
 
-  points.resize(16);
-  // top
-  points[0] = bx::Vec3( 1.0f + lw,  1.0f + lw, -1.0f);
-  points[1] = bx::Vec3( 1.0f + lw,  1.0f + lw,  1.0f + lw);
-  points[2] = bx::Vec3(-1.0f,  1.0f + lw, -1.0f);
-  points[3] = bx::Vec3(-1.0f,  1.0f + lw,  1.0f + lw);
-
   moving_bo.models.init();
   moving_bo.models.import("cube.obj", 0);
 
@@ -435,7 +396,7 @@ void World::prepare()
 
 
   float screen_size = 100.0f;
-  float bg_y = -3.0f;
+  float bg_y = -5.0f;
   vertices[0] = bx::Vec3( screen_size, bg_y, -screen_size);
   vertices[1] = bx::Vec3( screen_size, bg_y,  screen_size);
   vertices[2] = bx::Vec3(-screen_size, bg_y, -screen_size);
