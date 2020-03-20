@@ -280,7 +280,8 @@ void World::prepare()
   vertices[22] = bx::Vec3(-1.0f, y - h, 1.0f + lw);
   vertices[23] = bx::Vec3(-1.0f, y, 1.0f + lw);
   colors[21] = colors[23] = gradient_color;
-  colors[20] = colors[22] = bg_color;
+  // colors[20] = colors[22] = bg_color;
+  colors[20] = colors[22] = gradient_color;
   normals[20] = normals[21] = normals[22] = normals[23] = bx::Vec3(-1.0f, 0.0f, 0.0f);
 
   // front gradient
@@ -289,7 +290,8 @@ void World::prepare()
   vertices[26] = bx::Vec3(-1.0f, y - h, -1.0f);
   vertices[27] = bx::Vec3(-1.0f, y, -1.0f);
   colors[25] = colors[27] = gradient_color;
-  colors[24] = colors[26] = bg_color;
+  // colors[24] = colors[26] = bg_color;
+  colors[24] = colors[26] = gradient_color;
   normals[24] = normals[25] = normals[26] = normals[27] = bx::Vec3(0.0f, 0.0f, -1.0f);
 
   // right gradient
@@ -298,7 +300,8 @@ void World::prepare()
   vertices[30] = bx::Vec3(1.0f + lw, y - h, -1.0f);
   vertices[31] = bx::Vec3(1.0f + lw, y, -1.0f);
   colors[29] = colors[31] = gradient_color;
-  colors[28] = colors[30] = bg_color;
+  // colors[28] = colors[30] = bg_color;
+  colors[28] = colors[30] = gradient_color;
   normals[28] = normals[29] = normals[30] = normals[31] = bx::Vec3(1.0f, 0.0f, 0.0f);
 
   for (int i = 0; i < planes; ++i) {
@@ -394,7 +397,7 @@ void World::prepare()
   uvs.resize(4);
   indices.resize(6);
 
-  float screen_size = 100.0f;
+  float screen_size = 1000.0f;
   float bg_y = -5.0f;
   vertices[0] = bx::Vec3( screen_size, bg_y, -screen_size);
   vertices[1] = bx::Vec3( screen_size, bg_y,  screen_size);
@@ -506,7 +509,6 @@ void World::init()
   writeFloorVertices(tiles_bo, tiles_positions, tiles_colors, tiles_mapping_ids);
   writeCubesVertices(editor_bo, editor_position, editor_color);
   writeModelsVertices(floor_bo, floor_positions, floor_colors, floor_models_list);
-  printf("bg\n");
   writeModelsVertices(bg_bo, bg_positions, bg_colors, bg_models_list);
 
   moving_next_spots = moving_spots;

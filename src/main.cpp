@@ -323,14 +323,16 @@ int main (int argc, char* args[])
   bool moved = false;
 
 
-  bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
-  bx::Vec3 eye = { 0.0f, 15.0f, -10.0f };
+  bx::Vec3 at  = { 0.0f, -4.0f,   0.0f };
+  // bx::Vec3 eye = { 0.0f, 15.0f, -10.0f };
+  bx::Vec3 eye = { 0.0f, 10.0f, -15.0f };
 
   std::vector<bx::Vec3*> vectors_for_editing;
-  vectors_for_editing.reserve(2);
-  vectors_for_editing.resize(2);
+  vectors_for_editing.reserve(3);
+  vectors_for_editing.resize(3);
   vectors_for_editing[0] = &eye;
   vectors_for_editing[1] = &at;
+  vectors_for_editing[2] = &(world.bg_color);
   bx::Vec3* vector_for_editing = NULL;
   int editing_vector = -1;
 
@@ -560,8 +562,13 @@ int main (int argc, char* args[])
       vector_for_editing->x += f_move.x;
       vector_for_editing->y += f_move.y;
       vector_for_editing->z += f_move.z;
+      // vector_for_editing->x += f_move.x * 0.1;
+      // vector_for_editing->y += f_move.y * 0.1;
+      // vector_for_editing->z += f_move.z * 0.1;
       printf("vector_for_editing:\n");
       Common::pv3(*vector_for_editing);
+      world.init();
+      world.updateBuffers();
     } else {
       world.resolve(move, in_editor, back, reset);
       if (world.won) {
