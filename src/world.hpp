@@ -90,7 +90,7 @@ struct World
   };
   bx::Vec3 editor_thing_color = {0.3f, 0.3f, 0.3f};
   bx::Vec3 floor_color = {0.0f, 0.0f, 0.0f};
-  bx::Vec3 bg_color = {0.5f, 0.5f, 0.5f};
+  bx::Vec3 bg_color = {0.75f, 0.95f, 0.85f};
 
   void prepare();
   void init();

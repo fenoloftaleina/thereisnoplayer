@@ -243,8 +243,8 @@ void World::prepare()
   uvs.resize(planes * 4);
   indices.resize(planes * 6);
 
-  bx::Vec3 inside_color(0.8f, 0.8f, 0.8f);
-  bx::Vec3 bg_color(0.33f, 0.33f, 0.33f);
+  bx::Vec3 inside_color(0.8f, 0.84f, 0.85f);
+  // bx::Vec3 bg_color(0.33f, 0.33f, 0.33f);
   bx::Vec3 border_color_main(0.4f, 0.4f, 0.4f);
   // bx::Vec3 border_color_secondary(0.6f, 0.6f, 0.6f);
   bx::Vec3 gradient_color(0.5f, 0.5f, 0.5f);
@@ -386,39 +386,52 @@ void World::prepare()
 
 
 
-  vertices.resize(4);
-  colors.resize(4);
-  normals.resize(4);
-  uvs.resize(4);
-  indices.resize(6);
+  // vertices.resize(4);
+  // colors.resize(4);
+  // normals.resize(4);
+  // uvs.resize(4);
+  // indices.resize(6);
+  //
+  // vertices[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
+  // vertices[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
+  // vertices[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  // vertices[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
+  //
+  // colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(0.0f, 0.0f, 0.0f);
+  // normals[0] = normals[1] = normals[2] = normals[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
+  //
+  // uvs[0] = bx::Vec3(moving_bo.textures.mappings[0].x2, moving_bo.textures.mappings[0].y1, 0.0f);
+  // uvs[1] = bx::Vec3(moving_bo.textures.mappings[0].x2, moving_bo.textures.mappings[0].y2, 0.0f);
+  // uvs[2] = bx::Vec3(moving_bo.textures.mappings[0].x1, moving_bo.textures.mappings[0].y1, 0.0f);
+  // uvs[3] = bx::Vec3(moving_bo.textures.mappings[0].x1, moving_bo.textures.mappings[0].y2, 0.0f);
+  //
+  // // uvs[0] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  // // uvs[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
+  // // uvs[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
+  // // uvs[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
+  //
+  // indices[0] = 1;
+  // indices[1] = 0;
+  // indices[2] = 3;
+  // indices[3] = 0;
+  // indices[4] = 2;
+  // indices[5] = 3;
+  //
+  // moving_bo.models.init();
+  // moving_bo.models.set(vertices, colors, normals, uvs, indices, 0);
 
-  vertices[0] = bx::Vec3( 1.0f, -1.0f, -1.0f);
-  vertices[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
-  vertices[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  vertices[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
 
-  colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(0.0f, 0.0f, 0.0f);
-  normals[0] = normals[1] = normals[2] = normals[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
-
-  uvs[0] = bx::Vec3(moving_bo.textures.mappings[0].x2, moving_bo.textures.mappings[0].y1, 0.0f);
-  uvs[1] = bx::Vec3(moving_bo.textures.mappings[0].x2, moving_bo.textures.mappings[0].y2, 0.0f);
-  uvs[2] = bx::Vec3(moving_bo.textures.mappings[0].x1, moving_bo.textures.mappings[0].y1, 0.0f);
-  uvs[3] = bx::Vec3(moving_bo.textures.mappings[0].x1, moving_bo.textures.mappings[0].y2, 0.0f);
-
-  // uvs[0] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  // uvs[1] = bx::Vec3( 1.0f, -1.0f,  1.0f);
-  // uvs[2] = bx::Vec3(-1.0f, -1.0f, -1.0f);
-  // uvs[3] = bx::Vec3(-1.0f, -1.0f,  1.0f);
-
-  indices[0] = 1;
-  indices[1] = 0;
-  indices[2] = 3;
-  indices[3] = 0;
-  indices[4] = 2;
-  indices[5] = 3;
+  points.resize(16);
+  // top
+  points[0] = bx::Vec3( 1.0f + lw,  1.0f + lw, -1.0f);
+  points[1] = bx::Vec3( 1.0f + lw,  1.0f + lw,  1.0f + lw);
+  points[2] = bx::Vec3(-1.0f,  1.0f + lw, -1.0f);
+  points[3] = bx::Vec3(-1.0f,  1.0f + lw,  1.0f + lw);
 
   moving_bo.models.init();
-  moving_bo.models.set(vertices, colors, normals, uvs, indices, 0);
+  moving_bo.models.import("cube.obj", 0);
+
+
 
 
   float screen_size = 100.0f;
@@ -428,12 +441,19 @@ void World::prepare()
   vertices[2] = bx::Vec3(-screen_size, bg_y, -screen_size);
   vertices[3] = bx::Vec3(-screen_size, bg_y,  screen_size);
 
-  colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
+  colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(0.0f, 0.0f, 0.0f);
 
   uvs[0] = bx::Vec3(-1.0f, -1.0f, 0.0f);
   uvs[1] = bx::Vec3(-1.0f, -1.0f, 0.0f);
   uvs[2] = bx::Vec3(-1.0f, -1.0f, 0.0f);
   uvs[3] = bx::Vec3(-1.0f, -1.0f, 0.0f);
+
+  indices[0] = 1;
+  indices[1] = 0;
+  indices[2] = 3;
+  indices[3] = 0;
+  indices[4] = 2;
+  indices[5] = 3;
 
   bg_bo.models.init();
   bg_bo.models.set(vertices, colors, normals, uvs, indices, 0);
@@ -512,7 +532,8 @@ void World::init()
   writeFloorVertices(tiles_bo, tiles_positions, tiles_colors, tiles_mapping_ids);
   writeCubesVertices(editor_bo, editor_position, editor_color);
   writeModelsVertices(floor_bo, floor_positions, floor_colors, floor_models_list);
-  writeModelsVertices(bg_bo, moving_positions, moving_colors, bg_models_list);
+  printf("bg\n");
+  writeModelsVertices(bg_bo, bg_positions, bg_colors, bg_models_list);
 
   moving_next_spots = moving_spots;
 

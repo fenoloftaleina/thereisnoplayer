@@ -315,11 +315,24 @@ int main (int argc, char* args[])
   const bgfx::Caps* caps = bgfx::getCaps();
 
   Spot move;
+  bx::Vec3 f_move;
 
   bool in_editor = false;
   bool back = false;
   bool reset = false;
   bool moved = false;
+
+
+  bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
+  bx::Vec3 eye = { 0.0f, 15.0f, -10.0f };
+
+  std::vector<bx::Vec3*> vectors_for_editing;
+  vectors_for_editing.reserve(2);
+  vectors_for_editing.resize(2);
+  vectors_for_editing[0] = &eye;
+  vectors_for_editing[1] = &at;
+  bx::Vec3* vector_for_editing = NULL;
+  int editing_vector = -1;
 
   // Poll for events and wait till user closes window
   bool quit = false;
@@ -328,6 +341,9 @@ int main (int argc, char* args[])
   while(!quit) {
     move.x = 0;
     move.y = 0;
+    f_move.x = 0;
+    f_move.y = 0;
+    f_move.z = 0;
     moved = false;
     back = false;
     reset = false;
@@ -342,6 +358,7 @@ int main (int argc, char* args[])
             if (moved) break;
             moved = true;
             move.x = -1;
+            f_move.x = -1;
             break;
 
           case SDLK_d:
@@ -349,6 +366,7 @@ int main (int argc, char* args[])
             if (moved) break;
             moved = true;
             move.x = 1;
+            f_move.x = 1;
             break;
 
           case SDLK_w:
@@ -356,6 +374,7 @@ int main (int argc, char* args[])
             if (moved) break;
             moved = true;
             move.y = 1;
+            f_move.z = 1;
             break;
 
           case SDLK_s:
@@ -363,6 +382,7 @@ int main (int argc, char* args[])
             if (moved) break;
             moved = true;
             move.y = -1;
+            f_move.z = -1;
             break;
 
           case SDLK_r:
@@ -389,6 +409,28 @@ int main (int argc, char* args[])
 
           case SDLK_ESCAPE:
             in_editor = false;
+            break;
+
+          case SDLK_e:
+            // moving/user
+            if (!in_editor) break;
+            editing_vector += 1;
+            if (editing_vector >= vectors_for_editing.size()) {
+              editing_vector = -1;
+            }
+            if (editing_vector != -1) {
+              vector_for_editing = vectors_for_editing[editing_vector];
+            } else {
+              vector_for_editing = NULL;
+            }
+            break;
+
+          case SDLK_2:
+            f_move.y = 1;
+            break;
+
+          case SDLK_x:
+            f_move.y = -1;
             break;
 
           case SDLK_u:
@@ -514,20 +556,20 @@ int main (int argc, char* args[])
 
     dt = current_time - last_time;
 
-    world.resolve(move, in_editor, back, reset);
-    if (world.won) {
-      runLevel(current_level_id + 1);
+    if (vector_for_editing) {
+      vector_for_editing->x += f_move.x;
+      vector_for_editing->y += f_move.y;
+      vector_for_editing->z += f_move.z;
+      printf("vector_for_editing:\n");
+      Common::pv3(*vector_for_editing);
+    } else {
+      world.resolve(move, in_editor, back, reset);
+      if (world.won) {
+        runLevel(current_level_id + 1);
+      }
     }
 
     world.update(current_time, dt);
-
-    const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
-    // const bx::Vec3 at = bx::neg(Common::spot_offset);
-
-    // const bx::Vec3 eye = { -5.0f, 2.0f, -10.0f };
-    // const bx::Vec3 eye = { 5.0f, 2.0f, -10.0f };
-    // bx::Vec3 eye = {  -10.0f, 25.0f, -10.0f };
-    bx::Vec3 eye = {  0.0f, 25.0f, -10.0f };
 
     // Set view and projection matrix for view 0.
     bx::mtxLookAt(view, eye, at);
@@ -537,6 +579,7 @@ int main (int argc, char* args[])
         float(WIDTH)/float(HEIGHT),
         0.1f, 100.0f,
         bgfx::getCaps()->homogeneousDepth);
+    // bx::mtxOrtho(proj, -20.0f, 20.0f, -20.0f, 20.0f, -10.0f, 100.0f, 0.0f, caps->homogeneousDepth);
 
     bgfx::setViewTransform(deferred_view1, view, proj);
 

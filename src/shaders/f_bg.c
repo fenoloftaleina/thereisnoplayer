@@ -13,16 +13,9 @@ float random(vec2 st) {
 
 void main()
 {
-  vec3 color;
-
-  color = vec3(0.7, 0.7, 0.7);
-
   vec2 st = gl_FragCoord.xy;
   st = st / twh.yz;
 
-  float x = st.x * 1.8 - 0.9;
-  float y = st.y * 1.8 - 0.9;
-  color = color * (1.0 - x * x) * (1.0 - y * y);
-
-	gl_FragColor = vec4(color.xyz - random(st) * 0.1, 1.0);
+	/* gl_FragColor = vec4(v_color0.xyz - random(st) * 0.17, 1.0); */
+	gl_FragColor = vec4(v_color0.xyz, 1.0);
 }
