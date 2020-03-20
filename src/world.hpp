@@ -147,6 +147,7 @@ struct World
   float acc_animation_length;
   bool won;
   bool finished;
+  bool on_floor;
   std::vector<Spot> spots_temp;
   std::vector<bx::Vec3> positions_temp;
   std::vector<bx::Vec3> colors_temp;

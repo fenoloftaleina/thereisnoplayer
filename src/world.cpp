@@ -663,12 +663,16 @@ void World::maybe_make_move(const Spot& move)
     equals_sum(moving_next_spots[i], moving_spots[i], move);
   }
 
+  on_floor = false;
   fr(i, moving_next_spots) {
-    fr(j, static_spots) {
-      if (same(moving_next_spots[i], static_spots[j])) {
-        return;
+    fr(j, floor_spots) {
+      if (same(moving_next_spots[i], floor_spots[j])) {
+        on_floor = true;
       }
     }
+  }
+  if (!on_floor) {
+    return;
   }
 
   made_move = true;
