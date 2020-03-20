@@ -20,6 +20,18 @@ struct World
 {
   bgfx::ViewId view;
 
+  float w, h;
+  Spot set_spot{0,0};
+  bx::Vec3 pos, next_pos, cur_pos;
+  bool moving = false, next_move = true;
+  float timer = 0.0f;
+  float dash_time = 400.0f;
+  float dash_length = 150.0f;
+
+  bool input = false;
+  float slow = 0.0f;
+  float slow_time = 50.0f;
+
   std::vector<Spot> moving_spots;
   std::vector<Spot> moving_next_spots;
   std::vector<Spot> moving_cur_spots;

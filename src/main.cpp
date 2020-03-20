@@ -169,6 +169,9 @@ int main (int argc, char* args[])
 
 
 
+  world.w = w;
+  world.h = h;
+
   editor.world = &world;
   world.prepare();
 
@@ -339,29 +342,21 @@ int main (int argc, char* args[])
         switch (currentEvent.key.keysym.sym) {
           case SDLK_a:
           case SDLK_LEFT:
-            if (moved) break;
-            moved = true;
             move.x = -1;
             break;
 
           case SDLK_d:
           case SDLK_RIGHT:
-            if (moved) break;
-            moved = true;
             move.x = 1;
             break;
 
           case SDLK_w:
           case SDLK_UP:
-            if (moved) break;
-            moved = true;
             move.y = 1;
             break;
 
           case SDLK_s:
           case SDLK_DOWN:
-            if (moved) break;
-            moved = true;
             move.y = -1;
             break;
 
@@ -527,16 +522,18 @@ int main (int argc, char* args[])
     // const bx::Vec3 eye = { -5.0f, 2.0f, -10.0f };
     // const bx::Vec3 eye = { 5.0f, 2.0f, -10.0f };
     // bx::Vec3 eye = {  -10.0f, 25.0f, -10.0f };
-    bx::Vec3 eye = {  0.0f, 25.0f, -10.0f };
+    bx::Vec3 eye = {  0.0f, 0.0f, -10.0f };
 
     // Set view and projection matrix for view 0.
     bx::mtxLookAt(view, eye, at);
 
-    bx::mtxProj(proj,
-        70.0f,
-        float(WIDTH)/float(HEIGHT),
-        0.1f, 100.0f,
-        bgfx::getCaps()->homogeneousDepth);
+    // bx::mtxProj(proj,
+    //     70.0f,
+    //     float(WIDTH)/float(HEIGHT),
+    //     0.1f, 100.0f,
+    //     bgfx::getCaps()->homogeneousDepth);
+
+    bx::mtxOrtho(proj, 0.0f, w, 0.0f, h, -10.0f, 100.0f, 0.0f, caps->homogeneousDepth);
 
     bgfx::setViewTransform(deferred_view1, view, proj);
 

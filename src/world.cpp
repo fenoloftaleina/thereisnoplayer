@@ -202,7 +202,7 @@ void World::prepare()
   floor_bo.createBuffers();
   floor_bo.m_program = p_animated_tex;
   bg_bo.createBuffers();
-  bg_bo.m_program = p_bg;
+  bg_bo.m_program = p_animated_tex;
 
 
   std::vector<std::string> texture_assets = {
@@ -421,14 +421,12 @@ void World::prepare()
   moving_bo.models.set(vertices, colors, normals, uvs, indices, 0);
 
 
-  float screen_size = 100.0f;
-  float bg_y = -3.0f;
-  vertices[0] = bx::Vec3( screen_size, bg_y, -screen_size);
-  vertices[1] = bx::Vec3( screen_size, bg_y,  screen_size);
-  vertices[2] = bx::Vec3(-screen_size, bg_y, -screen_size);
-  vertices[3] = bx::Vec3(-screen_size, bg_y,  screen_size);
+  vertices[0] = bx::Vec3(w - 100.0f, 90.0f, 0.0f);
+  vertices[1] = bx::Vec3(w - 100.0f, 100.0f, 0.0f);
+  vertices[2] = bx::Vec3(100.0f, 90.0f, 0.0f);
+  vertices[3] = bx::Vec3(100.0f, 100.0f, 0.0f);
 
-  colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(0.0f, 1.0f, 0.0f);
+  colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(0.7f, 0.7f, 0.7f);
 
   uvs[0] = bx::Vec3(-1.0f, -1.0f, 0.0f);
   uvs[1] = bx::Vec3(-1.0f, -1.0f, 0.0f);
@@ -438,10 +436,20 @@ void World::prepare()
   bg_bo.models.init();
   bg_bo.models.set(vertices, colors, normals, uvs, indices, 0);
 
+
+  vertices[0] = bx::Vec3(30.0f, 0.0f, 0.0f);
+  vertices[1] = bx::Vec3(30.0f, 30.0f, 0.0f);
+  vertices[2] = bx::Vec3(0.0f, 0.0f, 0.0f);
+  vertices[3] = bx::Vec3(0.0f, 30.0f, 0.0f);
+
+  colors[0] = colors[1] = colors[2] = colors[3] = bx::Vec3(1.0f, 0.0f, 0.0f);
+
+  bg_bo.models.set(vertices, colors, normals, uvs, indices, 1);
+
   static_models_list.reserve(1000);
   moving_models_list.resize(100);
   floor_models_list.reserve(100);
-  bg_models_list.reserve(1);
+  bg_models_list.reserve(2);
 
   moving_nimate.prepare(this, &moving_bo, &moving_positions, &moving_colors, &moving_models_list);
 }
@@ -478,10 +486,11 @@ void World::init()
   setPositionsFromSpots(editor_position, editor_spot);
   setPositionsFromSpots(floor_positions, floor_spots);
 
-  bg_positions.resize(1);
-  bg_colors.resize(1);
+  bg_positions.resize(2);
+  bg_colors.resize(2);
   bg_positions[0] = bx::Vec3(0.0f, 0.0f, 0.0f);
-  bg_colors[0] = bg_color;
+  pos = next_pos = bg_positions[1] = bx::Vec3(200.0f, 100.0f, 0.0f);
+  bg_colors[0] = bg_colors[1] = bg_color;
 
   setColors(moving_colors, moving_color);
   setColors(static_colors, static_color);
@@ -501,8 +510,9 @@ void World::init()
     models_temp[i] = moving_models_list[i];
   }
 
-  bg_models_list.resize(1);
+  bg_models_list.resize(2);
   bg_models_list[0] = 0;
+  bg_models_list[1] = 1;
 
 
   writeModelsVertices(moving_bo, moving_positions, moving_colors, moving_models_list);
@@ -512,7 +522,7 @@ void World::init()
   writeFloorVertices(tiles_bo, tiles_positions, tiles_colors, tiles_mapping_ids);
   writeCubesVertices(editor_bo, editor_position, editor_color);
   writeModelsVertices(floor_bo, floor_positions, floor_colors, floor_models_list);
-  writeModelsVertices(bg_bo, moving_positions, moving_colors, bg_models_list);
+  writeModelsVertices(bg_bo, bg_positions, bg_colors, bg_models_list);
 
   moving_next_spots = moving_spots;
 
@@ -537,75 +547,76 @@ void World::updateBuffers()
 void World::resolve
 (const Spot& move, const bool in_editor, const bool back, const bool reset)
 {
-  made_move = false;
-  travel = false;
-  any_through_door = false;
+  printf("moving %d, move %d %d, set %d %d, pos %f %f, next_pos %f %f, cur_pos %f %f\n",
+      moving, move.x, move.y, set_spot.x, set_spot.y, pos.x, pos.y, next_pos.x, next_pos.y, cur_pos.x, cur_pos.y);
 
-  if (won || maybe_won()) {
-    return;
+  if ((move.x != 0 || move.y != 0)) {
+    if (!input) {
+      input = true;
+      slow = slow_time;
+    }
+    set_spot.x += move.x;
+    set_spot.y += move.y;
+    if (set_spot.x > 1.0f) {
+      set_spot.x = 1.0f;
+    } else if (set_spot.x < -1.0f) {
+      set_spot.x = -1.0f;
+    }
+    if (set_spot.y > 1.0f) {
+      set_spot.y = 1.0f;
+    } else if (set_spot.y < -1.0f) {
+      set_spot.y = -1.0f;
+    }
   }
 
-  if (in_editor) {
-    make_editor_move(move);
-    return;
+  if (slow < 0.0f) {
+    input = false;
   }
 
-  if (reset) {
-    execute_reset();
-    return;
-  }
+  if (next_move && !input && (set_spot.x != 0 || set_spot.y != 0)) {
+    moving = true;
+    next_move = false;
+    timer = dash_time;
+    next_pos.x = pos.x + set_spot.x * dash_length;
+    next_pos.y = pos.y + set_spot.y * dash_length;
 
-  if (back) {
-    execute_back();
-    return;
+    set_spot.x = set_spot.y = 0;
+  } else {
+    if (timer < 0.0f) {
+      next_move = true;
+      if (set_spot.x == 0 && set_spot.y == 0) {
+        moving = false;
+      }
+      pos = next_pos;
+    }
   }
-
-  maybe_make_move(move);
 }
 
 
 void World::update(const float t, const float dt)
 {
-  if (made_move) {
-    positions_temp.resize(moving_spots.size());
-    colors_temp.resize(moving_colors.size());
-    models_temp.resize(moving_models_list.size());
+  timer -= dt;
+  slow -= dt;
 
-    fr(i, colors_temp) {
-      colors_temp[i] = bx::Vec3(0.5f, 0.7f, 0.9f);
+  if (moving) {
+    float x = timer / dash_time;
+    cur_pos = bx::add(
+        bx::mul(pos, x * x),
+        bx::mul(next_pos, (1 - x * x))
+        );
+  } else {
+    pos.y -= dt * 1.5f;
+    if (pos.y < 100.0f) {
+      pos.y = 100.0f;
     }
 
-    fr(i, models_temp) {
-      // models_temp[i] = (models_temp[i] + 1) % 2;
-      models_temp[i] = 0;
-    }
-
-    setPositionsFromSpots(positions_temp, moving_cur_spots);
-
-    animation_length = 150.0f;
-    if (travel) { animation_length = 0.0f; }
-    fr(i, positions_temp) {
-      moving_nimate.schedule_position(i, positions_temp[i], t, t + animation_length);
-      // moving_nimate.schedule_color(i, colors_temp[i], t, t + 1000.0f);
-      moving_nimate.schedule_model(i, models_temp[i], t, t + animation_length * 2.0f);
-    }
-
-    acc_animation_length = t + animation_length;
-
-    if (any_through_door) {
-      setPositionsFromSpots(positions_temp, moving_spots);
-
-      animation_length = 0.0f;
-      fr(i, positions_temp) {
-        if (through_door[i]) {
-          moving_nimate.schedule_position(i, positions_temp[i],
-              acc_animation_length, acc_animation_length + animation_length);
-        }
-      }
-    }
+    next_pos = pos;
+    cur_pos = pos;
   }
 
-  moving_nimate.run(t);
+  bg_positions[1] = cur_pos;
+  writeModelsVertices(bg_bo, bg_positions, bg_colors, bg_models_list);
+  bg_bo.updateBuffer();
 }
 
 
