@@ -20,6 +20,7 @@ struct Editor
 
   int find(const std::vector<Spot>& spots, const Spot& spot);
   bool remove_for(std::vector<Spot>& spots, const Spot& spot);
+  bool remove_for(std::vector<Spot>& spots, std::vector<int>& models_list, const Spot& spot);
 
   void next_mapping(int i, BufferObject& bo, std::vector<int>& list, int possible_mappings_count);
 
