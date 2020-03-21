@@ -160,7 +160,7 @@ void World::prepare()
   moving_bo.initModels(100);
   static_bo.initModels(100);
   doors_bo.initModels(100);
-  winning_doors_bo.initCubes(1000);
+  winning_doors_bo.initModels(1000);
   tiles_bo.initQuads(1000);
   editor_bo.initCubes(1);
   quads_bo.initQuads(1000);
@@ -431,6 +431,9 @@ void World::prepare()
   doors_bo.models.init();
   doors_bo.models.set(vertices, colors, normals, uvs, indices, 0);
 
+  winning_doors_bo.models.init();
+  winning_doors_bo.models.set(vertices, colors, normals, uvs, indices, 0);
+
   static_models_list.reserve(1000);
   moving_models_list.resize(100);
   floor_models_list.reserve(100);
@@ -502,12 +505,16 @@ void World::init()
   fr(i, doors_positions) {
     doors_models_list[i] = 0;
   }
+  winning_doors_models_list.resize(winning_doors_positions.size());
+  fr(i, winning_doors_positions) {
+    winning_doors_models_list[i] = 0;
+  }
 
 
   writeModelsVertices(moving_bo, moving_positions, moving_colors, moving_models_list);
   writeModelsVertices(static_bo, static_positions, static_colors, static_models_list);
   writeModelsVertices(doors_bo, doors_positions, doors_colors, doors_models_list);
-  writeCubesVertices(winning_doors_bo, winning_doors_positions, winning_doors_colors);
+  writeModelsVertices(winning_doors_bo, winning_doors_positions, winning_doors_colors, winning_doors_models_list);
   writeFloorVertices(tiles_bo, tiles_positions, tiles_colors, tiles_mapping_ids);
   writeCubesVertices(editor_bo, editor_position, editor_color);
   writeModelsVertices(floor_bo, floor_positions, floor_colors, floor_models_list);
@@ -613,7 +620,7 @@ void World::draw(const bool in_editor)
   moving_bo.drawModels(view, BGFX_STATE_BLEND_ALPHA);
   static_bo.drawModels(view, 0);
   doors_bo.drawModels(view, BGFX_STATE_BLEND_ALPHA);
-  winning_doors_bo.drawCubes(view, winning_doors_spots.size(), BGFX_STATE_BLEND_ALPHA);
+  winning_doors_bo.drawModels(view, BGFX_STATE_BLEND_ALPHA);
   tiles_bo.drawQuads(view, tiles_spots.size());
   floor_bo.drawModels(view, 0);
   bg_bo.drawModels(view, 0);
@@ -778,6 +785,7 @@ void World::writeModelsVertices
 {
   if (positions.empty()) {
     bo.models_vertices_count = 0;
+    bo.models_indices_count = 0;
   } else {
     int nth_model_vertices_count = bo.models.nth_model_vertices_count(nth_model);
     int nth_model_indices_count = bo.models.nth_model_indices_count(nth_model);
@@ -804,6 +812,7 @@ void World::writeModelsVertices
 {
   if (positions.empty()) {
     bo.models_vertices_count = 0;
+    bo.models_indices_count = 0;
   } else {
     int acc_vertices_offset = 0;
     int acc_indices_offset = 0;
@@ -842,6 +851,7 @@ void World::writeAnimatedModelsVertices
 {
   if (positions1.empty()) {
     bo.models_vertices_count = 0;
+    bo.models_indices_count = 0;
   } else {
     int acc_vertices_offset = 0;
     int acc_indices_offset = 0;

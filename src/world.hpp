@@ -72,6 +72,7 @@ struct World
   std::vector<int> floor_models_list;
   std::vector<int> bg_models_list;
   std::vector<int> doors_models_list;
+  std::vector<int> winning_doors_models_list;
 
 
   Nimate moving_nimate;
