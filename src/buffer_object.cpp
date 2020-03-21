@@ -222,8 +222,8 @@ void BufferObject::destroy()
 
 void BufferObject::initModels(const int models_count)
 {
-  vertices_count = models_count * 10000;
-  indices_count = models_count * 10000;
+  vertices_count = models_count * 100;
+  indices_count = models_count * 100;
 
   vertices = new AnimatedPosColorTexVertex[vertices_count];
   indices = new uint16_t[indices_count];
