@@ -158,13 +158,13 @@ void World::prepare()
   AnimatedPosColorTexVertex::init();
 
   moving_bo.initModels(5);
-  static_bo.initModels(20);
-  doors_bo.initModels(10);
-  winning_doors_bo.initModels(5);
+  static_bo.initModels(1000);
+  doors_bo.initModels(20);
+  winning_doors_bo.initModels(10);
   tiles_bo.initQuads(1000);
   editor_bo.initCubes(1);
   quads_bo.initQuads(1000);
-  floor_bo.initModels(5);
+  floor_bo.initModels(100);
   bg_bo.initModels(1);
 
 
