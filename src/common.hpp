@@ -17,6 +17,7 @@ struct Common
   static bgfx::ShaderHandle loadShader(const char* _name);
   static bool sameSpot(const bx::Vec3& v1, const bx::Vec3 v2);
   static bx::Vec3 posOnSpot(const bx::Vec3& spot);
+  static void tim(const char* info);
 };
 
 #endif

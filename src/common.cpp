@@ -37,3 +37,24 @@ bx::Vec3 Common::posOnSpot(const bx::Vec3& spot)
 
   return bx::add(bx::mul(spot, 2.0f), spot_offset);
 }
+
+#include <sys/time.h>
+
+void Common::tim(const char* info)
+{
+  static long long prev_tim;
+
+  struct timeval te;
+  gettimeofday(&te, NULL);
+  long long now = te.tv_sec * 1000LL + te.tv_usec / 1000;
+
+  if (prev_tim == 0) {
+    prev_tim = now;
+  } else {
+    long long diff = now - prev_tim;
+    if (diff > 20) {
+      printf("---> %s elapsed: %lld, %lld %lld\n", info, now - prev_tim, now, prev_tim);
+    }
+    prev_tim = 0;
+  }
+}
