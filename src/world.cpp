@@ -321,7 +321,7 @@ void World::prepare()
 
   std::vector<bx::Vec3> points;
   points.resize(16);
-  lw = 0.0f;
+  // lw = 0.0f;
   // top
   points[0] = bx::Vec3( 1.0f + lw,  1.0f + lw, -1.0f);
   points[1] = bx::Vec3( 1.0f + lw,  1.0f + lw,  1.0f + lw);

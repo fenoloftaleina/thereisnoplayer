@@ -59,7 +59,69 @@
             3,
             3
         ],
-        "value7": [],
-        "value8": []
+        "value7": [
+            {
+                "value0": 0,
+                "value1": 0
+            },
+            {
+                "value0": 0,
+                "value1": -1
+            },
+            {
+                "value0": 1,
+                "value1": -1
+            },
+            {
+                "value0": 2,
+                "value1": -1
+            },
+            {
+                "value0": 1,
+                "value1": 0
+            },
+            {
+                "value0": 2,
+                "value1": 0
+            },
+            {
+                "value0": 3,
+                "value1": 0
+            },
+            {
+                "value0": 4,
+                "value1": 0
+            },
+            {
+                "value0": 4,
+                "value1": 1
+            },
+            {
+                "value0": 2,
+                "value1": 1
+            },
+            {
+                "value0": 2,
+                "value1": 2
+            },
+            {
+                "value0": 4,
+                "value1": 2
+            }
+        ],
+        "value8": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ]
     }
 }
