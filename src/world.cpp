@@ -172,6 +172,7 @@ void World::prepare()
   bgfx::ShaderHandle f_animated_tex = Common::loadShader("bin/f_animated_tex.bin");
   bgfx::ShaderHandle v_simple = Common::loadShader("bin/v_simple.bin");
   bgfx::ShaderHandle f_simple = Common::loadShader("bin/f_simple.bin");
+  bgfx::ShaderHandle v_animated_simple = Common::loadShader("bin/v_animated_simple.bin");
   bgfx::ShaderHandle f_noise_simple = Common::loadShader("bin/f_noise_simple.bin");
   bgfx::ShaderHandle v_tex = Common::loadShader("bin/v_tex.bin");
   bgfx::ShaderHandle f_tex = Common::loadShader("bin/f_tex.bin");
@@ -179,6 +180,7 @@ void World::prepare()
   bgfx::ShaderHandle f_bg = Common::loadShader("bin/f_bg.bin");
 
   bgfx::ProgramHandle p_animated_tex = bgfx::createProgram(v_animated_tex, f_animated_tex, false);
+  bgfx::ProgramHandle p_animated_simple = bgfx::createProgram(v_animated_simple, f_simple, false);
   bgfx::ProgramHandle p_simple = bgfx::createProgram(v_simple, f_simple, false);
   bgfx::ProgramHandle p_tex = bgfx::createProgram(v_tex, f_tex, false);
   bgfx::ProgramHandle p_noise_simple = bgfx::createProgram(v_simple, f_noise_simple, false);
@@ -186,7 +188,7 @@ void World::prepare()
   bgfx::ProgramHandle p_bg = bgfx::createProgram(v_animated_tex, f_bg, false);
 
   moving_bo.createBuffers();
-  moving_bo.m_program = p_animated_tex;
+  moving_bo.m_program = p_animated_simple;
   static_bo.createBuffers();
   static_bo.m_program = p_animated_tex;
   doors_bo.createBuffers();
