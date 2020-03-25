@@ -6,7 +6,8 @@ void Nimate::prepare(
     BufferObject* _bo,
     std::vector<bx::Vec3>* _positions,
     std::vector<bx::Vec3>* _colors,
-    std::vector<int>* _models
+    std::vector<int>* _models,
+    std::vector<int>* _flag1s
     )
 {
   world = _world;
@@ -14,27 +15,33 @@ void Nimate::prepare(
   positions = _positions;
   colors = _colors;
   models = _models;
+  flag1s = _flag1s;
 
-  next_positions.reserve(10000);
-  next_colors.reserve(10000);
-  next_models.reserve(10000);
-  positions_from.reserve(10000);
-  positions_to.reserve(10000);
-  colors_from.reserve(10000);
-  colors_to.reserve(10000);
-  models_from.reserve(10000);
-  models_to.reserve(10000);
-  ids_positions.reserve(10000);
-  ids_colors.reserve(10000);
-  ids_models.reserve(10000);
-  updated_positions.reserve(10000);
-  updated_colors.reserve(10000);
-  updated_models.reserve(10000);
-  positions_temp.reserve(10000);
-  colors_temp.reserve(10000);
-  models_temp.reserve(10000);
-  froms_temp.reserve(10000);
-  tos_temp.reserve(10000);
+  next_positions.reserve(100);
+  next_colors.reserve(100);
+  next_models.reserve(100);
+  next_flag1s.reserve(100);
+  positions_from.reserve(100);
+  positions_to.reserve(100);
+  colors_from.reserve(100);
+  colors_to.reserve(100);
+  models_from.reserve(100);
+  models_to.reserve(100);
+  flag1s_from.reserve(100);
+  flag1s_to.reserve(100);
+  ids_positions.reserve(100);
+  ids_colors.reserve(100);
+  ids_models.reserve(100);
+  ids_flag1s.reserve(100);
+  updated_positions.reserve(100);
+  updated_colors.reserve(100);
+  updated_models.reserve(100);
+  updated_flag1s.reserve(100);
+  positions_temp.reserve(100);
+  colors_temp.reserve(100);
+  models_temp.reserve(100);
+  froms_temp.reserve(100);
+  tos_temp.reserve(100);
 }
 
 
@@ -99,6 +106,21 @@ void Nimate::schedule_model(
 }
 
 
+void Nimate::schedule_flag1(
+    const int id,
+    const int value,
+    const float from,
+    const float to
+    )
+{
+  ids_flag1s.push_back(id);
+  next_flag1s.push_back(value);
+  flag1s_from.push_back(from);
+  flag1s_to.push_back(to);
+  updated_flag1s.push_back(false);
+}
+
+
 void Nimate::run(const float t, const bool update_anyway)
 {
   needs_update = false;
@@ -146,6 +168,17 @@ void Nimate::run(const float t, const bool update_anyway)
       tos_temp[ids_models[i]].x = models_to[i];
       updated_models[i] = true;
       needs_update = true;
+    }
+  }
+
+  fr(i, next_flag1s) {
+    if (!updated_flag1s[i] &&
+        flag1s_from[i] >= 0.0f &&
+        t >= flag1s_from[i] &&
+        (t > flag1s_to[i] ||
+         flag1s_to[i] - flag1s_from[i] < 0.001f)) {
+      (*flag1s)[ids_flag1s[i]] = next_flag1s[i];
+      updated_flag1s[i] = true;
     }
   }
 
@@ -222,6 +255,17 @@ void Nimate::run(const float t, const bool update_anyway)
         i -= 1;
       }
     }
+
+    fr(i, next_flag1s) {
+      if (t > flag1s_to[i]) {
+        next_flag1s.erase(next_flag1s.begin() + i);
+        flag1s_from.erase(flag1s_from.begin() + i);
+        flag1s_to.erase(flag1s_to.begin() + i);
+        ids_flag1s.erase(ids_flag1s.begin() + i);
+        updated_flag1s.erase(updated_flag1s.begin() + i);
+        i -= 1;
+      }
+    }
   }
 }
 
@@ -231,16 +275,21 @@ void Nimate::reset()
   next_positions.clear();
   next_colors.clear();
   next_models.clear();
+  next_flag1s.clear();
   positions_from.clear();
   positions_to.clear();
   colors_from.clear();
   colors_to.clear();
   models_from.clear();
   models_to.clear();
+  flag1s_from.clear();
+  flag1s_to.clear();
   ids_positions.clear();
   ids_colors.clear();
   ids_models.clear();
+  ids_flag1s.clear();
   updated_positions.clear();
   updated_colors.clear();
   updated_models.clear();
+  updated_flag1s.clear();
 }

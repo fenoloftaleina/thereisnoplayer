@@ -21,8 +21,9 @@ struct World
   bgfx::ViewId view;
 
   std::vector<Spot> moving_spots;
+  std::vector<Spot> moving_clones_spots;
+  std::vector<Spot> moving_intermediate_spots;
   std::vector<Spot> moving_next_spots;
-  std::vector<Spot> moving_cur_spots;
   std::vector<Spot> static_spots;
   std::vector<Spot> doors_spots;
   std::vector<Spot> winning_doors_spots;
@@ -30,12 +31,13 @@ struct World
   std::vector<Spot> editor_spot;
   std::vector<Spot> floor_spots;
 
-  std::vector<bool> through_door;
+  std::vector<int> through_door;
 
   std::vector<std::vector<Spot>> all_moving_spots;
   std::vector<bool> all_any_through_doors;
 
   std::vector<bx::Vec3> moving_positions;
+  std::vector<bx::Vec3> moving_clones_positions;
   std::vector<bx::Vec3> moving_colors;
   std::vector<bx::Vec3> static_positions;
   std::vector<bx::Vec3> static_colors;
@@ -54,6 +56,7 @@ struct World
   std::vector<bx::Vec3> bg_colors;
 
   BufferObject moving_bo;
+  BufferObject moving_clones_bo;
   BufferObject static_bo;
   BufferObject doors_bo;
   BufferObject winning_doors_bo;
@@ -76,6 +79,8 @@ struct World
 
 
   Nimate moving_nimate;
+  Nimate moving_clones_nimate;
+  Spot dead_spot{-1000, -1000};
 
 
   bx::Vec3 moving_color = {0.0f, 0.0f, 0.0f};
@@ -108,6 +113,7 @@ struct World
 
   static bool same(const Spot& s1, const Spot& s2);
   static void equals_sum(Spot& e, const Spot& s1, const Spot& s2);
+  static void equals_diff(Spot& e, const Spot& s1, const Spot& s2);
 
   bool maybe_won();
   void maybe_make_move(const Spot& move);
@@ -143,6 +149,7 @@ struct World
   int towards;
   int winning_count;
   bool made_move;
+  Spot current_move;
   bool travel;
   bool any_through_door;
   float animation_length;
@@ -154,6 +161,7 @@ struct World
   std::vector<bx::Vec3> positions_temp;
   std::vector<bx::Vec3> colors_temp;
   std::vector<int> models_temp;
+  std::vector<int> empty_flags;
 };
 
 #endif

@@ -15,7 +15,6 @@ void gen_quads_with_edges(
   bx::Vec3 a, b, c, normal;
   int planes = 5;
   int quads = planes * points.size() / 4;
-  printf("PLANES %d!\n\n", planes);
 
   std::vector<bx::Vec3> inner;
   inner.resize(4);
@@ -124,20 +123,24 @@ void gen_quads_with_edges(
 void World::prepare()
 {
   moving_spots.reserve(100);
+  moving_clones_spots.reserve(100);
   moving_next_spots.reserve(100);
-  moving_cur_spots.reserve(100);
+  moving_intermediate_spots.reserve(100);
   static_spots.reserve(1000);
   doors_spots.reserve(1000);
   winning_doors_spots.reserve(100);
   editor_spot.reserve(1);
   editor_spot.resize(1);
   through_door.reserve(100);
+  empty_flags.reserve(1);
+  empty_flags.resize(0);
   floor_spots.reserve(1000);
 
   all_moving_spots.reserve(1000);
   all_any_through_doors.reserve(1000);
 
   moving_positions.reserve(100);
+  moving_clones_positions.reserve(100);
   moving_colors.reserve(100);
   static_positions.reserve(1000);
   static_colors.reserve(1000);
@@ -158,6 +161,7 @@ void World::prepare()
   AnimatedPosColorTexVertex::init();
 
   moving_bo.initModels(5);
+  moving_clones_bo.initModels(5);
   static_bo.initModels(1000);
   doors_bo.initModels(20);
   winning_doors_bo.initModels(10);
@@ -172,6 +176,8 @@ void World::prepare()
   bgfx::ShaderHandle f_animated_tex = Common::loadShader("bin/f_animated_tex.bin");
   bgfx::ShaderHandle v_simple = Common::loadShader("bin/v_simple.bin");
   bgfx::ShaderHandle f_simple = Common::loadShader("bin/f_simple.bin");
+  bgfx::ShaderHandle f_simple_doors_in = Common::loadShader("bin/f_simple_doors_in.bin");
+  bgfx::ShaderHandle f_simple_doors_out = Common::loadShader("bin/f_simple_doors_out.bin");
   bgfx::ShaderHandle v_animated_simple = Common::loadShader("bin/v_animated_simple.bin");
   bgfx::ShaderHandle f_noise_simple = Common::loadShader("bin/f_noise_simple.bin");
   bgfx::ShaderHandle v_tex = Common::loadShader("bin/v_tex.bin");
@@ -181,6 +187,8 @@ void World::prepare()
 
   bgfx::ProgramHandle p_animated_tex = bgfx::createProgram(v_animated_tex, f_animated_tex, false);
   bgfx::ProgramHandle p_animated_simple = bgfx::createProgram(v_animated_simple, f_simple, false);
+  bgfx::ProgramHandle p_animated_simple_doors_in = bgfx::createProgram(v_animated_simple, f_simple_doors_in, false);
+  bgfx::ProgramHandle p_animated_simple_doors_out = bgfx::createProgram(v_animated_simple, f_simple_doors_out, false);
   bgfx::ProgramHandle p_simple = bgfx::createProgram(v_simple, f_simple, false);
   bgfx::ProgramHandle p_tex = bgfx::createProgram(v_tex, f_tex, false);
   bgfx::ProgramHandle p_noise_simple = bgfx::createProgram(v_simple, f_noise_simple, false);
@@ -188,7 +196,9 @@ void World::prepare()
   bgfx::ProgramHandle p_bg = bgfx::createProgram(v_animated_tex, f_bg, false);
 
   moving_bo.createBuffers();
-  moving_bo.m_program = p_animated_simple;
+  moving_bo.m_program = p_animated_simple_doors_in;
+  moving_clones_bo.createBuffers();
+  moving_clones_bo.m_program = p_animated_simple_doors_out;
   static_bo.createBuffers();
   static_bo.m_program = p_animated_tex;
   doors_bo.createBuffers();
@@ -212,9 +222,6 @@ void World::prepare()
     "assets/t2.png"
   };
   tiles_bo.textures.prepare(texture_assets);
-  moving_bo.textures.prepare(texture_assets);
-  static_bo.textures.prepare(texture_assets);
-
 
 
   std::vector<bx::Vec3> vertices;
@@ -391,6 +398,9 @@ void World::prepare()
   moving_bo.models.init();
   moving_bo.models.import("cube.obj", 0);
 
+  moving_clones_bo.models.init();
+  moving_clones_bo.models.import("cube.obj", 0);
+
 
 
   vertices.resize(4);
@@ -435,12 +445,13 @@ void World::prepare()
   winning_doors_bo.models.set(vertices, colors, normals, uvs, indices, 0);
 
   static_models_list.reserve(1000);
-  moving_models_list.resize(100);
+  moving_models_list.reserve(100);
   floor_models_list.reserve(100);
   bg_models_list.reserve(1);
   doors_models_list.reserve(100);
 
-  moving_nimate.prepare(this, &moving_bo, &moving_positions, &moving_colors, &moving_models_list);
+  moving_nimate.prepare(this, &moving_bo, &moving_positions, &moving_colors, &moving_models_list, &through_door);
+  moving_clones_nimate.prepare(this, &moving_clones_bo, &moving_clones_positions, &moving_colors, &moving_models_list, &empty_flags);
 }
 
 
@@ -448,8 +459,11 @@ void World::init()
 {
   won = false;
   moving_nimate.reset();
+  moving_clones_nimate.reset();
 
   moving_positions.resize(moving_spots.size());
+  moving_clones_spots.resize(moving_spots.size());
+  moving_clones_positions.resize(moving_clones_spots.size());
   static_positions.resize(static_spots.size());
   doors_positions.resize(doors_spots.size());
   winning_doors_positions.resize(winning_doors_spots.size());
@@ -462,12 +476,16 @@ void World::init()
   tiles_colors.resize(tiles_spots.size());
   editor_color.resize(1);
   through_door.resize(moving_spots.size());
-  moving_cur_spots.resize(moving_spots.size());
+  moving_intermediate_spots.resize(moving_spots.size());
   floor_positions.resize(floor_spots.size());
   floor_colors.resize(floor_spots.size());
 
 
   setPositionsFromSpots(moving_positions, moving_spots);
+  fr(i, moving_clones_spots) {
+    moving_clones_spots[i] = dead_spot;
+  }
+  setPositionsFromSpots(moving_clones_positions, moving_clones_spots);
   setPositionsFromSpots(static_positions, static_spots);
   setPositionsFromSpots(doors_positions, doors_spots);
   setPositionsFromSpots(winning_doors_positions, winning_doors_spots);
@@ -512,6 +530,7 @@ void World::init()
 
 
   writeModelsVertices(moving_bo, moving_positions, moving_colors, moving_models_list);
+  writeModelsVertices(moving_clones_bo, moving_clones_positions, moving_colors, moving_models_list);
   writeModelsVertices(static_bo, static_positions, static_colors, static_models_list);
   writeModelsVertices(doors_bo, doors_positions, doors_colors, doors_models_list);
   writeModelsVertices(winning_doors_bo, winning_doors_positions, winning_doors_colors, winning_doors_models_list);
@@ -524,12 +543,14 @@ void World::init()
 
 
   moving_nimate.init();
+  moving_clones_nimate.init();
 }
 
 
 void World::updateBuffers()
 {
   moving_bo.updateBuffer();
+  moving_clones_bo.updateBuffer();
   static_bo.updateBuffer();
   doors_bo.updateBuffer();
   winning_doors_bo.updateBuffer();
@@ -546,6 +567,7 @@ void World::resolve
   made_move = false;
   travel = false;
   any_through_door = false;
+  current_move = move;
 
   if (won || maybe_won()) {
     return;
@@ -586,38 +608,67 @@ void World::update(const float t, const float dt)
       models_temp[i] = 0;
     }
 
-    setPositionsFromSpots(positions_temp, moving_cur_spots);
+    setPositionsFromSpots(positions_temp, moving_intermediate_spots);
 
-    animation_length = 150.0f;
+    animation_length = 300.0f;
     if (travel) { animation_length = 0.0f; }
     fr(i, positions_temp) {
       moving_nimate.schedule_position(i, positions_temp[i], t, t + animation_length);
       // moving_nimate.schedule_color(i, colors_temp[i], t, t + 1000.0f);
-      moving_nimate.schedule_model(i, models_temp[i], t, t + animation_length * 2.0f);
+      moving_nimate.schedule_model(i, models_temp[i], t, t + animation_length);
     }
 
     acc_animation_length = t + animation_length;
 
     if (any_through_door) {
-      setPositionsFromSpots(positions_temp, moving_spots);
-
-      animation_length = 0.0f;
-      fr(i, positions_temp) {
+      fr(i, moving_intermediate_spots) {
         if (through_door[i]) {
-          moving_nimate.schedule_position(i, positions_temp[i],
-              acc_animation_length, acc_animation_length + animation_length);
+          equals_diff(moving_clones_spots[i], moving_spots[i], current_move);
         }
       }
+      setPositionsFromSpots(moving_clones_positions, moving_clones_spots);
+
+      setPositionsFromSpots(positions_temp, moving_spots);
+      fr(i, positions_temp) {
+        if (through_door[i]) {
+          moving_clones_nimate.schedule_position(i, positions_temp[i], t, t + animation_length);
+        }
+      }
+
+      setPositionsFromSpots(positions_temp, moving_spots);
+
+      fr(i, positions_temp) {
+        if (through_door[i]) {
+          moving_nimate.schedule_flag1(i, false, t, t + animation_length);
+          moving_nimate.schedule_position(i, positions_temp[i],
+              acc_animation_length, acc_animation_length);
+        }
+      }
+
+      fr(i, moving_clones_spots) {
+        moving_clones_spots[i] = dead_spot;
+      }
+      setPositionsFromSpots(positions_temp, moving_clones_spots);
+
+      fr(i, positions_temp) {
+        if (through_door[i]) {
+          moving_clones_nimate.schedule_position(i, positions_temp[i],
+              acc_animation_length, acc_animation_length);
+        }
+      }
+
     }
   }
 
   moving_nimate.run(t);
+  moving_clones_nimate.run(t);
 }
 
 
 void World::draw(const bool in_editor)
 {
   moving_bo.drawModels(view, BGFX_STATE_BLEND_ALPHA);
+  moving_clones_bo.drawModels(view, BGFX_STATE_BLEND_ALPHA);
   static_bo.drawModels(view, 0);
   doors_bo.drawModels(view, BGFX_STATE_BLEND_ALPHA);
   winning_doors_bo.drawModels(view, BGFX_STATE_BLEND_ALPHA);
@@ -636,6 +687,7 @@ void World::draw(const bool in_editor)
 void World::destroy()
 {
   moving_bo.destroy();
+  moving_clones_bo.destroy();
   static_bo.destroy();
   doors_bo.destroy();
   winning_doors_bo.destroy();
@@ -647,6 +699,7 @@ void World::destroy()
 
 bool World::same(const Spot& s1, const Spot& s2) {return s1.x == s2.x && s1.y == s2.y;}
 void World::equals_sum(Spot& e, const Spot& s1, const Spot& s2) { e.x = s1.x + s2.x; e.y = s1.y + s2.y; }
+void World::equals_diff(Spot& e, const Spot& s1, const Spot& s2) { e.x = s1.x - s2.x; e.y = s1.y - s2.y; }
 
 bool World::maybe_won()
 {
@@ -658,7 +711,7 @@ bool World::maybe_won()
     }
   }
 
-  won = winning_doors_spots.size() > 0 && winning_count == winning_doors_spots.size();
+  won = winning_count > 0 && winning_count == winning_doors_spots.size();
 
   return won;
 }
@@ -700,8 +753,8 @@ void World::maybe_make_move(const Spot& move)
 void World::maybe_doors()
 {
   fr(i, moving_next_spots) {
-    through_door[i] = false;
-    moving_cur_spots[i] = moving_next_spots[i];
+    // through_door[i] = false;
+    moving_intermediate_spots[i] = moving_next_spots[i];
     fr(j, doors_spots) {
       if (same(moving_next_spots[i], doors_spots[j])) {
         towards = (((j + 1) % 2) * 2) - 1;
@@ -722,7 +775,7 @@ void World::execute_back()
   if (all_any_through_doors.back()) {
     travel = true;
   }
-  moving_cur_spots = moving_spots;
+  moving_intermediate_spots = moving_spots;
   all_moving_spots.pop_back();
   all_any_through_doors.pop_back();
 }
@@ -734,7 +787,7 @@ void World::execute_reset()
   travel = true;
   moving_nimate.reset();
   moving_spots = all_moving_spots.front();
-  moving_cur_spots = moving_spots;
+  moving_intermediate_spots = moving_spots;
   all_moving_spots.clear();
   all_any_through_doors.clear();
 }

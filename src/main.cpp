@@ -173,11 +173,12 @@ int main (int argc, char* args[])
   world.prepare();
 
   loadLevels();
-  runLevel(0);
+  runLevel(1);
 
 
 
   bgfx::UniformHandle u_twh = bgfx::createUniform("twh", bgfx::UniformType::Vec4);
+  bgfx::UniformHandle u_doors = bgfx::createUniform("doors", bgfx::UniformType::Vec4, 21);
 
   bgfx::reset(WIDTH, HEIGHT, BGFX_RESET_VSYNC
       | BGFX_RESET_MSAA_X16
@@ -308,6 +309,8 @@ int main (int argc, char* args[])
   float u_twh_val[4];
   u_twh_val[1] = w;
   u_twh_val[2] = h;
+
+  float u_doors_val[21 * 4];
 
   float view[16];
   float proj[16];
@@ -603,6 +606,23 @@ int main (int argc, char* args[])
     u_twh_val[0] = current_time;
     bgfx::setUniform(u_twh, &u_twh_val);
 
+    bool through = false;
+    fr(i, world.through_door) {
+      if (world.through_door[i]) through = true;
+    }
+    if (through) {
+      u_doors_val[0] = (float)world.doors_positions.size();
+    } else {
+      u_doors_val[0] = 0.0f;
+    }
+
+    fr(i, world.doors_positions) {
+      u_doors_val[(i + 1) * 4 + 0] = world.doors_positions[i].x;
+      // u_doors_val[(i + 1) * 4 + 1] = world.doors_positions[i].y;
+      u_doors_val[(i + 1) * 4 + 2] = world.doors_positions[i].z;
+    }
+    bgfx::setUniform(u_doors, u_doors_val, world.doors_positions.size() + 1);
+
     world.draw(in_editor);
 
     // bgfx::blit(deferred_view, texture_handles[0], 0, 0, m_gbufferTex[0], 0, 0);
@@ -622,6 +642,7 @@ int main (int argc, char* args[])
 
   world.destroy();
   bgfx::destroy(u_twh);
+  bgfx::destroy(u_doors);
 
   bgfx::shutdown();
   // Free up window

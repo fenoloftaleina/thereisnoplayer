@@ -16,11 +16,7 @@ void Textures::prepare(const std::vector<std::string>& resources_pathnames)
   int i = 0, j = 0, max_line_height = 0;
 
   for(auto& pathname : resources_pathnames) {
-    printf("loop\n");
-
     image = stbi_load(pathname.c_str(), &width, &height, &nrChannels, 0);
-
-    printf("%d %d\n", width, height);
 
     for(int m = 0; m < height; ++m) {
       memcpy(texture + i * 4 + j * texture_size * 4 + m * texture_size * 4, image + m * width * 4, width * 4);
