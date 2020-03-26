@@ -23,7 +23,7 @@ void main()
     for (int i = 1; i < doors_count + 1; ++i) {
       if (abs(v_position0.x - doors[i].x) < 1.0 &&
           abs(v_position0.z - doors[i].z) < 1.0) {
-        color.a = 0.0;
+        color.a = 0.7;
       }
     }
   }

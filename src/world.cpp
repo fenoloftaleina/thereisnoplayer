@@ -176,6 +176,8 @@ void World::prepare()
   bgfx::ShaderHandle f_animated_tex = Common::loadShader("bin/f_animated_tex.bin");
   bgfx::ShaderHandle v_simple = Common::loadShader("bin/v_simple.bin");
   bgfx::ShaderHandle f_simple = Common::loadShader("bin/f_simple.bin");
+  bgfx::ShaderHandle v_animated_simple_doors_in = Common::loadShader("bin/v_animated_simple_doors_in.bin");
+  bgfx::ShaderHandle v_animated_simple_doors_out = Common::loadShader("bin/v_animated_simple_doors_out.bin");
   bgfx::ShaderHandle f_simple_doors_in = Common::loadShader("bin/f_simple_doors_in.bin");
   bgfx::ShaderHandle f_simple_doors_out = Common::loadShader("bin/f_simple_doors_out.bin");
   bgfx::ShaderHandle v_animated_simple = Common::loadShader("bin/v_animated_simple.bin");
@@ -618,7 +620,7 @@ void World::update(const float t, const float dt)
       moving_nimate.schedule_model(i, models_temp[i], t, t + animation_length);
     }
 
-    acc_animation_length = t + animation_length;
+    acc_animation_length = t + animation_length * 1.5;
 
     if (any_through_door) {
       fr(i, moving_intermediate_spots) {
@@ -631,7 +633,7 @@ void World::update(const float t, const float dt)
       setPositionsFromSpots(positions_temp, moving_spots);
       fr(i, positions_temp) {
         if (through_door[i]) {
-          moving_clones_nimate.schedule_position(i, positions_temp[i], t, t + animation_length);
+          moving_clones_nimate.schedule_position(i, positions_temp[i], t, acc_animation_length);
         }
       }
 
@@ -639,7 +641,7 @@ void World::update(const float t, const float dt)
 
       fr(i, positions_temp) {
         if (through_door[i]) {
-          moving_nimate.schedule_flag1(i, false, t, t + animation_length);
+          moving_nimate.schedule_flag1(i, false, t, acc_animation_length);
           moving_nimate.schedule_position(i, positions_temp[i],
               acc_animation_length, acc_animation_length);
         }
