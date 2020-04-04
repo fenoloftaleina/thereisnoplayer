@@ -521,13 +521,13 @@ int main (int argc, char* args[])
 
     world.update(current_time, dt);
 
-    const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
+    const bx::Vec3 at  = { 0.0f, 0.0f,   2.0f };
     // const bx::Vec3 at = bx::neg(Common::spot_offset);
 
     // const bx::Vec3 eye = { -5.0f, 2.0f, -10.0f };
     // const bx::Vec3 eye = { 5.0f, 2.0f, -10.0f };
     // bx::Vec3 eye = {  -10.0f, 25.0f, -10.0f };
-    bx::Vec3 eye = {  0.0f, 25.0f, -0.00001f };
+    bx::Vec3 eye = {  0.0f, 25.0f, 1.9999f };
 
     // Set view and projection matrix for view 0.
     bx::mtxLookAt(view, eye, at);
