@@ -16,3 +16,7 @@ On linux:
 ./deps.sh linux-debug64
 ./run
 ```
+
+## PuzzleScript version
+
+https://www.puzzlescript.net/play.html?p=235388e18ae1903fd9e4dafdfca30396
